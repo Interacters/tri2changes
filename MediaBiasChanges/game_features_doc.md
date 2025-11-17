@@ -31,7 +31,7 @@ async function submitFinalTime(username, seconds) {
 }
 ```
 
-### Backend Storage (Express + Mongo example)
+### Backend Storage 
 Two types of backend approaches. Although provided by AI we did our research on how this works.
 
 ```javascript
@@ -74,7 +74,7 @@ app.get('/api/media/leaderboard', async (req, res) => {
 
 ---
 
-## Timed Win Condition (integrate into mediabias_sub2 easily)
+## Timed Win Condition 
 
 Goal: Start a timer when the round begins (or on first drag), stop when every source is placed correctly, send seconds to backend.
 
@@ -173,7 +173,7 @@ if (img.dataset.bin === bin.dataset.bin) {
 
 ---
 
-## Improved Backend Source Delivery (recommended)
+## Improved Backend Source Delivery (Optionl improvement)
 
 Instead of hardcoding image lists on the client, deliver a randomized set from the backend so we can add/remove sources without touching the client.
 

@@ -1,0 +1,653 @@
+---
+layout: post
+title: Game Features Improvement Plan
+permalink: /mediabias_plan
+author: Interacters
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Features Improvement Plan</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e0e0e0;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #0f1419;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  overflow: hidden;
+  border: 1px solid #2a2a3e;
+}
+
+.header {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2a2a5e 100%);
+  color: #e0e0e0;
+  padding: 60px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: pulse 15s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  position: relative;
+  z-index: 1;
+  color: #4a9eff;
+}
+
+.subtitle {
+  font-size: 1.3em;
+  font-style: italic;
+  opacity: 0.95;
+  position: relative;
+  z-index: 1;
+  color: #b0b0b0;
+}
+
+.content {
+  padding: 40px;
+  background: #0f1419;
+}
+
+.section {
+  margin-bottom: 50px;
+  padding: 30px;
+  background: linear-gradient(135deg, #1a1f2e 0%, #1e2533 100%);
+  border-radius: 15px;
+  border-left: 6px solid #3d5a80;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(61, 90, 128, 0.3);
+}
+
+.section-title {
+  color: #4a9eff;
+  font-size: 2em;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.section-description {
+  font-style: italic;
+  color: #a0a0a0;
+  font-size: 1.1em;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(61, 90, 128, 0.15);
+  border-radius: 10px;
+  border: 1px solid #2a3f5f;
+}
+
+h3 {
+  color: #5a9fd4;
+  font-size: 1.5em;
+  margin: 30px 0 15px 0;
+  padding-left: 15px;
+  border-left: 4px solid #5a9fd4;
+}
+
+h4 {
+  color: #7da3c6;
+  font-size: 1.2em;
+  margin: 20px 0 10px 0;
+}
+
+.benefits {
+  background: linear-gradient(135deg, #1e3a4f 0%, #2a4a5e 100%);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border: 1px solid #3d5a6f;
+}
+
+.benefits h3 {
+  border-left-color: #4a9eff;
+  color: #4a9eff;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  padding: 10px 0 10px 35px;
+  position: relative;
+  color: #c0c0c0;
+}
+
+ul li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  font-size: 1.2em;
+  color: #4a9eff;
+}
+
+code {
+  background: #1a2332;
+  color: #68d391;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+pre {
+  background: #0d1117;
+  color: #e2e8f0;
+  padding: 25px;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 20px 0;
+  border: 2px solid #30363d;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+}
+
+pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+.note {
+  background: linear-gradient(135deg, #2a3f1f 0%, #3a4f2f 100%);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  border-left: 6px solid #5a7f4f;
+  font-weight: 500;
+  border: 1px solid #4a6f3f;
+  color: #d0d0d0;
+}
+
+.note::before {
+  content: '';
+  font-size: 1.3em;
+}
+
+.feature-box {
+  background: linear-gradient(135deg, #1f2e2a 0%, #2a3f3a 100%);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 15px 0;
+  border: 2px solid #3f5f4f;
+}
+
+.feature-box h4 {
+  color: #6fa385;
+  margin-top: 0;
+}
+
+.divider {
+  height: 3px;
+  background: linear-gradient(90deg, #3d5a80 0%, #5a7f9f 50%, #3d5a80 100%);
+  margin: 40px 0;
+  border-radius: 2px;
+}
+
+.footer {
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  color: #b0b0b0;
+  text-align: center;
+  padding: 30px;
+  font-style: italic;
+  border-top: 1px solid #2a2a3e;
+}
+
+strong {
+  color: #6fa3d4;
+  font-weight: 600;
+}
+
+.implementation {
+  background: linear-gradient(135deg, #1e2a3f 0%, #2a3a5f 100%);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid #3a4a6f;
+}
+
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #3d5a80 50%, transparent 100%);
+  margin: 30px 0;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Game Features Improvement Plan</h1>
+    <p class="subtitle">Transforming Media Bias Game into an Engaging, Interactive Experience</p>
+  </div>
+
+  <div class="content">
+    <div class="section">
+      <h2 class="section-title">Backend-Driven Leaderboard System</h2>
+      <p class="section-description">A robust, competitive leaderboard that tracks player performance in real-time, encouraging replayability and social competition.</p>
+      
+      <div class="benefits">
+        <h3>Key Benefits</h3>
+        <ul>
+          <li>Fair Competition: Server-side validation prevents cheating</li>
+          <li>Real-time Updates: Instant leaderboard refresh after each game</li>
+          <li>Persistent Records: Historical tracking of all player attempts</li>
+          <li>Time-based Ranking: Fastest completion times rise to the top</li>
+        </ul>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3>Frontend Submission (time-based, using javaURI)</h3>
+      <p class="note">Integration Point: Call this function when the player successfully completes the game.</p>
+      <p>Use the javaURI import already on the page (or replace with relative path if needed):</p>
+
+<pre><code>// Example to POST time-based score (seconds)
+// Use this form in the frontend where you finalize the game
+async function submitFinalTime(username, seconds) {
+  // Path-param style (matches mediabias_sub2's current pattern if you want to keep it)
+  await fetch(`${javaURI}/api/media/score/${encodeURIComponent(username)}/${seconds}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  // OR: JSON body style (backend should accept either)
+  // await fetch(`${javaURI}/api/media/score`, {
+  //   method: 'POST',
+  //   headers: { 'Content-Type': 'application/json' },
+  //   body: JSON.stringify({ user: username, time: seconds })
+  // });
+}</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>Backend Storage</h3>
+      <p class="note">Implementation Note: Choose the API style that best fits your existing backend architecture. Both approaches are equally valid.</p>
+      <p>Two types of backend approaches. Although provided by AI we did our research on how this works.</p>
+
+<pre><code>// Express examples
+// Path-param style
+app.post('/api/media/score/:user/:time', async (req, res) => {
+  const user = req.params.user;
+  const time = Number(req.params.time);
+  if (!user || isNaN(time) || time < 0) return res.status(400).json({ error: 'Invalid data' });
+
+  await db.leaderboard.insertOne({ username: user, time, date: new Date() });
+  res.json({ ok: true });
+});
+
+// JSON body style
+app.post('/api/media/score', async (req, res) => {
+  const { user, time } = req.body;
+  if (!user || typeof time !== 'number' || time < 0) return res.status(400).json({ error: 'Invalid data' });
+
+  await db.leaderboard.insertOne({ username: user, time, date: new Date() });
+  res.json({ ok: true });
+});</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>Frontend Leaderboard Display (fetch sorted by fastest time)</h3>
+      <p class="note">Display Strategy: Update the leaderboard after each game completion, highlighting the current player's rank if they made the top 10.</p>
+
+<pre><code>// GET top 10 fastest times (lower time is better)
+const res = await fetch(`${javaURI}/api/media/leaderboard`);
+const scores = await res.json(); // expect sorted by time ascending
+render(scores);</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>Backend Leaderboard Route (sorted by time ascending)</h3>
+      <p class="note">Performance Tip: Consider adding database indexing on the time field for faster queries as your leaderboard grows.</p>
+
+<pre><code>app.get('/api/media/leaderboard', async (req, res) => {
+  const top = await db.leaderboard.find().sort({ time: 1 }).limit(10).toArray();
+  res.json(top);
+});</code></pre>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Timed Win Condition</h2>
+      <p class="section-description">Add urgency and competitive depth by tracking how quickly players can correctly categorize all news sources.</p>
+      
+      <p><strong>Goal:</strong> Start a timer when the round begins (or on first drag), stop when every source is placed correctly, send seconds to backend.</p>
+
+      <div class="implementation">
+        <h3>Implementation Strategy</h3>
+        <ol style="padding-left: 20px;">
+          <li><strong>Timer Start</strong> — Trigger on game initialization or first user interaction</li>
+          <li><strong>Timer Stop</strong> — Trigger when all sources are correctly placed</li>
+          <li><strong>Data Submission</strong> — Immediately send time to backend for leaderboard consideration</li>
+          <li><strong>User Feedback</strong> — Display completion time prominently in success screen</li>
+        </ol>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3>Timer Utility Function</h3>
+
+<pre><code>// Timer helper (drop into existing script)
+// startTimer() -> returns stopTimer() which resolves to elapsed seconds
+function startTimer() {
+  let seconds = 0;
+  const interval = setInterval(() => seconds++, 1000);
+  const startedAt = Date.now();
+  return {
+    stop: () => {
+      clearInterval(interval);
+      // compute final seconds more precisely if desired
+      const total = Math.round((Date.now() - startedAt) / 1000);
+      return total;
+    },
+    getSeconds: () => seconds
+  };
+}
+
+// Example usage:
+// let timerHandle = startTimer(); // call at initGame or on first interaction
+// const elapsed = timerHandle.stop(); // call when all correct, then submitFinalTime(player, elapsed)</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>Integration with Game Completion Logic</h3>
+      <p>Integrate with the existing completion logic (a small snippet you can drop into the final-check area):</p>
+
+<pre><code>// After you confirm all images are placed and correct:
+const elapsed = timerHandle.stop();
+await submitFinalTime(currentPlayer, elapsed);
+// show congrats, reset, etc.</code></pre>
+
+      <p class="note">Advanced Scoring: Adding a count-based score as well. Include it as an additional field when posting: { username, timeSeconds, countCorrect }.</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Planet-vs-Saucer Animation on Correct Placement</h2>
+      <p class="section-description">Reward players instantly with an exciting animation when they make a correct placement, enhancing the game's satisfaction factor.</p>
+      
+      <p><strong>When to Trigger:</strong> When the user sorts a news icon in the correct bin, we play the animation of the planet shooting at the invading alien saucer.</p>
+
+      <h3>Canvas Setup</h3>
+      <p>Add this canvas element once in your page template:</p>
+
+<pre><code>&lt;!-- Add this once in the page template (example placement) --&gt;
+&lt;canvas id="attackCanvas" style="position:fixed;pointer-events:none;top:0;left:0;width:100vw;height:100vh;z-index:999"&gt;&lt;/canvas&gt;</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>Animation Function</h3>
+      <p class="note">Performance Note: Uses requestAnimationFrame for smooth, GPU-accelerated animation. Lightweight and won't impact game performance.</p>
+      <p>Small performant animation using requestAnimationFrame (call playAttackAnimation() when a correct placement is detected):</p>
+
+<pre><code>function playAttackAnimation() {
+  const c = document.getElementById('attackCanvas');
+  if (!c) return;
+  // adapt canvas CSS size to device pixels
+  c.width = c.clientWidth * devicePixelRatio;
+  c.height = c.clientHeight * devicePixelRatio;
+  const ctx = c.getContext('2d');
+  const planet = { x: 60 * devicePixelRatio, y: c.height - 80 * devicePixelRatio };
+  const saucer = { x: c.width - 140 * devicePixelRatio, y: 80 * devicePixelRatio };
+  let laserX = planet.x;
+  function frame() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    // planet
+    ctx.fillStyle = '#2b6cb0';
+    ctx.beginPath();
+    ctx.arc(planet.x, planet.y, 40 * devicePixelRatio, 0, Math.PI * 2);
+    ctx.fill();
+    // saucer
+    ctx.fillStyle = '#888';
+    ctx.fillRect(saucer.x, saucer.y, 80 * devicePixelRatio, 40 * devicePixelRatio);
+    // laser
+    ctx.fillStyle = 'red';
+    ctx.fillRect(laserX, planet.y - 4 * devicePixelRatio, 8 * devicePixelRatio, 8 * devicePixelRatio);
+    laserX += 22 * devicePixelRatio;
+    if (laserX < saucer.x) requestAnimationFrame(frame);
+    else {
+      // hit explosion (simple)
+      ctx.fillStyle = 'orange';
+      ctx.beginPath();
+      ctx.arc(saucer.x + 40 * devicePixelRatio, saucer.y + 20 * devicePixelRatio, 30 * devicePixelRatio, 0, Math.PI * 2);
+      ctx.fill();
+      setTimeout(() => ctx.clearRect(0, 0, c.width, c.height), 300);
+    }
+  }
+  requestAnimationFrame(frame);
+}</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>Trigger Integration</h3>
+      <p>Add to pre-existing success logic</p>
+<pre><code>if (img.dataset.bin === bin.dataset.bin) {
+  // ...existing success logic...
+  playAttackAnimation();
+}</code></pre>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Improved Backend Source Delivery</h2>
+      <p class="section-description">Manage your news sources database-side for easy updates without redeploying the frontend.</p>
+      
+      <p><strong>Optional Improvement:</strong> Instead of hardcoding image lists on the client, deliver a randomized set from the backend so we can add/remove sources without touching the client.</p>
+
+      <h3>Backend Randomization</h3>
+      <p class="note">Why Server-Side? Ensures all players get fair, unpredictable source distributions. Prevents client-side manipulation.</p>
+      <p>Backend:</p>
+<pre><code>app.get('/api/media/sources', async (req, res) => {
+  const list = await db.sources.find().toArray();
+  // shuffle server-side for fairness
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  res.json(list);
+});</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>Frontend Integration</h3>
+      <p>Frontend (use this to replace the static imageFiles block if you want):</p>
+<pre><code>const newsSources = await fetch(`${javaURI}/api/media/sources`).then(r => r.json());
+// newsSources should be an array of { src, company, bin } and can be used exactly like imageFiles</code></pre>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">AI Chatbox Expansion</h2>
+      <p class="section-description">Help players learn about unfamiliar news sources instantly through intelligent, context-aware AI assistance.</p>
+
+      <h3>Core Purpose</h3>
+      <p>When players encounter news sources they don't recognize, the AI chatbox provides quick, factual information to help them make informed categorization decisions without spoiling the answer.</p>
+
+      <div class="divider"></div>
+
+      <div class="feature-box">
+        <h4>FEATURE ONE: Source Information Lookup</h4>
+        <p><strong>What it does:</strong> Players search for any news source name and receive neutral background information.</p>
+        <p><strong>Use case:</strong> Player sees "The Epoch Times" logo but doesn't recognize it → types name into chatbox → receives factual description of ownership, founding, and general audience without revealing bias category.</p>
+        <p><strong>Player benefit:</strong> Continue playing without leaving the game to Google unfamiliar sources.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="feature-box">
+        <h4>FEATURE TWO: Smart Hint System</h4>
+        <p><strong>What it does:</strong> Provides educational hints about a source's characteristics without revealing its bias placement.</p>
+        <p><strong>Use case:</strong> Player asks "Give me a hint about Reuters" → AI responds with clues like "Consider their funding model and international reputation for fact-checking" rather than stating bias category.</p>
+        <p><strong>Player benefit:</strong> Develop critical thinking skills instead of memorizing answers.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="feature-box">
+        <h4>FEATURE THREE: General Media Literacy Questions</h4>
+        <p><strong>What it does:</strong> Answer broader questions about media bias concepts and terminology.</p>
+        <p><strong>Use case:</strong> Player asks "What does 'editorial slant' mean?" → AI explains the concept clearly and concisely, helping player understand the game's educational purpose.</p>
+        <p><strong>Player benefit:</strong> Learn media literacy principles while playing, making the game more educational.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="feature-box">
+        <h4>FEATURE FOUR: Compare Sources (Advanced)</h4>
+        <p><strong>What it does:</strong> Help players understand subtle differences between similar sources.</p>
+        <p><strong>Use case:</strong> Player asks "What's the difference between BBC and NPR?" → AI explains ownership structure, funding models, and target audiences without stating bias categories.</p>
+        <p><strong>Player benefit:</strong> Understand nuanced differences that aren't obvious from logos alone.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="feature-box">
+        <h4>FEATURE FIVE: Post-Game Explanation Mode</h4>
+        <p><strong>What it does:</strong> After completing the game, players can ask why sources were categorized as they were.</p>
+        <p><strong>Use case:</strong> Player finishes game and asks "Why is Fox News categorized as right-leaning?" → AI provides detailed, factual explanation with examples and research citations.</p>
+        <p><strong>Player benefit:</strong> Deep learning after gameplay, reinforcing lessons and satisfying curiosity.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3>Technical Implementation</h3>
+      <p>Use the same javaURI pattern for chat helpers:</p>
+
+      <h4>Frontend Implementation</h4>
+<pre><code>async function askAboutSource(name) {
+  const res = await fetch(`${javaURI}/api/media/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sourceName: name })
+  });
+  return res.json();
+}</code></pre>
+
+      <h4>Backend Implementation</h4>
+      <p>Backend (example using an LLM provider):</p>
+<pre><code>app.post('/api/media/chat', async (req, res) => {
+  const { sourceName, hintOnly } = req.body;
+  // call your AI provider here (openai/gemini wrapper)
+  // keep the prompt neutral and avoid giving the answer away if hintOnly === true
+  const prompt = hintOnly
+    ? `Give a short neutral description of the news outlet named "${sourceName}" without revealing political category.`
+    : `Explain this news source factually: ${sourceName}`;
+  const info = await aiClient.generate({ prompt });
+  res.json({ text: info.text });
+});</code></pre>
+
+      <div class="divider"></div>
+
+      <h3>User Interface Recommendations</h3>
+      <p><strong>Placement:</strong> Fixed chat icon in bottom-right corner that opens overlay modal when clicked.</p>
+      <p><strong>Visual Design:</strong></p>
+      <ul>
+        <li>Clean, minimal interface that doesn't distract from gameplay</li>
+        <li>Message bubbles with subtle shadows for depth</li>
+        <li>Typing indicator animation when AI is generating response</li>
+        <li>Auto-scroll to newest messages</li>
+      </ul>
+
+      <p><strong>Interaction Flow:</strong></p>
+      <ol style="padding-left: 20px;">
+        <li>Player clicks chat icon</li>
+        <li>Modal opens with search/question input field</li>
+        <li>Player types source name or question</li>
+        <li>AI responds within 2-3 seconds</li>
+        <li>Conversation history preserved during session</li>
+        <li>Player closes modal and continues playing</li>
+      </ol>
+
+      <p><strong>Mobile Optimization:</strong></p>
+      <ul>
+        <li>Full-screen chat modal on mobile devices</li>
+        <li>Large touch targets for buttons</li>
+        <li>Keyboard auto-focuses when modal opens</li>
+        <li>Swipe-down gesture to close</li>
+      </ul>
+
+      <div class="divider"></div>
+
+      <h3>Content Safety & Guidelines</h3>
+      <p><strong>Input Filtering:</strong> Block inappropriate language and prevent attempts to manipulate AI into revealing answers during active gameplay.</p>
+      <p><strong>Output Validation:</strong> Ensure AI responses remain neutral and educational, never revealing bias categories when hintOnly mode is active.</p>
+      <p><strong>Privacy:</strong> Don't store personally identifiable information. Anonymize conversation logs if used for improving prompts.</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Summary: Transformation Impact</h2>
+      <p>By implementing these features, the Media Bias Game evolves from a simple sorting exercise into a comprehensive, engaging, educational platform that combines:</p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
+        <div style="background: linear-gradient(135deg, #2a3f5f 0%, #3a4f6f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #4a5f7f;">
+          <h4 style="color: #6fa3d4; margin: 0 0 10px 0;">Competition</h4>
+          <p style="margin: 0;">Leaderboards and timed challenges create replay value</p>
+        </div>
+        <div style="background: linear-gradient(135deg, #3f2a5f 0%, #4f3a6f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #5f4a7f;">
+          <h4 style="color: #a390c6; margin: 0 0 10px 0;">Feedback</h4>
+          <p style="margin: 0;">Visual animations reward correct placements</p>
+        </div>
+        <div style="background: linear-gradient(135deg, #1e3a4f 0%, #2a4a5e 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #3a5a6f;">
+          <h4 style="color: #5a9fd4; margin: 0 0 10px 0;">Education</h4>
+          <p style="margin: 0;">AI-powered learning assistant builds genuine media literacy</p>
+        </div>
+        <div style="background: linear-gradient(135deg, #1f3f2f 0%, #2f4f3f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #3f5f4f;">
+          <h4 style="color: #6fa385; margin: 0 0 10px 0;">Scalability</h4>
+          <p style="margin: 0;">Backend-driven content allows easy updates</p>
+        </div>
+        <div style="background: linear-gradient(135deg, #3f2f1f 0%, #4f3f2f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #5f4f3f;">
+          <h4 style="color: #c6a390; margin: 0 0 10px 0;">Retention</h4>
+          <p style="margin: 0;">Multiple features provide reasons to return</p>
+        </div>
+      </div>
+
+      <p style="font-size: 1.1em; margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #2a3f1f 0%, #3a4f2f 100%); border-radius: 10px; text-align: center; border: 1px solid #4a5f3f; color: #d0d0d0;">
+        The AI Chatbox transforms passive gameplay into active learning, helping players develop critical thinking skills that extend far beyond the game itself.
+      </p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Last Updated: November 2024 | Author: Interacters Team</p>
+  </div>
+</div>
+</body>
+</html>

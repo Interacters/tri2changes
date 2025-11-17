@@ -19,7 +19,8 @@ description: "Class of 2026"
 owner_name: John Mortensen
 github_username: jm1021 
 github_repo: "student" 
-baseurl: "/student" 
+baseurl: "/tri2changes" 
+url: "https://interacters.github.io"
 future: true
 
 # Build settings

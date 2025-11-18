@@ -346,6 +346,13 @@ render(scores);</code></pre>
   const top = await db.leaderboard.find().sort({ time: 1 }).limit(10).toArray();
   res.json(top);
 });</code></pre>
+<pre><code>[
+  { username: "Aashika", time: 12 },
+  { username: "Brandon", time: 15 },
+  { username: "Anwita", time: 42 },
+  ...
+]
+;</code></pre>
     </div>
 
     <div class="section">

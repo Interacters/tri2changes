@@ -260,7 +260,7 @@ hr {
 <div class="container">
   <div class="header">
     <h1>Game Features Improvement Plan</h1>
-    <p class="subtitle">Transforming Media Bias Game into an Engaging, Interactive Experience</p>
+    <p class="subtitle">Adding a backend to the Media Bias game and improving functionality</p>
   </div>
 
   <div class="content">
@@ -521,33 +521,6 @@ await submitFinalTime(currentPlayer, elapsed);
 
       <div class="divider"></div>
 
-      <div class="feature-box">
-        <h4>FEATURE THREE: General Media Literacy Questions</h4>
-        <p><strong>What it does:</strong> Answer broader questions about media bias concepts and terminology.</p>
-        <p><strong>Use case:</strong> Player asks "What does 'editorial slant' mean?" → AI explains the concept clearly and concisely, helping player understand the game's educational purpose.</p>
-        <p><strong>Player benefit:</strong> Learn media literacy principles while playing, making the game more educational.</p>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="feature-box">
-        <h4>FEATURE FOUR: Compare Sources (Advanced)</h4>
-        <p><strong>What it does:</strong> Help players understand subtle differences between similar sources.</p>
-        <p><strong>Use case:</strong> Player asks "What's the difference between BBC and NPR?" → AI explains ownership structure, funding models, and target audiences without stating bias categories.</p>
-        <p><strong>Player benefit:</strong> Understand nuanced differences that aren't obvious from logos alone.</p>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="feature-box">
-        <h4>FEATURE FIVE: Post-Game Explanation Mode</h4>
-        <p><strong>What it does:</strong> After completing the game, players can ask why sources were categorized as they were.</p>
-        <p><strong>Use case:</strong> Player finishes game and asks "Why is Fox News categorized as right-leaning?" → AI provides detailed, factual explanation with examples and research citations.</p>
-        <p><strong>Player benefit:</strong> Deep learning after gameplay, reinforcing lessons and satisfying curiosity.</p>
-      </div>
-
-      <div class="divider"></div>
-
       <h3>Technical Implementation</h3>
       <p>Use the same javaURI pattern for chat helpers:</p>
 
@@ -573,78 +546,8 @@ await submitFinalTime(currentPlayer, elapsed);
   const info = await aiClient.generate({ prompt });
   res.json({ text: info.text });
 });</code></pre>
-
-      <div class="divider"></div>
-
-      <h3>User Interface Recommendations</h3>
-      <p><strong>Placement:</strong> Fixed chat icon in bottom-right corner that opens overlay modal when clicked.</p>
-      <p><strong>Visual Design:</strong></p>
-      <ul>
-        <li>Clean, minimal interface that doesn't distract from gameplay</li>
-        <li>Message bubbles with subtle shadows for depth</li>
-        <li>Typing indicator animation when AI is generating response</li>
-        <li>Auto-scroll to newest messages</li>
-      </ul>
-
-      <p><strong>Interaction Flow:</strong></p>
-      <ol style="padding-left: 20px;">
-        <li>Player clicks chat icon</li>
-        <li>Modal opens with search/question input field</li>
-        <li>Player types source name or question</li>
-        <li>AI responds within 2-3 seconds</li>
-        <li>Conversation history preserved during session</li>
-        <li>Player closes modal and continues playing</li>
-      </ol>
-
-      <p><strong>Mobile Optimization:</strong></p>
-      <ul>
-        <li>Full-screen chat modal on mobile devices</li>
-        <li>Large touch targets for buttons</li>
-        <li>Keyboard auto-focuses when modal opens</li>
-        <li>Swipe-down gesture to close</li>
-      </ul>
-
-      <div class="divider"></div>
-
-      <h3>Content Safety & Guidelines</h3>
-      <p><strong>Input Filtering:</strong> Block inappropriate language and prevent attempts to manipulate AI into revealing answers during active gameplay.</p>
-      <p><strong>Output Validation:</strong> Ensure AI responses remain neutral and educational, never revealing bias categories when hintOnly mode is active.</p>
-      <p><strong>Privacy:</strong> Don't store personally identifiable information. Anonymize conversation logs if used for improving prompts.</p>
-    </div>
-
-    <div class="section">
-      <h2 class="section-title">Summary: Transformation Impact</h2>
-      <p>By implementing these features, the Media Bias Game evolves from a simple sorting exercise into a comprehensive, engaging, educational platform that combines:</p>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0;">
-        <div style="background: linear-gradient(135deg, #2a3f5f 0%, #3a4f6f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #4a5f7f;">
-          <h4 style="color: #6fa3d4; margin: 0 0 10px 0;">Competition</h4>
-          <p style="margin: 0;">Leaderboards and timed challenges create replay value</p>
-        </div>
-        <div style="background: linear-gradient(135deg, #3f2a5f 0%, #4f3a6f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #5f4a7f;">
-          <h4 style="color: #a390c6; margin: 0 0 10px 0;">Feedback</h4>
-          <p style="margin: 0;">Visual animations reward correct placements</p>
-        </div>
-        <div style="background: linear-gradient(135deg, #1e3a4f 0%, #2a4a5e 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #3a5a6f;">
-          <h4 style="color: #5a9fd4; margin: 0 0 10px 0;">Education</h4>
-          <p style="margin: 0;">AI-powered learning assistant builds genuine media literacy</p>
-        </div>
-        <div style="background: linear-gradient(135deg, #1f3f2f 0%, #2f4f3f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #3f5f4f;">
-          <h4 style="color: #6fa385; margin: 0 0 10px 0;">Scalability</h4>
-          <p style="margin: 0;">Backend-driven content allows easy updates</p>
-        </div>
-        <div style="background: linear-gradient(135deg, #3f2f1f 0%, #4f3f2f 100%); color: #e0e0e0; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #5f4f3f;">
-          <h4 style="color: #c6a390; margin: 0 0 10px 0;">Retention</h4>
-          <p style="margin: 0;">Multiple features provide reasons to return</p>
-        </div>
-      </div>
-
-      <p style="font-size: 1.1em; margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #2a3f1f 0%, #3a4f2f 100%); border-radius: 10px; text-align: center; border: 1px solid #4a5f3f; color: #d0d0d0;">
-        The AI Chatbox transforms passive gameplay into active learning, helping players develop critical thinking skills that extend far beyond the game itself.
-      </p>
     </div>
   </div>
-
   <div class="footer">
     <p>Last Updated: November 2024 | Author: Interacters Team</p>
   </div>

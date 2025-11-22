@@ -208,6 +208,103 @@ body {
 .leaderboard-table tr:nth-child(even) {
   background: rgba(255,255,255,0.02);
 }
+
+/* --- Source Intel Chat styles --- */
+.ai-card {
+  background: linear-gradient(160deg, #1e2a38, #2f3f4f);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 30px 0 10px;
+  color: #eaf6ff;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+}
+.ai-card h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #e4f1ff;
+}
+.ai-card p {
+  margin-top: 4px;
+  color: #c8d7eb;
+}
+.ai-card label {
+  font-weight: 600;
+  display: block;
+  margin: 12px 0 6px;
+}
+.ai-card textarea {
+  width: 100%;
+  min-height: 90px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  color: #eaf6ff;
+  resize: vertical;
+}
+.ai-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.ai-btn {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  color: #0e2038;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.ai-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+.ai-btn.primary { background: #7ad2f9; }
+.ai-btn.secondary { background: #9be7c4; }
+.ai-btn.ghost {
+  background: rgba(255,255,255,0.1);
+  color: #d6e6ff;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.ai-status {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  display: none;
+  font-weight: 600;
+}
+.ai-chat-log {
+  margin-top: 16px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px;
+}
+.chat-bubble {
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  line-height: 1.45;
+}
+.chat-bubble.user {
+  background: rgba(122,210,249,0.12);
+  border: 1px solid rgba(122,210,249,0.3);
+}
+.chat-bubble.ai {
+  background: rgba(155,231,196,0.12);
+  border: 1px solid rgba(155,231,196,0.3);
+}
+.chat-hint {
+  color: #9bb3d6;
+  font-size: 0.95rem;
+}
 </style>
 
 <div class="game-container">
@@ -261,6 +358,218 @@ body {
         </table>
     </div>
 </div>
+
+<!-- 🛰 Source Intel Chatbox -->
+<div class="ai-card" id="source-intel-chat">
+  <h3>AI Source Intel Chat</h3>
+  <p>Ask about a news source to get neutral background info, or request a hint without revealing bias placement.</p>
+
+  <label for="source-query">Type a source or question:</label>
+  <textarea id="source-query" placeholder="e.g., Tell me about The Epoch Times, or 'Hint about Reuters'"></textarea>
+
+  <div class="ai-controls">
+    <button class="ai-btn primary" id="lookup-btn">🔍 Source Lookup</button>
+    <button class="ai-btn secondary" id="hint-btn">💡 Smart Hint</button>
+    <button class="ai-btn ghost" id="save-chat-btn">💾 Save Session</button>
+    <button class="ai-btn ghost" id="load-chat-btn">📂 Load Saved</button>
+    <button class="ai-btn ghost" id="clear-chat-btn">🧹 Clear Chat</button>
+  </div>
+
+  <div id="ai-chat-status" class="ai-status"></div>
+
+  <div class="ai-chat-log" id="source-chat-log">
+    <div class="chat-hint">Try: "What should I know about Reuters?" or "Give me a hint about Fox News."</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const statusBox = document.getElementById('ai-chat-status');
+  const queryInput = document.getElementById('source-query');
+  const chatLog = document.getElementById('source-chat-log');
+  let lastMatchedSource = null;
+
+  const SOURCE_PROFILES = [
+    {
+      name: "The Epoch Times",
+      aliases: ["epoch times", "the epoch"],
+      ownership: "Epoch Media Group",
+      founded: "2000 by John Tang",
+      audience: "Global audience with focus on U.S. and China politics",
+      description: "International newspaper with investigative coverage and roots in Falun Gong-affiliated ownership.",
+      notes: "Often blends straight reporting with analysis pieces; check sourcing when stories go viral.",
+      hints: [
+        "Check ownership ties and how coverage of China is framed compared with other outlets.",
+        "Scan whether opinion and hard news are clearly separated in the piece you saw."
+      ]
+    },
+    {
+      name: "Reuters",
+      aliases: ["thomson reuters"],
+      ownership: "Thomson Reuters (public company)",
+      founded: "1851 by Paul Julius Reuter",
+      audience: "Global wire service feeding newsrooms and financial terminals",
+      description: "Wire service known for speed and fact-centered copy supplied to other outlets.",
+      notes: "Focuses on straight news; opinion content is uncommon and usually labeled.",
+      hints: [
+        "Consider their revenue model (terminals and licensing) and how that affects incentives.",
+        "Look at datelines and sourcing—they emphasize multiple independent confirmations."
+      ]
+    },
+    {
+      name: "Fox News",
+      aliases: ["fox"],
+      ownership: "Fox Corporation",
+      founded: "1996 by Rupert Murdoch and Roger Ailes",
+      audience: "Large U.S. cable audience; mix of news programming and opinion shows",
+      description: "Cable channel combining straight news segments with high-profile opinion primetime shows.",
+      notes: "Distinguish between newsroom reporting and commentary—tone shifts by program.",
+      hints: [
+        "Check whether the segment was from daytime news or primetime opinion.",
+        "Notice guest selection and how panels frame contested topics."
+      ]
+    },
+    {
+      name: "NPR",
+      aliases: ["national public radio"],
+      ownership: "Nonprofit; member station network",
+      founded: "1970",
+      audience: "U.S. public radio listeners and digital readers",
+      description: "Public media network producing radio, podcasts, and digital news with focus on explanatory reporting.",
+      notes: "Member stations contribute reporting; funding combines donations, underwriting, and grants.",
+      hints: [
+        "Check whether the piece is straight news or an explanatory feature with analysis.",
+        "Look at how sources are balanced between officials, experts, and affected communities."
+      ]
+    },
+    {
+      name: "The New York Times",
+      aliases: ["ny times", "nyt", "the times"],
+      ownership: "The New York Times Company (public, Sulzberger family control)",
+      founded: "1851 by Henry Jarvis Raymond and George Jones",
+      audience: "Global digital subscribers and U.S. print readers",
+      description: "Legacy newspaper with extensive national and international bureaus and large opinion section.",
+      notes: "News and opinion are separate desks; look for the Opinion label on columns.",
+      hints: [
+        "Check whether you’re reading News, Opinion, or Guest Essay—labels matter.",
+        "Consider how sourcing spans officials, experts, and impacted individuals."
+      ]
+    }
+  ];
+
+  function setStatus(message, type = "info") {
+    statusBox.textContent = message;
+    statusBox.style.display = "block";
+    const colors = {
+      info: { bg: "rgba(122,210,249,0.14)", color: "#b4e4ff" },
+      success: { bg: "rgba(155,231,196,0.14)", color: "#b6f3d8" },
+      error: { bg: "rgba(255,204,204,0.18)", color: "#ffd6d6" }
+    };
+    const palette = colors[type] || colors.info;
+    statusBox.style.backgroundColor = palette.bg;
+    statusBox.style.color = palette.color;
+    if (type !== "info") {
+      setTimeout(() => { statusBox.style.display = "none"; }, 4000);
+    }
+  }
+
+  function addMessage(role, text, allowHTML = false) {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${role}`;
+    if (allowHTML) {
+      bubble.innerHTML = text;
+    } else {
+      bubble.textContent = text;
+    }
+    chatLog.appendChild(bubble);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  function findSource(query) {
+    const q = query.toLowerCase();
+    return SOURCE_PROFILES.find(src =>
+      [src.name, ...(src.aliases || [])].some(n => n.toLowerCase().includes(q))
+    );
+  }
+
+  function formatSourceResponse(src) {
+    return `
+      <strong>${src.name}</strong><br>
+      Ownership: ${src.ownership}<br>
+      Founded: ${src.founded}<br>
+      Audience: ${src.audience}<br>
+      Summary: ${src.description}<br>
+      Note: ${src.notes}
+    `;
+  }
+
+  function handleLookup() {
+    const query = queryInput.value.trim();
+    if (!query) {
+      setStatus("⚠️ Enter a source name first.", "error");
+      return;
+    }
+    addMessage("user", `You: ${query}`);
+    setStatus("Looking up source...", "info");
+    const match = findSource(query);
+    if (match) {
+      lastMatchedSource = match;
+      addMessage("ai", formatSourceResponse(match), true);
+      setStatus("✅ Source info shared.", "success");
+    } else {
+      addMessage("ai", "I could not find that source in the quick reference. Try a different spelling or ask for a general hint.");
+      setStatus("No direct match found.", "error");
+    }
+  }
+
+  function handleHint() {
+    const query = queryInput.value.trim();
+    const match = query ? findSource(query) : lastMatchedSource;
+    if (match) {
+      lastMatchedSource = match;
+      const hint = match.hints[Math.floor(Math.random() * match.hints.length)];
+      addMessage("ai", `Hint about ${match.name}: ${hint}`);
+      setStatus("🎯 Hint delivered.", "success");
+    } else {
+      addMessage("ai", "Think about ownership, funding, and how clearly news is separated from opinion. Try entering a source name for a tailored hint.");
+      setStatus("Shared a general hint.", "info");
+    }
+  }
+
+  function saveChat() {
+    const payload = {
+      html: chatLog.innerHTML,
+      last: lastMatchedSource ? lastMatchedSource.name : null
+    };
+    localStorage.setItem("source-intel-chat", JSON.stringify(payload));
+    setStatus("💾 Session saved locally.", "success");
+  }
+
+  function loadChat() {
+    const saved = localStorage.getItem("source-intel-chat");
+    if (!saved) {
+      setStatus("⚠️ No saved session found.", "error");
+      return;
+    }
+    const data = JSON.parse(saved);
+    chatLog.innerHTML = data.html || "";
+    lastMatchedSource = SOURCE_PROFILES.find(s => s.name === data.last) || null;
+    setStatus("📂 Session loaded.", "success");
+  }
+
+  function clearChat() {
+    chatLog.innerHTML = '<div class="chat-hint">Try: "What should I know about Reuters?" or "Give me a hint about Fox News."</div>';
+    lastMatchedSource = null;
+    setStatus("Chat cleared.", "info");
+  }
+
+  document.getElementById('lookup-btn').addEventListener('click', handleLookup);
+  document.getElementById('hint-btn').addEventListener('click', handleHint);
+  document.getElementById('save-chat-btn').addEventListener('click', saveChat);
+  document.getElementById('load-chat-btn').addEventListener('click', loadChat);
+  document.getElementById('clear-chat-btn').addEventListener('click', clearChat);
+})();
+</script>
 
 <script type="module">
     console.log("✅ Game script loaded");
@@ -583,7 +892,6 @@ body {
         fetchUser();
         initGame();
         fetchLeaderboard();
-        setInterval(fetchLeaderboard, 30000);
+        setInterval(fetchLeaderboard, 3000z0);
     };
 </script>
-

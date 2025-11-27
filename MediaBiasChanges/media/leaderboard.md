@@ -15,7 +15,7 @@ permalink: /media/leaderboard
             <tr>
                 <th>Rank</th>
                 <th>Username</th>
-                <th>Score</th>
+                <th>Time</th>
             </tr>
         </thead>
         <tbody id="leaderboard-body">

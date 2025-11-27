@@ -182,7 +182,7 @@ body {
   border-radius: 10px;
   padding: 20px;
   margin-top: 20px;
-  color: #eaf6ff; /* light text on darker background */
+  color: #ffffffff; /* light text on darker background */
   border: 1px solid rgba(255,255,255,0.04);
 }
 
@@ -311,8 +311,7 @@ body {
     <div class="game-header">
         <div class="player-info">
             <div class="info-pill" id="player-name">Player: Guest</div>
-            <div class="info-pill" id="lives">Lives: 👽👽👽</div>
-            <div class="info-pill" id="score">Score: 0</div>
+            <div class="info-pill" id="timer">Time: 0:00</div>
         </div>
     </div>
 
@@ -349,7 +348,7 @@ body {
                 <tr>
                     <th>Rank</th>
                     <th>Player</th>
-                    <th>Score</th>
+                    <th>Time</th>
                 </tr>
             </thead>
             <tbody id="leaderboard-body">
@@ -571,6 +570,7 @@ body {
 })();
 </script>
 
+<!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->
 <script type="module">
     console.log("✅ Game script loaded");
     import { javaURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
@@ -610,20 +610,47 @@ body {
         { src: "cbnR.png", company: "CBN", bin: "Right"}
     ];
 
-    let lives = 3;
-    let score = 0;
+    // CHANGED: Removed lives variable
     let currentPlayer = "Guest";
     let placedImages = new Set();
+    let timerHandle = null;
+    let gameStarted = false;
 
-    const scoreDisplay = document.getElementById('score');
-    const livesDisplay = document.getElementById('lives');
+    // CHANGED: Removed livesDisplay reference
     const playerDisplay = document.getElementById('player-name');
+    const timerDisplay = document.getElementById('timer');
     const bins = document.querySelectorAll('.bin');
     const imagesArea = document.getElementById('images');
 
+    // TIMER UTILITIES - NEW
+    function startTimer() {
+        const startedAt = Date.now();
+        let seconds = 0;
+        const interval = setInterval(() => {
+            seconds++;
+            updateTimerDisplay(seconds);
+        }, 1000);
+        
+        return {
+            stop: () => {
+                clearInterval(interval);
+                const total = Math.round((Date.now() - startedAt) / 1000);
+                return total;
+            },
+            getSeconds: () => seconds
+        };
+    }
+
+    function updateTimerDisplay(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        if (timerDisplay) {
+            timerDisplay.textContent = `Time: ${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
+    }
+
+    // CHANGED: Removed lives and score updates
     function updateDisplays() {
-        scoreDisplay.textContent = `Score: ${score}`;
-        livesDisplay.textContent = `Lives: ${"👽".repeat(Math.max(0, lives))}`;
         playerDisplay.textContent = `Player: ${currentPlayer}`;
     }
 
@@ -638,10 +665,13 @@ body {
         img.dataset.id = `img-${index}`;
 
         img.addEventListener('dragstart', (e) => {
-            if (placedImages.has(e.target.dataset.id)) {
-                e.preventDefault();
-                return;
+            // Start timer on first interaction
+            if (!gameStarted) {
+                gameStarted = true;
+                timerHandle = startTimer();
+                console.log("⏱️ Timer started!");
             }
+            
             e.target.classList.add('dragging');
             e.dataTransfer.setData('text/plain', e.target.dataset.id);
         });
@@ -653,14 +683,25 @@ body {
         return img;
     }
 
+    // CHANGED: Removed lives reset
     function initGame() {
-    imagesArea.innerHTML = '';
-    // clear any previously placed images inside the bins for the image game
-    document.querySelectorAll('.bin-content').forEach(el => el.innerHTML = '');
-    placedImages.clear();
-    score = 0;
-    lives = 3;
-    updateDisplays();
+        imagesArea.innerHTML = '';
+        document.querySelectorAll('.bin-content').forEach(el => el.innerHTML = '');
+        placedImages.clear();
+        gameStarted = false;
+        
+        // Stop any existing timer
+        if (timerHandle) {
+            timerHandle.stop();
+            timerHandle = null;
+        }
+        
+        // Reset timer display
+        if (timerDisplay) {
+            timerDisplay.textContent = 'Time: 0:00';
+        }
+        
+        updateDisplays();
 
         const getRandomSubset = (arr, count) => {
             return [...arr]
@@ -684,30 +725,28 @@ body {
         });
     }
 
-      // Autofill helper for image game: place all images into their correct bins
-      function autofillImageGame(showAlert = false) {
-        // clear existing bin contents
+    // Autofill helper
+    function autofillImageGame(showAlert = false) {
         document.querySelectorAll('.bin-content').forEach(el => el.innerHTML = '');
-        // find all image elements (either in pool or already placed)
         const imgs = Array.from(document.querySelectorAll('img.image'));
         let correctCount = 0;
         imgs.forEach(img => {
-          const target = img.dataset.bin;
-          const id = img.dataset.id;
-          const bin = Array.from(document.querySelectorAll('.bin')).find(b => b.dataset.bin === target);
-          if (bin) {
-            bin.querySelector('.bin-content').appendChild(img);
-            img.style.opacity = '0.6';
-            img.style.cursor = 'default';
-            placedImages.add(id);
-            correctCount++;
-          }
+            const target = img.dataset.bin;
+            const id = img.dataset.id;
+            const bin = Array.from(document.querySelectorAll('.bin')).find(b => b.dataset.bin === target);
+            if (bin) {
+                bin.querySelector('.bin-content').appendChild(img);
+                img.style.opacity = '1';
+                img.style.cursor = 'grab';
+                placedImages.add(id);
+                correctCount++;
+            }
         });
-        score = correctCount;
         updateDisplays();
         if (showAlert) alert(`Autofill placed ${correctCount} images into their correct bins.`);
-      }
+    }
 
+    // CHANGED: Images can be moved freely between bins
     bins.forEach(bin => {
         bin.addEventListener('dragover', e => {
             e.preventDefault();
@@ -725,29 +764,18 @@ body {
             const id = e.dataTransfer.getData('text/plain');
             const img = document.querySelector(`[data-id="${id}"]`);
             
-            if (!img || placedImages.has(id)) return;
+            if (!img) return;
 
-            if (img.dataset.bin === bin.dataset.bin) {
-                bin.querySelector('.bin-content').appendChild(img);
-                score++;
-                placedImages.add(id);
-                img.style.opacity = '0.6';
-                img.style.cursor = 'default';
-            } else {
-                lives--;
-                if (lives <= 0) {
-                    alert(`Game Over! Final score: ${score}`);
-                    postScore(currentPlayer, score);
-                    initGame();
-                    return;
-                }
-                img.animate([
-                    {transform: 'translateX(0)'},
-                    {transform: 'translateX(-5px)'},
-                    {transform: 'translateX(5px)'},
-                    {transform: 'translateX(0)'}
-                ], {duration: 300});
-            }
+            // Remove from placedImages if moving to a different bin
+            placedImages.delete(id);
+            
+            // Place the image in the new bin
+            bin.querySelector('.bin-content').appendChild(img);
+            placedImages.add(id);
+            
+            // Reset opacity to show it's movable
+            img.style.opacity = '1';
+            img.style.cursor = 'grab';
             
             updateDisplays();
         });
@@ -766,23 +794,26 @@ body {
         updateDisplays();
     }
 
-    async function postScore(username, finalScore) {
+    // CHANGED: Now submits time instead of score
+    async function submitFinalTime(username, seconds) {
         try {
-            const response = await fetch(`${javaURI}/api/media/score/${encodeURIComponent(username)}/${finalScore}`, {
+            const response = await fetch(`${javaURI}/api/media/score/${encodeURIComponent(username)}/${seconds}`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'}
             });
-            if (!response.ok) throw new Error('Failed to save score');
+            if (!response.ok) throw new Error('Failed to save time');
+            console.log(`✅ Time submitted: ${seconds}s`);
             fetchLeaderboard();
         } catch (err) {
-            console.error('Error saving score:', err);
+            console.error('Error saving time:', err);
         }
     }
 
+    // CHANGED: Displays times in MM:SS format
     async function fetchLeaderboard() {
         const tbody = document.getElementById('leaderboard-body');
         try {
-            const response = await fetch(javaURI + '/api/media/');
+            const response = await fetch(javaURI + '/api/media/leaderboard');
             if (!response.ok) throw new Error('Failed to fetch leaderboard');
             const data = await response.json();
             
@@ -791,99 +822,180 @@ body {
                 const row = tbody.insertRow();
                 row.insertCell().textContent = entry.rank || (index + 1);
                 row.insertCell().textContent = entry.username || 'Unknown';
-                row.insertCell().textContent = entry.score || 0;
+                
+                // Format time as MM:SS
+                const time = entry.time || 0;
+                const minutes = Math.floor(time / 60);
+                const seconds = time % 60;
+                row.insertCell().textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             });
         } catch (err) {
             console.error('Error fetching leaderboard:', err);
             tbody.innerHTML = '<tr><td colspan="3">Unable to load leaderboard</td></tr>';
         }
     }
-        // feedback modal/message
-        function showCongrats() {
-            const msg = document.createElement('div');
-            msg.style.position = 'fixed';
-            msg.style.top = '0';
-            msg.style.left = '0';
-            msg.style.width = '100vw';
-            msg.style.height = '100vh';
-            msg.style.background = 'rgba(0,0,0,0.55)';
-            msg.style.display = 'flex';
-            msg.style.alignItems = 'center';
-            msg.style.justifyContent = 'center';
-            msg.style.zIndex = '9999';
-            msg.innerHTML = `<div style="background: #6a75c8ff;padding:36px 32px 28px 32px;border-radius:18px;box-shadow:0 8px 32px #353e7444;text-align:center;max-width:420px;">
-            <h2 style='color:#2b6cb0;margin-bottom:12px;'>Congratulations!</h2>
-            <div style='font-size:1.1rem;color:#033e61;margin-bottom:18px;'>You defended Media Literacy Planet again.<br><b>The shield level is now 2. The number for the vault is 5</b></div>
-            <div style='font-size:1.05rem;color:#a3cbf5ff;margin-bottom:18px;'>
-             Continue to the final defense: 
-            <b><a href="{{ site.baseurl }}/digital-famine/media-lit/submodule_3/" style="color:#a3cbf5ff;text-decoration:underline;">Truth Scanner</a></b>!
-             </div>
-            <button style='margin-top:8px;padding:8px 18px;border-radius:8px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;' 
-            onclick='window.location.href="{{ site.baseurl }}/digital-famine/media-lit/submodule_3/"'>
-            Continue
+
+    function showCongrats() {
+        // create overlay
+        const msg = document.createElement('div');
+        msg.style.position = 'fixed';
+        msg.style.top = '0';
+        msg.style.left = '0';
+        msg.style.width = '100vw';
+        msg.style.height = '100vh';
+        msg.style.background = 'rgba(0,0,0,0.55)';
+        msg.style.display = 'flex';
+        msg.style.alignItems = 'center';
+        msg.style.justifyContent = 'center';
+        msg.style.zIndex = '9999';
+
+        // modal content (no links, neutral message)
+        msg.innerHTML = `
+          <div style="background: #6a75c8ff;padding:28px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.2);text-align:center;max-width:420px;">
+            <h2 style="color: #546dbeff;margin-bottom:8px;">Congratulations!</h2>
+            <p style="color: #e6f0ff;margin:0 0 18px;font-size:1.05rem;">
+              Congratulations on mastering media bias.
+            </p>
+            <button id="return-to-game" style="padding:10px 18px;border-radius:8px;background:#4299e1;color:white;border:none;cursor:pointer;font-weight:700;">
+              Return to Game
             </button>
-            </div>`;
-            document.body.appendChild(msg);
+          </div>
+        `;
+
+        document.body.appendChild(msg);
+
+        // close modal on button click
+        const btn = document.getElementById('return-to-game');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            msg.remove();
+          });
         }
+    }
+
+    function showIncorrectFeedback(incorrectImages) {
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.background = 'rgba(0,0,0,0.7)';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.zIndex = '9999';
+        
+        const imageGrid = incorrectImages.map(img => 
+            `<div style="display:flex;align-items:center;gap:12px;margin:10px 0;padding:10px;background:rgba(255,100,100,0.15);border-radius:8px;">
+                <img src="${img.src}" alt="${img.name}" style="width:50px;height:50px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                <div style="text-align:left;">
+                    <div style="font-weight:700;color:#ff6b6b;font-size:1.05rem;">${img.name}</div>
+                    <div style="font-size:0.9rem;color:#ffb3b3;">Currently in: ${img.currentBin}</div>
+                </div>
+            </div>`
+        ).join('');
+        
+        modal.innerHTML = `
+            <div style="background:linear-gradient(135deg, #2d3561, #4a5080);padding:30px;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,0.4);max-width:500px;max-height:80vh;overflow-y:auto;">
+                <h2 style='color:#ffd6d6;margin-bottom:8px;text-align:center;'>⚠️ Incorrect Placements</h2>
+                <p style='color:#c8d7eb;text-align:center;margin-bottom:20px;font-size:1rem;'>
+                    ${incorrectImages.length} source${incorrectImages.length > 1 ? 's are' : ' is'} in the wrong bin. Keep trying!
+                </p>
+                <div style="margin:20px 0;">
+                    ${imageGrid}
+                </div>
+                <button id="close-feedback" style='width:100%;margin-top:15px;padding:12px;border-radius:10px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;font-size:1.05rem;'>
+                    Try Again
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('close-feedback').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        // Also close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 DOM fully loaded — initializing game & buttons");
+        console.log("🚀 DOM fully loaded — initializing game & buttons");
 
-    // --- Start the game immediately ---
-    initGame(); // images will appear right away
-    console.log("✅ Game initialized automatically");
-
-    // --- RESET button ---
-    const resetBtn = document.getElementById('reset-btn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
-        console.log("🔁 Reset clicked");
         initGame();
-        });
-    }
+        console.log("✅ Game initialized automatically");
 
-    // --- AUTOFILL button ---
-    const autofillBtn = document.getElementById('autofill-images');
-    if (autofillBtn) {
-        autofillBtn.addEventListener('click', () => {
-        console.log("✨ Autofill clicked");
-        autofillImageGame(true); // your existing autofill function
-        });
-    }
-
-    // --- SUBMIT button with validation ---
-    const submitBtn = document.getElementById('submit-btn');
-    if (submitBtn) {
-        submitBtn.addEventListener('click', () => {
-        console.log("📨 Submit clicked");
-
-        const totalImages = document.querySelectorAll('.image').length;
-        const placedCount = placedImages.size;
-
-        if (placedCount < totalImages) {
-            alert(`You haven’t placed all the images yet! You’ve placed ${placedCount} out of ${totalImages}.`);
-            return;
-        }
-
-        // Extra check for correct placement
-        let allCorrect = true;
-        document.querySelectorAll('.bin').forEach(bin => {
-            bin.querySelectorAll('.image').forEach(img => {
-            if (img.dataset.bin !== bin.dataset.bin) allCorrect = false;
+        const resetBtn = document.getElementById('reset-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                console.log("🔁 Reset clicked");
+                initGame();
             });
-        });
-
-        if (!allCorrect) {
-            alert("Some images are in the wrong bins! Try again.");
-            return;
         }
 
-        // Post score, show congrats, reset game
-        postScore(currentPlayer, score);
-        showCongrats();
-        initGame();
-        });
-      }
+        const autofillBtn = document.getElementById('autofill-images');
+        if (autofillBtn) {
+            autofillBtn.addEventListener('click', () => {
+                console.log("✨ Autofill clicked");
+                autofillImageGame(true);
+            });
+        }
+
+        // CHANGED: Submit validates and shows incorrect placements
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', () => {
+                console.log("📨 Submit clicked");
+
+                const totalImages = document.querySelectorAll('.image').length;
+                const placedCount = placedImages.size;
+
+                if (placedCount < totalImages) {
+                    alert(`You haven't placed all the images yet! You've placed ${placedCount} out of ${totalImages}.`);
+                    return;
+                }
+
+                // Check for correct placement and collect incorrect ones
+                let incorrectImages = [];
+                document.querySelectorAll('.bin').forEach(bin => {
+                    bin.querySelectorAll('.image').forEach(img => {
+                        if (img.dataset.bin !== bin.dataset.bin) {
+                            incorrectImages.push({
+                                name: img.dataset.company,
+                                currentBin: bin.dataset.bin,
+                                src: img.src
+                            });
+                        }
+                    });
+                });
+
+                if (incorrectImages.length > 0) {
+                    showIncorrectFeedback(incorrectImages);
+                    return;
+                }
+
+                // Stop timer and get final time
+                if (timerHandle) {
+                    const elapsed = timerHandle.stop();
+                    submitFinalTime(currentPlayer, elapsed);
+                    
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    alert(`Completed in ${minutes}:${seconds.toString().padStart(2, '0')}!`);
+                    
+                    showCongrats();
+                    initGame();
+                } else {
+                    alert("Timer not started. Please play the game first!");
+                }
+            });
+        }
     });
 
     // Initialize
@@ -892,6 +1004,6 @@ body {
         fetchUser();
         initGame();
         fetchLeaderboard();
-        setInterval(fetchLeaderboard, 3000z0);
+        setInterval(fetchLeaderboard, 30000);
     };
 </script>

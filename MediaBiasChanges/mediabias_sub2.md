@@ -931,7 +931,7 @@ Funding: ${src.funding}`;
       addMessage("ai", `**Hint about ${match.name}:**\n${hint}`);
       setStatus("Hint provided.", "success");
     } else {
-      addMessage("ai", "**General Hint:**\nThink about:\n• Who owns the organization?\n• How is it funded (ads, subscriptions, donations)?\n• What topics do they emphasize?\n• Is news separated from opinion?\n\nEnter a source name for a specific hint!");
+      addMessage("ai", "**General Hint:**\nThink about:\n• Who owns the organization?\n• How is it funded (ads, subscriptions)?\n• What topics do they emphasize?\n• Is news separated from opinion?\n\nEnter a source name for a specific hint!");
       setStatus("General hint provided.", "info");
     }
   }
@@ -1202,46 +1202,148 @@ Funding: ${src.funding}`;
         updateDisplays();
     }
 
-    // CHANGED: Now submits time instead of score
-    async function submitFinalTime(username, seconds) {
-        try {
-            const response = await fetch(`${javaURI}/api/media/score/${encodeURIComponent(username)}/${seconds}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'}
-            });
-            if (!response.ok) throw new Error('Failed to save time');
-            console.log(`✅ Time submitted: ${seconds}s`);
-            fetchLeaderboard();
-        } catch (err) {
-            console.error('Error saving time:', err);
-        }
-    }
+    // Helper: build candidate base URLs to try when javaURI is unreachable
+function getApiBases() {
+	// prefer explicit javaURI, then common local dev ports, then origin, then relative
+	const bases = new Set();
+	if (typeof javaURI === 'string' && javaURI) bases.add(javaURI.replace(/\/$/, ''));
+	bases.add('http://localhost:8587');
+	bases.add('http://localhost:4600');
+	bases.add(window.location.origin);
+	bases.add(''); // for relative paths
+	return Array.from(bases);
+}
 
-    // CHANGED: Displays times in MM:SS format
-    async function fetchLeaderboard() {
-        const tbody = document.getElementById('leaderboard-body');
-        try {
-            const response = await fetch(javaURI + '/api/media/leaderboard');
-            if (!response.ok) throw new Error('Failed to fetch leaderboard');
-            const data = await response.json();
-            
-            tbody.innerHTML = '';
-            data.forEach((entry, index) => {
-                const row = tbody.insertRow();
-                row.insertCell().textContent = entry.rank || (index + 1);
-                row.insertCell().textContent = entry.username || 'Unknown';
-                
-                // Format time as MM:SS
-                const time = entry.time || 0;
-                const minutes = Math.floor(time / 60);
-                const seconds = time % 60;
-                row.insertCell().textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            });
-        } catch (err) {
-            console.error('Error fetching leaderboard:', err);
-            tbody.innerHTML = '<tr><td colspan="3">Unable to load leaderboard</td></tr>';
-        }
-    }
+async function tryFetchJson(url, opts = {}) {
+	try {
+		const r = await fetch(url, opts);
+		return r;
+	} catch (err) {
+		// network error (connection refused / CORS) — return null to try next candidate
+		console.warn('tryFetchJson network error for', url, err);
+		return null;
+	}
+}
+
+// Robust submit: JSON-first across candidate bases, then path-param fallback
+async function submitFinalTime(username, seconds) {
+	const bases = getApiBases();
+	let lastError = null;
+
+	// Try JSON POST on each base
+	for (const base of bases) {
+		const jsonUrl = (base ? `${base}/api/media/score` : `/api/media/score`);
+		const resp = await tryFetchJson(jsonUrl, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ user: username, time: seconds })
+		});
+		if (resp === null) { lastError = 'network'; continue; }
+		if (resp.ok) { console.log('Score submitted (json) to', jsonUrl); fetchLeaderboard(); return; }
+		// non-ok response: log and try next
+		lastError = `non-ok ${resp.status} @ ${jsonUrl}`;
+		console.warn('JSON submit non-ok', resp.status, jsonUrl);
+	}
+
+	// Try path-param POST on each base
+	for (const base of bases) {
+		const pathUrl = (base ? `${base}/api/media/score/${encodeURIComponent(username)}/${seconds}` : `/api/media/score/${encodeURIComponent(username)}/${seconds}`);
+		const resp = await tryFetchJson(pathUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+		if (resp === null) { lastError = 'network'; continue; }
+		if (resp.ok) { console.log('Score submitted (path) to', pathUrl); fetchLeaderboard(); return; }
+		lastError = `non-ok ${resp.status} @ ${pathUrl}`;
+		console.warn('Path-param submit non-ok', resp.status, pathUrl);
+	}
+
+	// All attempts failed
+	console.error('All submit attempts failed:', lastError);
+	if (lastError === 'network') {
+		alert('Network error: backend unreachable. Score not submitted. Confirm your backend is running and the API base in config.js is correct.');
+	} else {
+		alert('Submit failed: server rejected request. See console for details.');
+	}
+}
+
+// Robust fetchLeaderboard: probe multiple endpoints and normalize results
+async function fetchLeaderboard() {
+	const tbody = document.getElementById('leaderboard-body');
+	if (!tbody) return;
+	tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+
+	const bases = getApiBases();
+	let data = null;
+	let lastErr = null;
+
+	for (const base of bases) {
+		// try leaderboard specific endpoint first
+		const candidates = [
+			(base ? `${base}/api/media/leaderboard` : '/api/media/leaderboard'),
+			(base ? `${base}/api/media/` : '/api/media/'),
+			(base ? `${base}/api/media` : '/api/media')
+		];
+
+		for (const url of candidates) {
+			const resp = await tryFetchJson(url);
+			if (resp === null) { lastErr = 'network'; continue; }
+			if (!resp.ok) { lastErr = `non-ok ${resp.status} @ ${url}`; console.warn('Leaderboard non-ok', resp.status, url); continue; }
+			try {
+				const json = await resp.json();
+				// Accept several shapes
+				if (Array.isArray(json)) data = json;
+				else if (json && Array.isArray(json.results)) data = json.results;
+				else if (json && Array.isArray(json.data)) data = json.data;
+				else if (json && Array.isArray(json.leaderboard)) data = json.leaderboard;
+			} catch (err) {
+				lastErr = `parse-error @ ${url}`;
+				console.warn('Failed parsing leaderboard JSON from', url, err);
+			}
+			if (data) break;
+		}
+		if (data) break;
+	}
+
+	if (!Array.isArray(data) || data.length === 0) {
+		if (lastErr === 'network') {
+			tbody.innerHTML = '<tr><td colspan="3">Offline — backend unreachable. Leaderboard unavailable.</td></tr>';
+		} else {
+			tbody.innerHTML = '<tr><td colspan="3">No scores yet or leaderboard unavailable.</td></tr>';
+		}
+		console.warn('fetchLeaderboard finished with no data:', lastErr);
+		return;
+	}
+
+	// Normalize entries and render
+	const normalized = data.map((entry, i) => {
+		const username = entry.username || entry.user || entry.name || 'Anonymous';
+		const t = Number(entry.time ?? entry.score ?? entry.timeSeconds ?? 0);
+		return { username, time: isNaN(t) ? 0 : t, rank: entry.rank ?? (i + 1) };
+	}).sort((a,b) => a.time - b.time);
+
+	tbody.innerHTML = '';
+	normalized.slice(0, 50).forEach((entry, idx) => {
+		const row = document.createElement('tr');
+		const rankCell = document.createElement('td');
+		const rank = entry.rank || (idx + 1);
+		rankCell.textContent = rank;
+		rankCell.className = 'rank-cell';
+		if (rank === 1) rankCell.classList.add('rank-1');
+		else if (rank === 2) rankCell.classList.add('rank-2');
+		else if (rank === 3) rankCell.classList.add('rank-3');
+
+		const usernameCell = document.createElement('td');
+		usernameCell.textContent = entry.username;
+
+		const timeCell = document.createElement('td');
+		const minutes = Math.floor(entry.time / 60);
+		const seconds = entry.time % 60;
+		timeCell.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+		row.appendChild(rankCell);
+		row.appendChild(usernameCell);
+		row.appendChild(timeCell);
+		tbody.appendChild(row);
+	});
+}
 
     function showCongrats() {
         // create overlay

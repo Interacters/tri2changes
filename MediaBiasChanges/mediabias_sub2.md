@@ -2,7 +2,7 @@
 layout: post
 title: "Bias Detector"
 description: "Second line of defense from foregin invaders"
-permalink: /digital-famine/media-lit/submodule_2/
+permalink: ok 
 footer:
   previous: /digital-famine/media-lit/submodule_1
   home: /digital-famine/media-lit
@@ -905,7 +905,18 @@ Funding: ${src.funding}`;
       setStatus("Please enter a source name or question.", "error");
       return;
     }
-    
+
+    // record the prompt into shared storage so attempts can include it
+    try {
+      const d = loadData();
+      d.meta = d.meta || {};
+      d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
+      d.meta.currentChatPrompts.push({ type: 'query', text: query, at: Date.now() });
+      saveData(d);
+    } catch (err) {
+      console.warn('record prompt failed', err);
+    }
+
     addMessage("user", query);
     queryInput.value = '';
     setStatus("Looking up source...", "info");
@@ -928,6 +939,18 @@ Funding: ${src.funding}`;
     if (match) {
       lastMatchedSource = match;
       const hint = match.hints[Math.floor(Math.random() * match.hints.length)];
+
+      // record the hint shown into shared storage
+      try {
+        const d = loadData();
+        d.meta = d.meta || {};
+        d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
+        d.meta.currentChatPrompts.push({ type: 'hint', text: hint, source: match.name, at: Date.now() });
+        saveData(d);
+      } catch (err) {
+        console.warn('record hint failed', err);
+      }
+
       addMessage("ai", `**Hint about ${match.name}:**\n${hint}`);
       setStatus("Hint provided.", "success");
     } else {
@@ -1619,6 +1642,20 @@ async function fetchLeaderboard() {
                 // Stop timer and get final time
                 if (timerHandle) {
                     const elapsed = timerHandle.stop();
+
+                    // Persist prompts + attempt locally (minimal addition)
+                    try {
+                      const d = loadData();
+                      d.attempts = d.attempts || [];
+                      const prompts = (d.meta && d.meta.currentChatPrompts) ? d.meta.currentChatPrompts.slice() : [];
+                      d.attempts.push({ username: currentPlayer || 'Guest', time: Number(elapsed) || 0, at: Date.now(), prompts });
+                      // clear ephemeral prompts for next run
+                      if (d.meta) delete d.meta.currentChatPrompts;
+                      saveData(d);
+                    } catch (err) {
+                      console.warn('save attempt with prompts failed', err);
+                    }
+
                     submitFinalTime(currentPlayer, elapsed);
                     
                     const minutes = Math.floor(elapsed / 60);

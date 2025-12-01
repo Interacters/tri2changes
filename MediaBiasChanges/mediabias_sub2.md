@@ -2,7 +2,7 @@
 layout: post
 title: "Bias Detector"
 description: "Second line of defense from foregin invaders"
-permalink: ok 
+permalink: /digital-famine/media-lit/submodule_2/
 footer:
   previous: /digital-famine/media-lit/submodule_1
   home: /digital-famine/media-lit

@@ -937,25 +937,27 @@ Funding: ${src.funding}`;
   }
 
   function saveChat() {
-    const payload = {
-      html: chatLog.innerHTML
-    };
-    localStorage.setItem("source-intel-chat", JSON.stringify(payload));
-    setStatus("Session saved locally.", "success");
-  }
+    const payloadHtml = chatLog.innerHTML;
+    // store in shared object under profiles.chatSession for cross-module persistence
+    const data = loadData();
+    data.profiles = data.profiles || {};
+    data.profiles.chatSession = { html: payloadHtml, savedAt: Date.now() };
+    saveData(data);
+    setStatus("Session saved locally (shared).", "success");
+}
 
-  function loadChat() {
-    const saved = localStorage.getItem("source-intel-chat");
-    if (!saved) {
+function loadChat() {
+    const data = loadData();
+    const saved = data.profiles && data.profiles.chatSession;
+    if (!saved || !saved.html) {
       setStatus("No saved session found.", "error");
       return;
     }
-    const data = JSON.parse(saved);
-    chatLog.innerHTML = data.html || "";
-    setStatus("Session loaded.", "success");
-  }
+    chatLog.innerHTML = saved.html;
+    setStatus("Session loaded (shared).", "success");
+}
 
-  function clearChat() {
+function clearChat() {
     chatLog.innerHTML = '<div class="chat-hint">Try: "What should I know about Reuters?" or "Tell me about Fox News" or "Give me a hint about NPR."</div>';
     lastMatchedSource = null;
     setStatus("Chat cleared.", "info");
@@ -1018,6 +1020,62 @@ Funding: ${src.funding}`;
         { src: "cbnR.png", company: "CBN", bin: "Right"}
     ];
 
+    // ===== Shared localStorage utility =====
+const STORAGE_KEY = 'biasGameData_v1';
+const DEFAULT_DATA = {
+  profiles: {},
+  gameState: {},
+  meta: { lastModule: null, showInstructions: true },
+  _version: 1
+};
+
+function _safeGet(key) {
+  try { return localStorage.getItem(key); }
+  catch (err) { console.warn('localStorage read error', err); return null; }
+}
+
+function _safeSet(key, value) {
+  try { localStorage.setItem(key, value); }
+  catch (err) { console.warn('localStorage write error', err); }
+}
+
+function loadData() {
+  const raw = _safeGet(STORAGE_KEY);
+  if (!raw) return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  try {
+    const parsed = JSON.parse(raw);
+    // Merge with defaults to tolerate older/partial formats
+    const merged = Object.assign({}, DEFAULT_DATA, parsed);
+    merged.profiles = Object.assign({}, DEFAULT_DATA.profiles, parsed.profiles || {});
+    merged.gameState = Object.assign({}, DEFAULT_DATA.gameState, parsed.gameState || {});
+    merged.meta = Object.assign({}, DEFAULT_DATA.meta, parsed.meta || {});
+    return merged;
+  } catch (err) {
+    console.warn('Failed to parse storage; returning defaults', err);
+    return JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+}
+
+function saveData(data) {
+  try {
+    data._version = DEFAULT_DATA._version;
+    _safeSet(STORAGE_KEY, JSON.stringify(data));
+  } catch (err) {
+    console.warn('Failed to save storage', err);
+  }
+}
+
+function clearGameStateForIds(ids = []) {
+  const data = loadData();
+  if (!data.gameState) data.gameState = {};
+  ids.forEach(id => {
+    if (Object.prototype.hasOwnProperty.call(data.gameState, id)) {
+      delete data.gameState[id];
+    }
+  });
+  saveData(data);
+}
+
     // CHANGED: Removed lives variable
     let currentPlayer = "Guest";
     let placedImages = new Set();
@@ -1062,6 +1120,10 @@ Funding: ${src.funding}`;
         playerDisplay.textContent = `Player: ${currentPlayer}`;
     }
 
+    function slugify(text) {
+  return 'img-' + String(text).toLowerCase().replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
     function createImageCard(file, index) {
         const img = document.createElement('img');
         img.src = IMAGE_BASE + file.src;
@@ -1070,7 +1132,8 @@ Funding: ${src.funding}`;
         img.draggable = true;
         img.dataset.bin = file.bin;
         img.dataset.company = file.company;
-        img.dataset.id = `img-${index}`;
+        // CHANGED: stable id based on company name (slug) so saved placements persist across reloads
+        img.dataset.id = slugify(file.company);
 
         img.addEventListener('dragstart', (e) => {
             // Start timer on first interaction
@@ -1121,16 +1184,55 @@ Funding: ${src.funding}`;
         const centerImages = imageFiles.filter(img => img.bin === "Center");
         const rightImages = imageFiles.filter(img => img.bin === "Right");
 
-        const selectedImages = [
-            ...getRandomSubset(leftImages, 7),
-            ...getRandomSubset(centerImages, 7),
-            ...getRandomSubset(rightImages, 7)
-        ].sort(() => 0.5 - Math.random());
+        // Load storage and try to reuse previous round's image set (by stable ids)
+        const data = loadData();
+        data.meta = data.meta || {};
 
-        selectedImages.forEach((file, index) => {
-            const card = createImageCard(file, index);
+        let selectedImages = null;
+        if (Array.isArray(data.meta.roundImages) && data.meta.roundImages.length === 21) {
+            // map saved ids back to files (ensure all are present)
+            const idMap = new Map(imageFiles.map(f => [slugify(f.company), f]));
+            const files = data.meta.roundImages.map(id => idMap.get(id)).filter(Boolean);
+            if (files.length === 21) {
+                selectedImages = files;
+            }
+        }
+
+        // If no valid saved round, pick a new random set and persist its ids
+        if (!selectedImages) {
+            selectedImages = [
+                ...getRandomSubset(leftImages, 7),
+                ...getRandomSubset(centerImages, 7),
+                ...getRandomSubset(rightImages, 7)
+            ].sort(() => 0.5 - Math.random());
+
+            data.meta.roundImages = selectedImages.map(f => slugify(f.company));
+            saveData(data);
+        }
+
+        // create and append cards for the selectedImages
+        selectedImages.forEach((file) => {
+            const card = createImageCard(file);
             imagesArea.appendChild(card);
         });
+
+    // ===== restore saved placements for images shown =====
+    document.querySelectorAll('img.image').forEach(img => {
+        const id = img.dataset.id;
+        const zone = data.gameState && data.gameState[id];
+        if (zone) {
+            const bin = document.querySelector(`.bin[data-bin="${zone}"]`);
+            if (bin) {
+                bin.querySelector('.bin-content').appendChild(img);
+                placedImages.add(id);
+                img.style.opacity = '1';
+                img.style.cursor = 'grab';
+            }
+        }
+    });
+    // ensure lastModule meta
+    data.meta.lastModule = 'sortingGame';
+    saveData(data);
     }
 
     // Autofill helper
@@ -1138,6 +1240,9 @@ Funding: ${src.funding}`;
         document.querySelectorAll('.bin-content').forEach(el => el.innerHTML = '');
         const imgs = Array.from(document.querySelectorAll('img.image'));
         let correctCount = 0;
+        const data = loadData();
+        data.gameState = data.gameState || {};
+
         imgs.forEach(img => {
             const target = img.dataset.bin;
             const id = img.dataset.id;
@@ -1147,9 +1252,12 @@ Funding: ${src.funding}`;
                 img.style.opacity = '1';
                 img.style.cursor = 'grab';
                 placedImages.add(id);
+                data.gameState[id] = target; // persist
                 correctCount++;
             }
         });
+
+        saveData(data);
         updateDisplays();
         if (showAlert) alert(`Autofill placed ${correctCount} images into their correct bins.`);
     }
@@ -1184,8 +1292,15 @@ Funding: ${src.funding}`;
             // Reset opacity to show it's movable
             img.style.opacity = '1';
             img.style.cursor = 'grab';
-            
-            updateDisplays();
+
+            // ===== persist placement =====
+    const data = loadData();
+    data.gameState = data.gameState || {};
+    data.gameState[id] = bin.dataset.bin;
+    saveData(data);
+    // ===== end persist =====
+    
+    updateDisplays();
         });
     });
 
@@ -1445,6 +1560,17 @@ async function fetchLeaderboard() {
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
                 console.log("🔁 Reset clicked");
+                // clear saved placements only for images currently on the board
+                const ids = Array.from(document.querySelectorAll('img.image')).map(i => i.dataset.id);
+                clearGameStateForIds(ids);
+
+                // also clear the persisted round selection so a fresh random set is chosen
+                const data = loadData();
+                if (data.meta && data.meta.roundImages) {
+                    delete data.meta.roundImages;
+                    saveData(data);
+                }
+
                 initGame();
             });
         }

@@ -1752,6 +1752,7 @@ async function submitFinalTime(username, elapsed) {
   <div class="cite-row">
     <div class="cite-label">URL</div>
     <input id="cite-url" class="cite-input" placeholder="https://..." />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Fetch metadata from URL" style="margin-left:8px;min-width:120px;">Fetch from URL</button>
   </div>
 
   <div class="cite-actions">
@@ -1774,6 +1775,7 @@ async function submitFinalTime(username, elapsed) {
   const sourceEl = document.getElementById('cite-source');
   const urlEl = document.getElementById('cite-url');
   const outEl = document.getElementById('cite-output');
+  const fetchBtn = document.getElementById('cite-fetch-metadata');
 
   const KEY = 'biasGame_citations_v1';
 
@@ -1854,13 +1856,101 @@ async function submitFinalTime(username, elapsed) {
     outEl.innerHTML = last.citation;
   }
 
-  document.getElementById('cite-generate').addEventListener('click', generate);
-  document.getElementById('cite-copy').addEventListener('click', () => {
-    const txt = outEl.textContent || generate();
-    copyToClipboard(txt);
-  });
-  document.getElementById('cite-save').addEventListener('click', save);
-  document.getElementById('cite-load').addEventListener('click', loadLast);
+  async function tryFetchHtml(url) {
+    // Try direct fetch first (may fail due to CORS)
+    try {
+      const r = await fetch(url, { method: 'GET', mode: 'cors' });
+      if (r.ok) return await r.text();
+    } catch (err) {
+      console.warn('Direct fetch failed (CORS?), will try proxy', err);
+    }
+    // Fallback to AllOrigins public proxy (rate-limited). Replace with your own proxy for production.
+    try {
+      const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      const r2 = await fetch(proxy);
+      if (r2.ok) return await r2.text();
+    } catch (err) {
+      console.warn('Proxy fetch failed', err);
+    }
+    return null;
+  }
+
+  function parseMetadataFromHtml(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const getMeta = (name, prop) => {
+      const byName = doc.querySelector(`meta[name="${name}"]`);
+      if (byName && byName.content) return byName.content;
+      const byProp = doc.querySelector(`meta[property="${prop}"]`);
+      if (byProp && byProp.content) return byProp.content;
+      const byLink = doc.querySelector(`link[rel="canonical"]`);
+      if (name === 'url' && byLink && byLink.href) return byLink.href;
+      return null;
+    };
+
+    const title = getMeta('title','og:title') || doc.querySelector('title')?.textContent || getMeta('twitter:title','twitter:title');
+    const site = getMeta('site_name','og:site_name') || (new URL(url)).hostname.replace(/^www\./,'');
+    const author = getMeta('author','article:author') || getMeta('author','og:author') || getMeta('byline','byline');
+    const published = getMeta('date','article:published_time') || getMeta('publication_date','publication_date') || getMeta('date','og:updated_time') || getMeta('pubdate','pubdate');
+
+    return { title, site, author, published, url };
+  }
+
+  // Format published timestamps into user-friendly strings for each citation style.
+  function formatPublishedDate(raw) {
+    if (!raw) return null;
+    // try parse ISO / common date strings
+    const ms = Date.parse(raw);
+    if (isNaN(ms)) {
+      return { apa: raw, mla: raw, chicago: raw };
+    }
+    const d = new Date(ms);
+    // use UTC parts to avoid timezone shifts from ISO Z strings
+    const year = d.getUTCFullYear();
+    const monthIdx = d.getUTCMonth();
+    const day = d.getUTCDate();
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const monthName = months[monthIdx];
+    return {
+      apa: `${year}, ${monthName} ${day}`,      // e.g. "2025, December 4"
+      mla: `${day} ${monthName} ${year}`,       // e.g. "4 December 2025"
+      chicago: `${year}`                        // Chicago author-date often uses just year for in-text
+    };
+  }
+  
+  async function fetchAndFill() {
+    const url = (urlEl.value || '').trim();
+    if (!url) { alert('Enter a URL first.'); return; }
+    fetchBtn.textContent = 'Fetching…';
+    fetchBtn.disabled = true;
+    try {
+      const html = await tryFetchHtml(url);
+      if (!html) {
+        alert('Failed to fetch page. CORS or proxy error. Consider using a server-side proxy.');
+        return;
+      }
+      const meta = parseMetadataFromHtml(html, url);
+      if (meta.author) authorEl.value = meta.author;
+      if (meta.published) {
+        const fmt = formatPublishedDate(meta.published);
+        // choose default format based on selected style
+        const style = (styleEl && styleEl.value) ? styleEl.value : 'apa';
+        dateEl.value = (fmt && fmt[style]) ? fmt[style] : meta.published;
+      }
+      if (meta.title) titleEl.value = meta.title;
+      if (meta.site) sourceEl.value = meta.site;
+      urlEl.value = meta.url || url;
+      generate();
+      setTimeout(()=>{ fetchBtn.textContent = 'Fetch from URL'; fetchBtn.disabled = false; }, 250);
+    } catch (err) {
+      console.warn(err);
+      alert('Error fetching metadata.');
+      fetchBtn.textContent = 'Fetch from URL';
+      fetchBtn.disabled = false;
+    }
+  }
+
+  fetchBtn.addEventListener('click', fetchAndFill);
 
   // show a default sample on load
   authorEl.value = 'Doe, J.';

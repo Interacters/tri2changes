@@ -9,8 +9,8 @@ categories: [CSP, Submodule, Analytics/Admin]
 tags: [analytics, submodule, curators]
 breadcrumb: true
 microblog: true
-author: "Anwita Bandaru and Nick Diaz"
-date: 2025-10-21
+author: "Interactors"
+date: 2025-12-2
 ---
 ## Bias In Sources
 <style>
@@ -1706,4 +1706,262 @@ async function submitFinalTime(username, elapsed) {
         fetchLeaderboard();
         setInterval(fetchLeaderboard, 30000);
     };
+</script>
+
+<!-- Citation Generator -->
+<style>
+  .cite-card { background: linear-gradient(160deg,#2b3956,#21304a); color:#e6f2ff; padding:18px; border-radius:12px; margin:20px 0; }
+  .cite-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  .cite-label { min-width:110px; font-weight:700; color:#d6e9ff; }
+  .cite-input, .cite-select { flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:inherit; }
+  .cite-actions { display:flex; gap:10px; margin-top:12px; justify-content:flex-end; }
+  .cite-btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
+  .cite-btn.primary { background:#7ad2f9; color:#082033; }
+  .cite-btn.ghost { background:rgba(255,255,255,0.06); color:#d6e6ff; border:1px solid rgba(255,255,255,0.04); }
+  .cite-output { margin-top:12px; background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; font-family:system-ui, -apple-system, sans-serif; color:#eaf6ff; }
+  .cite-small { font-size:0.9rem; color:#9fb7da; margin-top:6px; }
+</style>
+
+<div class="cite-card" id="citation-tool">
+  <h3 style="margin:0 0 8px 0;">Citation Generator</h3>
+  <div class="cite-row">
+    <div class="cite-label">Style</div>
+    <select id="cite-style" class="cite-select">
+      <option value="apa">APA</option>
+      <option value="mla">MLA (9th ed.)</option>
+      <option value="chicago">Chicago (author-date)</option>
+    </select>
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Author(s)</div>
+    <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Date</div>
+    <input id="cite-date" class="cite-input" placeholder="e.g., 2025, May 10 or 2025" />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Title</div>
+    <input id="cite-title" class="cite-input" placeholder="Article title (no italics markup)" />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Source</div>
+    <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">URL</div>
+    <input id="cite-url" class="cite-input" placeholder="https://..." />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Fetch metadata from URL" style="margin-left:8px;min-width:120px;">Fetch from URL</button>
+  </div>
+
+  <div class="cite-actions">
+    <button id="cite-generate" class="cite-btn primary">Generate</button>
+    <button id="cite-copy" class="cite-btn ghost">Copy</button>
+    <button id="cite-save" class="cite-btn ghost" title="Save locally">Save</button>
+    <button id="cite-load" class="cite-btn ghost" title="Load last">Load</button>
+  </div>
+
+  <div id="cite-output" class="cite-output" aria-live="polite"></div>
+  <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
+</div>
+
+<script>
+(function(){
+  const styleEl = document.getElementById('cite-style');
+  const authorEl = document.getElementById('cite-author');
+  const dateEl = document.getElementById('cite-date');
+  const titleEl = document.getElementById('cite-title');
+  const sourceEl = document.getElementById('cite-source');
+  const urlEl = document.getElementById('cite-url');
+  const outEl = document.getElementById('cite-output');
+  const fetchBtn = document.getElementById('cite-fetch-metadata');
+
+  const KEY = 'biasGame_citations_v1';
+
+  function safe(val, fallback='') { return (val || '').trim(); }
+
+  function fmtAPA({author, date, title, source, url}) {
+    const d = date || 'n.d.';
+    const auth = author || 'Doe, J.';
+    const src = source ? `${source}.` : '';
+    const link = url ? ` ${url}` : '';
+    return `${auth} (${d}). ${title ? `<i>${title}</i>` : '<i>Untitled</i>'} ${src}${link}`;
+  }
+
+  function fmtMLA9({author, date, title, source, url}) {
+    // Simple MLA 9th ed web citation: Author. "Title." Source, Day Month Year, URL.
+    const auth = author ? `${author}.` : 'Doe, John.';
+    const t = title ? `"${title}."` : `"Untitled."`;
+    const src = source ? `${source},` : '';
+    const d = date ? `${date},` : '';
+    const link = url ? ` ${url}` : '';
+    return `${auth} ${t} ${src} ${d}${link}`.replace(/\s+/g,' ').trim();
+  }
+
+  function fmtChicago({author, date, title, source, url}) {
+    // Chicago author-date simple web citation: Author. Year. "Title." Source. URL.
+    const auth = author || 'Doe, John';
+    const year = (date || '').split(',')[0].trim() || 'n.d.';
+    const t = title ? `"${title}."` : `"Untitled."`;
+    const src = source ? `${source}.` : '';
+    const link = url ? ` ${url}` : '';
+    return `${auth}. ${year}. ${t} ${src}${link}`.replace(/\s+/g,' ').trim();
+  }
+
+  function generate() {
+    const payload = {
+      author: safe(authorEl.value),
+      date: safe(dateEl.value),
+      title: safe(titleEl.value),
+      source: safe(sourceEl.value),
+      url: safe(urlEl.value)
+    };
+    const style = styleEl.value;
+    let citation = '';
+    if (style === 'mla') citation = fmtMLA9(payload);
+    else if (style === 'chicago') citation = fmtChicago(payload);
+    else citation = fmtAPA(payload);
+
+    outEl.innerHTML = citation;
+    return citation;
+  }
+
+  function copyToClipboard(text) {
+    if (!navigator.clipboard) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      alert('Citation copied (fallback).');
+      return;
+    }
+    navigator.clipboard.writeText(text).catch(() => { alert('Copy failed.'); });
+  }
+
+  function save() {
+    const citation = generate();
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    saved.push({ citation, at: Date.now() });
+    localStorage.setItem(KEY, JSON.stringify(saved.slice(-50)));
+    alert('Citation saved locally.');
+  }
+
+  function loadLast() {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (!saved.length) { alert('No saved citations.'); return; }
+    const last = saved[saved.length - 1];
+    outEl.innerHTML = last.citation;
+  }
+
+  async function tryFetchHtml(url) {
+    // Try direct fetch first (may fail due to CORS)
+    try {
+      const r = await fetch(url, { method: 'GET', mode: 'cors' });
+      if (r.ok) return await r.text();
+    } catch (err) {
+      console.warn('Direct fetch failed (CORS?), will try proxy', err);
+    }
+    // Fallback to AllOrigins public proxy (rate-limited). Replace with your own proxy for production.
+    try {
+      const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      const r2 = await fetch(proxy);
+      if (r2.ok) return await r2.text();
+    } catch (err) {
+      console.warn('Proxy fetch failed', err);
+    }
+    return null;
+  }
+
+  function parseMetadataFromHtml(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const getMeta = (name, prop) => {
+      const byName = doc.querySelector(`meta[name="${name}"]`);
+      if (byName && byName.content) return byName.content;
+      const byProp = doc.querySelector(`meta[property="${prop}"]`);
+      if (byProp && byProp.content) return byProp.content;
+      const byLink = doc.querySelector(`link[rel="canonical"]`);
+      if (name === 'url' && byLink && byLink.href) return byLink.href;
+      return null;
+    };
+
+    const title = getMeta('title','og:title') || doc.querySelector('title')?.textContent || getMeta('twitter:title','twitter:title');
+    const site = getMeta('site_name','og:site_name') || (new URL(url)).hostname.replace(/^www\./,'');
+    const author = getMeta('author','article:author') || getMeta('author','og:author') || getMeta('byline','byline');
+    const published = getMeta('date','article:published_time') || getMeta('publication_date','publication_date') || getMeta('date','og:updated_time') || getMeta('pubdate','pubdate');
+
+    return { title, site, author, published, url };
+  }
+
+  // Format published timestamps into user-friendly strings for each citation style.
+  function formatPublishedDate(raw) {
+    if (!raw) return null;
+    // try parse ISO / common date strings
+    const ms = Date.parse(raw);
+    if (isNaN(ms)) {
+      return { apa: raw, mla: raw, chicago: raw };
+    }
+    const d = new Date(ms);
+    // use UTC parts to avoid timezone shifts from ISO Z strings
+    const year = d.getUTCFullYear();
+    const monthIdx = d.getUTCMonth();
+    const day = d.getUTCDate();
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const monthName = months[monthIdx];
+    return {
+      apa: `${year}, ${monthName} ${day}`,      // e.g. "2025, December 4"
+      mla: `${day} ${monthName} ${year}`,       // e.g. "4 December 2025"
+      chicago: `${year}`                        // Chicago author-date often uses just year for in-text
+    };
+  }
+  
+  async function fetchAndFill() {
+    const url = (urlEl.value || '').trim();
+    if (!url) { alert('Enter a URL first.'); return; }
+    fetchBtn.textContent = 'Fetching…';
+    fetchBtn.disabled = true;
+    try {
+      const html = await tryFetchHtml(url);
+      if (!html) {
+        alert('Failed to fetch page. CORS or proxy error. Consider using a server-side proxy.');
+        return;
+      }
+      const meta = parseMetadataFromHtml(html, url);
+      if (meta.author) authorEl.value = meta.author;
+      if (meta.published) {
+        const fmt = formatPublishedDate(meta.published);
+        // choose default format based on selected style
+        const style = (styleEl && styleEl.value) ? styleEl.value : 'apa';
+        dateEl.value = (fmt && fmt[style]) ? fmt[style] : meta.published;
+      }
+      if (meta.title) titleEl.value = meta.title;
+      if (meta.site) sourceEl.value = meta.site;
+      urlEl.value = meta.url || url;
+      generate();
+      setTimeout(()=>{ fetchBtn.textContent = 'Fetch from URL'; fetchBtn.disabled = false; }, 250);
+    } catch (err) {
+      console.warn(err);
+      alert('Error fetching metadata.');
+      fetchBtn.textContent = 'Fetch from URL';
+      fetchBtn.disabled = false;
+    }
+  }
+
+  fetchBtn.addEventListener('click', fetchAndFill);
+
+  // show a default sample on load
+  authorEl.value = 'Doe, J.';
+  dateEl.value = '2025, May 10';
+  titleEl.value = 'Harvard revokes tenure of Francesca Gino after misconduct findings.';
+  sourceEl.value = 'The New York Times';
+  urlEl.value = 'https://www.nytimes.com/article-link';
+  generate();
+})();
 </script>

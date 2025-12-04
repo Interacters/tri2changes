@@ -1561,6 +1561,20 @@ async function postScore(username, finalTime) {
             }
         });
     }
+async function submitFinalTime(username, elapsed) {
+    try {
+        const response = await fetch(`${pythonURI}/api/media/score/${encodeURIComponent(username)}/${elapsed}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (!response.ok) throw new Error('Failed to save score');
+        console.log(`✅ Score saved: ${username} - ${elapsed}s`);
+        fetchLeaderboard();
+    } catch (err) {
+        console.error('Error saving score:', err);
+        alert('Failed to save your score. Please try again.');
+    }
+}
 
     window.addEventListener('DOMContentLoaded', () => {
         console.log("🚀 DOM fully loaded — initializing game & buttons");

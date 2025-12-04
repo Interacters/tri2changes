@@ -23,10 +23,10 @@ permalink: /media/leaderboard
         </tbody>
     </table>
     <script type="module">
-        import {javaURI} from '{{site.baseurl}}/assets/js/api/config.js';
-        console.log(javaURI);
+        import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
+        console.log(pythonURI);
         document.addEventListener("DOMContentLoaded", function() {
-            fetch(javaURI+'/api/media/') // Assuming this is the correct API URL
+            fetch(pythonURI+'/api/media/') // Assuming this is the correct API URL
                 .then(response => response.json())
                 .then(data => {
                     const leaderboardBody = document.getElementById("leaderboard-body");

@@ -38,7 +38,7 @@ date: 2025-10-21
 <style>
 body {
   min-height: 100vh;
-  background: url('{{ site.baseurl }}/hacks/digital-famine/media-lit/media/assets/spacebackground.jpg') no-repeat center center fixed;
+  background: url('{{ site.baseurl }}/MediaBiasChanges/media/assets/spacebackground.jpg') no-repeat center center fixed;
   background-size: cover;
   background-color: #061226; /* fallback */
 }
@@ -1005,9 +1005,121 @@ function clearChat() {
 
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->
 <script type="module">
-    console.log("✅ Game script loaded");
-    import { javaURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
+    import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
     
+    // Name Entry Modal HTML - inject into page
+    function createNameEntryModal() {
+        const modalHTML = `
+            <div id="name-entry-modal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;">
+                <div style="background:linear-gradient(135deg, #353e74ff, #9384d5ff);padding:40px;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center;max-width:400px;">
+                    <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;">Welcome to Essay Development Help</h2>
+                    <p style="color:#c8d7eb;margin-bottom:25px;">Enter your name to begin</p>
+                    <input 
+                        type="text" 
+                        id="player-name-input" 
+                        placeholder="Your Name" 
+                        style="width:100%;padding:12px;border-radius:10px;border:2px solid #4299e1;font-size:1rem;margin-bottom:20px;background:rgba(136, 134, 172, 0.9);"
+                    />
+                    <button 
+                        id="start-game-btn" 
+                        style="width:100%;padding:14px;border-radius:10px;background:#4299e1;color:white;font-weight:700;font-size:1.1rem;border:none;cursor:pointer;transition:transform 0.2s;"
+                        onmouseover="this.style.transform='translateY(-2px)'" 
+                        onmouseout="this.style.transform='translateY(0)'"
+                    >
+                        Start Game
+                    </button>
+                    <p id="name-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;"></p>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // Register name with backend
+    async function registerPlayer(name) {
+        try {
+            const response = await fetch(pythonURI + '/api/media/person/get', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: name })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Player registered:', data);
+                return data;
+            } else {
+                console.error('Failed to register player:', response.status);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error registering player:', error);
+            return null;
+        }
+    }
+
+    // Show name entry modal on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedName = sessionStorage.getItem('playerName');
+        
+        if (!savedName) {
+            createNameEntryModal();
+            
+            const modal = document.getElementById('name-entry-modal');
+            const input = document.getElementById('player-name-input');
+            const startBtn = document.getElementById('start-game-btn');
+            const errorMsg = document.getElementById('name-error');
+            
+            startBtn.addEventListener('click', async () => {
+                const name = input.value.trim();
+                
+                if (name.length < 2) {
+                    errorMsg.textContent = 'Name must be at least 2 characters';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                
+                startBtn.disabled = true;
+                startBtn.textContent = 'Loading...';
+                
+                const result = await registerPlayer(name);
+                
+                if (result) {
+                    sessionStorage.setItem('playerName', name);
+                    modal.remove();
+                    
+                    // Update the global currentPlayer variable
+                    if (typeof currentPlayer !== 'undefined') {
+                        currentPlayer = name;
+                        updateDisplays();
+                    }
+                    
+                    console.log('✅ Player registered:', name);
+                } else {
+                    errorMsg.textContent = 'Failed to register. Please try again.';
+                    errorMsg.style.display = 'block';
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Start Game';
+                }
+            });
+            
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startBtn.click();
+                }
+            });
+            
+            input.focus();
+        }
+    });
+</script>
+
+<script type="module">
+    console.log("✅ Game script loaded");
+    import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
+
     // Configuration
     const IMAGE_BASE = '{{site.baseurl}}/media/assets/';
     const imageFiles = [
@@ -1327,36 +1439,45 @@ function clearGameStateForIds(ids = []) {
         });
     });
 
-    async function fetchUser() {
-        try {
-            const response = await fetch(javaURI + '/api/person/get', fetchOptions);
-            if (response.ok) {
-                const data = await response.json();
-                currentPlayer = data.name || data.username || 'Guest';
-            }
-        } catch (err) {
-            console.warn('Failed to fetch user:', err);
-        }
+async function fetchUser() {
+    // Check if name is already set from name entry modal
+    const savedName = sessionStorage.getItem('playerName');
+    if (savedName) {
+        currentPlayer = savedName;
         updateDisplays();
+        return;
     }
-
-    async function postScore(username, finalScore) {
-        try {
-            const response = await fetch(`${javaURI}/api/media/score/${encodeURIComponent(username)}/${finalScore}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'}
-            });
-            if (!response.ok) throw new Error('Failed to save score');
-            fetchLeaderboard();
-        } catch (err) {
-            console.error('Error saving score:', err);
+    
+    // Fallback to old method
+    try {
+        const response = await fetch(pythonURI + '/api/person/get', fetchOptions);
+        if (response.ok) {
+            const data = await response.json();
+            currentPlayer = data.name || data.username || 'Guest';
         }
+    } catch (err) {
+        console.warn('Failed to fetch user:', err);
     }
+    updateDisplays();
+}
+
+async function postScore(username, finalTime) {
+    try {
+        const response = await fetch(`${pythonURI}/api/media/score/${encodeURIComponent(username)}/${finalTime}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        if (!response.ok) throw new Error('Failed to save score');
+        fetchLeaderboard();
+    } catch (err) {
+        console.error('Error saving score:', err);
+    }
+}
 
     async function fetchLeaderboard() {
         const tbody = document.getElementById('leaderboard-body');
         try {
-            const response = await fetch(javaURI + '/api/media/');
+            const response = await fetch(pythonURI + '/api/media/');
             if (!response.ok) throw new Error('Failed to fetch leaderboard');
             const data = await response.json();
             

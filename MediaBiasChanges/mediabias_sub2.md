@@ -1,12 +1,7 @@
 ---
 layout: post
-title: "Bias Detector"
-description: "Second line of defense from foregin invaders"
+title: "English Essay Help"
 permalink: /digital-famine/media-lit/submodule_2/
-footer:
-  previous: /digital-famine/media-lit/submodule_1
-  home: /digital-famine/media-lit
-  next: /digital-famine/media-lit/submodule_3
 parent: "Analytics/Admin"
 team: "Scratchers"
 submodule: 2
@@ -17,24 +12,7 @@ microblog: true
 author: "Anwita Bandaru and Nick Diaz"
 date: 2025-10-21
 ---
-# Bias Detector
-
-<div class="intro-text">
-  <h3>Why is checking for bias Important?</h3>
-  <p>
-    The alien misinformation swarm doesn’t invade with lasers or ships — it attacks minds.<br>
-    Every distorted headline, every emotional post, every half-true story is a signal designed to scramble human judgment. Once people can’t tell what’s real, they stop trusting reliable information. Biased language can make ordinary events sound urgent or frightening, pushing people to react before they think. When that happens, truth fades and manipulation spreads.
-  </p>
-  <hr>
-  <p><strong>By identifying bias, you decode the signal. You learn to notice when words are chosen to provoke rather than inform.</strong></p>
-
-  <h2>Media Bias Training</h2>
-  <p>
-    Before you receive your mission to protect Media Literacy Planet, you'll need to undergo training. Test your knowledge of media bias by sorting news outlets into their typical editorial positions. This training will help you understand the different biases present in major news sources to defeat the invaders.
-  </p>
-  <p><strong>Begin by pressing reset to load the images</strong></p>
-</div>
-
+## Bias In Sources
 <style>
 body {
   min-height: 100vh;

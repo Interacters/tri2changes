@@ -1473,24 +1473,28 @@ async function postScore(username, finalTime) {
 }
 
     async function fetchLeaderboard() {
-        const tbody = document.getElementById('leaderboard-body');
-        try {
-            const response = await fetch(pythonURI + '/api/media/');
-            if (!response.ok) throw new Error('Failed to fetch leaderboard');
-            const data = await response.json();
-            
-            tbody.innerHTML = '';
-            data.forEach((entry, index) => {
-                const row = tbody.insertRow();
-                row.insertCell().textContent = entry.rank || (index + 1);
-                row.insertCell().textContent = entry.username || 'Unknown';
-                row.insertCell().textContent = entry.score || 0;
-            });
-        } catch (err) {
-            console.error('Error fetching leaderboard:', err);
-            tbody.innerHTML = '<tr><td colspan="3">Unable to load leaderboard</td></tr>';
-        }
+    const tbody = document.getElementById('leaderboard-body');
+    try {
+        const response = await fetch(pythonURI + '/api/media/leaderboard');
+        if (!response.ok) throw new Error('Failed to fetch leaderboard');
+        const data = await response.json();
+        
+        tbody.innerHTML = '';
+        data.forEach((entry, index) => {
+            const row = tbody.insertRow();
+            row.insertCell().textContent = entry.rank || (index + 1);
+            row.insertCell().textContent = entry.username || 'Unknown';
+            // CHANGED: Use 'time' instead of 'score' and format it
+            const timeInSeconds = entry.time || 0;
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = timeInSeconds % 60;
+            row.insertCell().textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        });
+    } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+        tbody.innerHTML = '<tr><td colspan="3">Unable to load leaderboard</td></tr>';
     }
+}
 
     function showCongrats() {
         // create overlay

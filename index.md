@@ -53,3 +53,51 @@ Hi! My name is [Your Full Name]
 > Feel free to reach out if you'd like to collaborate or learn more about our work.
 
 <p style="color: #2A7DB1;">Open Coding Society: <a href="https://opencodingsociety.com" style="color: #2A7DB1; text-decoration: underline;">Socials</a></p>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mood Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #mood-list {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f3f3f3;
+            border-radius: 8px;
+        }
+
+        .mood-entry {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mood Checker</h1>
+
+    <button onclick="sendMood('Happy')">😀 Happy</button>
+    <button onclick="sendMood('Sad')">😢 Sad</button>
+    <button onclick="sendMood('Angry')">😡 Angry</button>
+    <button onclick="sendMood('Excited')">🤩 Excited</button>
+
+    <h2>All Mood Logs:</h2>
+    <div id="mood-list"></div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "English Essay Help"
-permalink: /digital-famine/media-lit/submodule_2/
+permalink: /digital-famine/media-lit/gemini/
 parent: "Analytics/Admin"
 team: "Scratchers"
 submodule: 2

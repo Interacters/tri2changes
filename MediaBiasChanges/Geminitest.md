@@ -366,442 +366,13 @@ body {
   const chatLog = document.getElementById('source-chat-log');
   let lastMatchedSource = null;
 
-  const SOURCE_PROFILES = [
-    {
-      name: "The Epoch Times",
-      aliases: ["epoch times", "the epoch", "epoch"],
-      ownership: "Epoch Media Group (affiliated with Falun Gong movement)",
-      founded: "2000",
-      headquarters: "New York City",
-      focus: "International news with emphasis on China, politics, and culture",
-      notable: "Significant digital and print presence, known for investigative journalism on China and anti-communist stance",
-      funding: "Subscription-based, donations, advertising",
-      hints: [
-        "Look at their ownership connections and how they cover China-related topics compared to mainstream outlets.",
-        "Consider their founding background and what movements or groups they're affiliated with."
-      ]
-    },
-    {
-      name: "Reuters",
-      aliases: ["thomson reuters", "reuters news"],
-      ownership: "Thomson Reuters Corporation (publicly traded)",
-      founded: "1851",
-      headquarters: "London, UK / Toronto, Canada",
-      focus: "Global wire service providing breaking news to media outlets worldwide",
-      notable: "One of the largest international news agencies, serves over 1,000 news organizations with fact-based reporting",
-      funding: "Business intelligence terminals, licensing content to other news organizations",
-      hints: [
-        "They sell news as a product to other outlets - think about how that affects their incentive to be accurate vs. sensational.",
-        "Check their datelines and sourcing—they emphasize multiple independent confirmations before publishing."
-      ]
-    },
-    {
-      name: "Fox News",
-      aliases: ["fox", "fox news channel"],
-      ownership: "Fox Corporation (Murdoch family)",
-      founded: "1996",
-      headquarters: "New York City",
-      focus: "Cable news with mix of news reporting and opinion programming",
-      notable: "Most-watched cable news network in US, especially in primetime opinion shows like Tucker Carlson Tonight (former) and Hannity",
-      funding: "Cable/satellite subscriptions, advertising",
-      hints: [
-        "Distinguish between their daytime news reporting and their primetime opinion shows - the tone and approach differ significantly.",
-        "Notice who owns it (Murdoch family) and compare their editorial approach to other Murdoch properties."
-      ]
-    },
-    {
-      name: "NPR",
-      aliases: ["national public radio", "npr news"],
-      ownership: "Independent nonprofit media organization",
-      founded: "1970",
-      headquarters: "Washington, D.C.",
-      focus: "Public radio producing news, talk, and cultural programming",
-      notable: "Member station network, known for long-form journalism and explanatory reporting",
-      funding: "Corporate sponsorships, member station fees, federal grants, individual donations",
-      hints: [
-        "Look at their funding sources - corporate sponsorships, donations, and some government funding. How might that influence coverage?",
-        "Consider whether stories are straight news reporting or explanatory features with more analysis."
-      ]
-    },
-    {
-      name: "The New York Times",
-      aliases: ["ny times", "nyt", "the times", "new york times"],
-      ownership: "The New York Times Company (publicly traded, Sulzberger family control)",
-      founded: "1851",
-      headquarters: "New York City",
-      focus: "Daily newspaper with national and international coverage",
-      notable: "Most Pulitzer Prizes of any news organization, large investigative reporting team, major digital subscription success",
-      funding: "Digital subscriptions (primary revenue source), advertising",
-      hints: [
-        "Check whether you're reading from the News section or the Opinion section - they're separate editorial teams.",
-        "Consider their subscriber base and how that might influence what stories they prioritize."
-      ]
-    },
-    {
-      name: "CNN",
-      aliases: ["cnn news", "cable news network"],
-      ownership: "Warner Bros. Discovery",
-      founded: "1980",
-      headquarters: "Atlanta, Georgia",
-      focus: "24-hour cable news network with breaking news focus",
-      notable: "First 24-hour news channel, extensive international bureau network, known for breaking news coverage",
-      funding: "Cable/satellite subscriptions, advertising",
-      hints: [
-        "As a 24-hour news network, consider how the need to fill airtime affects their coverage approach.",
-        "Look at their panel discussions and who they invite as regular commentators."
-      ]
-    },
-    {
-      name: "BBC",
-      aliases: ["bbc news", "british broadcasting corporation"],
-      ownership: "UK public service broadcaster (operates under Royal Charter)",
-      founded: "1922",
-      headquarters: "London, UK",
-      focus: "International news and programming",
-      notable: "One of the world's largest news organizations with global reach, funded by UK license fees",
-      funding: "UK television license fees, commercial activities outside UK",
-      hints: [
-        "Consider how being funded by UK license fees (not ads or subscriptions) affects their incentives.",
-        "Look at how they cover UK government vs. international stories."
-      ]
-    },
-    {
-      name: "The Wall Street Journal",
-      aliases: ["wsj", "wall street journal", "journal"],
-      ownership: "News Corp (Murdoch family)",
-      founded: "1889",
-      headquarters: "New York City",
-      focus: "Business and financial news with general news coverage",
-      notable: "Largest newspaper in US by circulation, known for strong separation between news and opinion sections",
-      funding: "Subscriptions (primary), advertising",
-      hints: [
-        "Despite same ownership as Fox News, their news desk operates independently from opinion pages.",
-        "Consider their business-focused readership and how that shapes coverage priorities."
-      ]
-    },
-    {
-      name: "Newsmax",
-      aliases: ["newsmax tv", "newsmax media"],
-      ownership: "Newsmax Media Inc. (Christopher Ruddy)",
-      founded: "1998",
-      headquarters: "Boca Raton, Florida",
-      focus: "Cable news network and news website",
-      notable: "Grew significantly in 2020-2021, competes with Fox News and CNN for cable news audience",
-      funding: "Cable/satellite subscriptions, advertising, website subscriptions",
-      hints: [
-        "Look at when they experienced major growth and what audience they attracted during that time.",
-        "Compare their coverage style to other cable news networks."
-      ]
-    },
-    {
-      name: "The Daily Wire",
-      aliases: ["daily wire"],
-      ownership: "Private company (Ben Shapiro, Jeremy Boreing)",
-      founded: "2015",
-      headquarters: "Nashville, Tennessee",
-      focus: "News and opinion website with podcasting network",
-      notable: "Large social media presence, subscription-based model for premium content, founded by conservative commentator Ben Shapiro",
-      funding: "Subscriptions, advertising",
-      hints: [
-        "Consider who founded it (Ben Shapiro) and their background in political commentary.",
-        "Look at their business model - they rely on subscriber support rather than traditional advertising."
-      ]
-    },
-    {
-      name: "Vox",
-      aliases: ["vox media", "vox news"],
-      ownership: "Vox Media",
-      founded: "2014",
-      headquarters: "Washington, D.C. / New York City",
-      focus: "Explanatory journalism on policy, politics, culture",
-      notable: "Known for 'explainer' articles and video content, founded by Ezra Klein and Melissa Bell",
-      funding: "Advertising, branded content",
-      hints: [
-        "Their focus on 'explanatory journalism' means more interpretation and context - consider how that differs from straight news.",
-        "Look at who founded it and what other media projects they've been involved with."
-      ]
-    },
-    {
-      name: "The Atlantic",
-      aliases: ["atlantic", "atlantic magazine"],
-      ownership: "Emerson Collective (Laurene Powell Jobs)",
-      founded: "1857",
-      headquarters: "Washington, D.C.",
-      focus: "Long-form journalism on politics, culture, technology",
-      notable: "One of oldest American magazines still in publication, known for in-depth analysis and essays",
-      funding: "Subscriptions, events, advertising",
-      hints: [
-        "Consider their focus on long-form essays and analysis versus breaking news.",
-        "Look at their historical reputation and how it's evolved over 165+ years."
-      ]
-    },
-    {
-      name: "BuzzFeed News",
-      aliases: ["buzzfeed", "buzzfeed news"],
-      ownership: "BuzzFeed Inc. (publicly traded)",
-      founded: "2006 (BuzzFeed), 2011 (News division)",
-      headquarters: "New York City",
-      focus: "Digital media with investigative reporting division",
-      notable: "Pulitzer Prize finalist, mix of viral content and serious journalism (Note: News division shut down in 2023)",
-      funding: "Advertising, commerce, licensing",
-      hints: [
-        "Despite starting as a viral content site, their news division did serious investigative work - consider that split.",
-        "Note that their news division shut down in 2023 - what does that tell you about their business model?"
-      ]
-    },
-    {
-      name: "ABC News",
-      aliases: ["abc", "american broadcasting company"],
-      ownership: "The Walt Disney Company",
-      founded: "1945",
-      headquarters: "New York City",
-      focus: "Broadcast television news network",
-      notable: "Major network news division with programs like Good Morning America and World News Tonight",
-      funding: "Advertising, cable/satellite fees",
-      hints: [
-        "As a Disney property, consider how corporate ownership affects editorial decisions.",
-        "Compare their broadcast news approach to cable news channels."
-      ]
-    },
-    {
-      name: "NBC News",
-      aliases: ["nbc", "national broadcasting company"],
-      ownership: "NBCUniversal (Comcast)",
-      founded: "1940",
-      headquarters: "New York City",
-      focus: "Broadcast and cable news (includes MSNBC)",
-      notable: "One of the 'Big Three' television networks, owns both broadcast NBC News and cable channel MSNBC",
-      funding: "Advertising, cable/satellite fees",
-      hints: [
-        "They own both NBC News (broadcast) and MSNBC (cable) - these have different approaches and audiences.",
-        "Consider how being owned by a major cable company (Comcast) might affect coverage."
-      ]
-    },
-    {
-      name: "The Washington Post",
-      aliases: ["washington post", "wapo", "wash post"],
-      ownership: "Nash Holdings LLC (Jeff Bezos)",
-      founded: "1877",
-      headquarters: "Washington, D.C.",
-      focus: "Politics, policy, and national news",
-      notable: "Known for investigative reporting, particularly on government. Famous for Watergate coverage. Bought by Jeff Bezos in 2013.",
-      funding: "Digital subscriptions, advertising",
-      hints: [
-        "Consider their location (D.C.) and focus on government/politics.",
-        "Jeff Bezos bought them in 2013 - research how ownership by a tech billionaire might influence coverage."
-      ]
-    },
-    {
-      name: "The Daily Caller",
-      aliases: ["daily caller"],
-      ownership: "Daily Caller Inc. (Neil Patel, Tucker Carlson co-founded)",
-      founded: "2010",
-      headquarters: "Washington, D.C.",
-      focus: "Political news and opinion website",
-      notable: "Co-founded by Tucker Carlson, focuses on politics and breaking news",
-      funding: "Advertising, subscriptions",
-      hints: [
-        "Look at who co-founded it (Tucker Carlson) and their media background.",
-        "Consider how their focus on breaking political news affects their coverage."
-      ]
-    },
-    {
-      name: "The Federalist",
-      aliases: ["federalist"],
-      ownership: "FDRLST Media (Ben Domenech, Sean Davis)",
-      founded: "2013",
-      headquarters: "Washington, D.C.",
-      focus: "Politics, policy, and culture commentary",
-      notable: "Online magazine focusing on policy analysis and cultural commentary",
-      funding: "Advertising, reader support",
-      hints: [
-        "Their name references the Federalist Papers - consider what political philosophy that represents.",
-        "Look at the balance between news reporting and opinion/analysis."
-      ]
-    },
-    {
-      name: "MarketWatch",
-      aliases: ["market watch"],
-      ownership: "Dow Jones & Company (News Corp)",
-      founded: "1997",
-      headquarters: "New York City",
-      focus: "Financial and business news",
-      notable: "Real-time financial news and market data",
-      funding: "Advertising, subscriptions",
-      hints: [
-        "As a financial news site, they focus on markets and economic data more than political analysis.",
-        "Consider how their business/investor audience affects what they cover."
-      ]
-    },
-    {
-      name: "The Hill",
-      aliases: ["hill", "thehill"],
-      ownership: "Nexstar Media Group",
-      founded: "1994",
-      headquarters: "Washington, D.C.",
-      focus: "Congressional and political news",
-      notable: "Focused on Capitol Hill coverage, read widely by political insiders",
-      funding: "Advertising, subscriptions",
-      hints: [
-        "They focus specifically on Congressional news and inside-the-Beltway politics.",
-        "Consider their audience (political professionals) and how that shapes coverage."
-      ]
-    },
-    {
-      name: "Newsweek",
-      aliases: ["news week"],
-      ownership: "Newsweek Publishing LLC (Dev Pragad)",
-      founded: "1933",
-      headquarters: "New York City",
-      focus: "News magazine covering politics, culture, and current events",
-      notable: "Historic news magazine that went digital-first in 2012, then returned to print",
-      funding: "Advertising, subscriptions",
-      hints: [
-        "Once a major print magazine, now focuses more on digital content.",
-        "Compare their current approach to their historic reputation."
-      ]
-    },
-    {
-      name: "Time",
-      aliases: ["time magazine"],
-      ownership: "Time USA, LLC (Marc Benioff)",
-      founded: "1923",
-      headquarters: "New York City",
-      focus: "News magazine covering politics, world events, and culture",
-      notable: "Historic American news magazine, known for 'Person of the Year' cover",
-      funding: "Subscriptions, advertising",
-      hints: [
-        "Long history as a mainstream news magazine - consider how it's evolved.",
-        "Owned by Salesforce founder Marc Benioff since 2018."
-      ]
-    },
-    {
-      name: "Yahoo News",
-      aliases: ["yahoo"],
-      ownership: "Yahoo Inc. (Apollo Global Management)",
-      founded: "1996",
-      headquarters: "Sunnyvale, California",
-      focus: "News aggregation and original reporting",
-      notable: "Combines aggregated content from other sources with original reporting",
-      funding: "Advertising",
-      hints: [
-        "They aggregate news from many sources - not all original content.",
-        "Consider how aggregation affects the editorial voice."
-      ]
-    },
-    {
-      name: "New York Post",
-      aliases: ["ny post", "nypost"],
-      ownership: "News Corp (Murdoch family)",
-      founded: "1801",
-      headquarters: "New York City",
-      focus: "Tabloid newspaper covering news, entertainment, sports",
-      notable: "Oldest continuously published daily newspaper in the US, tabloid format with sensational headlines",
-      funding: "Sales, advertising",
-      hints: [
-        "Tabloid format means more emphasis on sensational headlines and shorter stories.",
-        "Same ownership as Wall Street Journal but very different editorial approach."
-      ]
-    },
-    {
-      name: "CBN",
-      aliases: ["cbn news", "christian broadcasting network"],
-      ownership: "Christian Broadcasting Network (Pat Robertson founded)",
-      founded: "1960",
-      headquarters: "Virginia Beach, Virginia",
-      focus: "Religious broadcasting and news with Christian perspective",
-      notable: "Founded by televangelist Pat Robertson, mixes news with religious programming",
-      funding: "Donations, viewer support",
-      hints: [
-        "Founded by a prominent Christian televangelist - consider how faith perspective shapes coverage.",
-        "Look at their funding model (donations) versus ad-supported news."
-      ]
-    },
-    {
-      name: "Forbes",
-      aliases: ["forbes magazine"],
-      ownership: "Integrated Whale Media Investments (Hong Kong-based)",
-      founded: "1917",
-      headquarters: "Jersey City, New Jersey",
-      focus: "Business, finance, investing, and entrepreneurship",
-      notable: "Known for annual lists (Forbes 400, World's Billionaires), contributor model for content",
-      funding: "Advertising, subscriptions, licensing",
-      hints: [
-        "Focus on business and wealth means economic policy gets more attention than social issues.",
-        "Uses a contributor model where many writers aren't staff - consider how that affects editorial consistency."
-      ]
-    },
-    {
-      name: "Washington Times",
-      aliases: ["wash times", "washtimes"],
-      ownership: "Operations Holdings (owned by Unification Church)",
-      founded: "1982",
-      headquarters: "Washington, D.C.",
-      focus: "Politics and national news",
-      notable: "Founded by Unification Church leader Sun Myung Moon, focuses on D.C. politics",
-      funding: "Subscriptions, advertising",
-      hints: [
-        "Founded by the Unification Church - research how religious organization ownership affects editorial stance.",
-        "Often confused with Washington Post but they're very different organizations."
-      ]
-    },
-    {
-      name: "News Nation",
-      aliases: ["newsnation"],
-      ownership: "Nexstar Media Group",
-      founded: "2020 (rebranded from WGN America)",
-      headquarters: "Chicago, Illinois",
-      focus: "National cable news",
-      notable: "Newer cable news network, aims for less partisan approach than competitors",
-      funding: "Cable/satellite subscriptions, advertising",
-      hints: [
-        "Very new to cable news (2020), positioning themselves as less partisan alternative.",
-        "Consider how being owned by a large local TV station group (Nexstar) shapes their approach."
-      ]
-    },
-    {
-      name: "Reason",
-      aliases: ["reason magazine", "reason news"],
-      ownership: "Reason Foundation (nonprofit)",
-      founded: "1968",
-      headquarters: "Los Angeles, California",
-      focus: "Libertarian politics, free markets, civil liberties",
-      notable: "Libertarian perspective, focuses on individual freedom and limited government",
-      funding: "Donations, subscriptions",
-      hints: [
-        "Explicitly libertarian publication - they oppose government intervention from both major parties.",
-        "Consider how libertarian philosophy (social freedom + economic freedom) differs from traditional left/right."
-      ]
-    },
-    {
-      name: "Upward News",
-      aliases: ["upward", "un", "UN"],
-      ownership: "Independent conservative media outlet",
-      founded: "2020s",
-      headquarters: "United States",
-      focus: "Conservative news and commentary",
-      notable: "Newer conservative-focused digital news outlet",
-      funding: "Advertising, subscriptions",
-      hints: [
-        "Newer outlet that emerged in recent years - consider what audience gap they're trying to fill.",
-        "Look at their stated mission and what topics they prioritize."
-      ]
-    },
-    {
-      name: "SAN News",
-      aliases: ["san"],
-      ownership: "Independent",
-      founded: "Recent",
-      headquarters: "United States",
-      focus: "Straight news reporting",
-      notable: "Newer outlet focused on straightforward news delivery",
-      funding: "Various",
-      hints: [
-        "Relatively new outlet - research their stated editorial approach.",
-        "Consider how newer outlets differentiate themselves from established media."
-      ]
-    }
-  ];
+  (function() {
+  // Import backend URL from your config
+  import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
+  
+  const statusBox = document.getElementById('ai-chat-status');
+  const queryInput = document.getElementById('source-query');
+  const chatLog = document.getElementById('source-chat-log');
 
   function setStatus(message, type = "info") {
     statusBox.textContent = message;
@@ -836,119 +407,127 @@ body {
     chatLog.scrollTop = chatLog.scrollHeight;
   }
 
-  function findSource(query) {
-    const q = query.toLowerCase().trim();
-    
-    // Remove common question words
-    const cleanQuery = q
-      .replace(/what should i know about/gi, '')
-      .replace(/tell me about/gi, '')
-      .replace(/what is/gi, '')
-      .replace(/who is/gi, '')
-      .replace(/give me a hint about/gi, '')
-      .replace(/hint about/gi, '')
-      .replace(/info on/gi, '')
-      .replace(/information about/gi, '')
-      .trim();
-    
-    return SOURCE_PROFILES.find(src => {
-      const name = src.name.toLowerCase();
-      const aliases = src.aliases.map(a => a.toLowerCase());
-      
-      // Check if query contains the source name or vice versa
-      if (name.includes(cleanQuery) || cleanQuery.includes(name)) {
-        return true;
+  async function callGeminiAPI(query, type = 'info') {
+    try {
+      const response = await fetch(`${pythonURI}/api/gemini/media-bias-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: query,
+          type: type
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `API error: ${response.status}`);
       }
-      
-      // Check aliases
-      return aliases.some(alias => 
-        alias.includes(cleanQuery) || cleanQuery.includes(alias)
-      );
-    });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Gemini API error:', error);
+      throw error;
+    }
   }
 
-  function formatSourceResponse(src) {
-    return `${src.name}
-
-Founded: ${src.founded}
-Ownership: ${src.ownership}
-Headquarters: ${src.headquarters}
-Focus: ${src.focus}
-Notable: ${src.notable}
-Funding: ${src.funding}`;
-  }
-
-  function handleAsk() {
+  async function handleAsk() {
     const query = queryInput.value.trim();
     if (!query) {
       setStatus("Please enter a source name or question.", "error");
       return;
     }
 
-    // record the prompt into shared storage so attempts can include it
+    // Record the prompt in storage
     try {
       const d = loadData();
       d.meta = d.meta || {};
       d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
-      d.meta.currentChatPrompts.push({ type: 'query', text: query, at: Date.now() });
+      d.meta.currentChatPrompts.push({ 
+        type: 'query', 
+        text: query, 
+        at: Date.now() 
+      });
       saveData(d);
     } catch (err) {
-      console.warn('record prompt failed', err);
+      console.warn('Record prompt failed', err);
     }
 
     addMessage("user", query);
     queryInput.value = '';
-    setStatus("Looking up source...", "info");
+    setStatus("Asking Gemini AI...", "info");
     
-    const match = findSource(query);
-    if (match) {
-      lastMatchedSource = match;
-      addMessage("ai", formatSourceResponse(match));
-      setStatus("Source info provided.", "success");
-    } else {
-      addMessage("ai", "I don't have detailed information about that source yet. Try: Reuters, Fox News, NPR, New York Times, CNN, BBC, The Epoch Times, Wall Street Journal, Washington Post, Newsmax, Daily Wire, Vox, The Atlantic, BuzzFeed News, ABC, NBC, MarketWatch, The Hill, Newsweek, or other major outlets.\n\nType the source name to learn more!");
-      setStatus("Source not found in database.", "error");
+    try {
+      const result = await callGeminiAPI(query, 'info');
+      
+      if (result.success) {
+        addMessage("ai", result.response);
+        setStatus("Response received.", "success");
+      } else {
+        throw new Error(result.message || 'Unknown error');
+      }
+    } catch (error) {
+      addMessage("ai", `Sorry, I encountered an error: ${error.message}. Please try again.`);
+      setStatus("Error getting response.", "error");
     }
   }
 
-  function handleHint() {
+  async function handleHint() {
     const query = queryInput.value.trim();
-    const match = query ? findSource(query) : lastMatchedSource;
     
-    if (match) {
-      lastMatchedSource = match;
-      const hint = match.hints[Math.floor(Math.random() * match.hints.length)];
-
-      // record the hint shown into shared storage
-      try {
-        const d = loadData();
-        d.meta = d.meta || {};
-        d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
-        d.meta.currentChatPrompts.push({ type: 'hint', text: hint, source: match.name, at: Date.now() });
-        saveData(d);
-      } catch (err) {
-        console.warn('record hint failed', err);
-      }
-
-      addMessage("ai", `**Hint about ${match.name}:**\n${hint}`);
-      setStatus("Hint provided.", "success");
-    } else {
-      addMessage("ai", "**General Hint:**\nThink about:\n• Who owns the organization?\n• How is it funded (ads, subscriptions)?\n• What topics do they emphasize?\n• Is news separated from opinion?\n\nEnter a source name for a specific hint!");
+    if (!query) {
+      addMessage("ai", "**General Hint:**\nThink about:\n• Who owns the organization?\n• How is it funded (ads, subscriptions, donations)?\n• What topics do they emphasize?\n• Is news separated from opinion?\n\nEnter a source name for a specific hint!");
       setStatus("General hint provided.", "info");
+      return;
+    }
+
+    // Record the hint request
+    try {
+      const d = loadData();
+      d.meta = d.meta || {};
+      d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
+      d.meta.currentChatPrompts.push({ 
+        type: 'hint', 
+        text: query, 
+        at: Date.now() 
+      });
+      saveData(d);
+    } catch (err) {
+      console.warn('Record hint failed', err);
+    }
+
+    setStatus("Getting hint from Gemini AI...", "info");
+    
+    try {
+      const result = await callGeminiAPI(query, 'hint');
+      
+      if (result.success) {
+        addMessage("ai", `**Hint about your query:**\n${result.response}`);
+        setStatus("Hint provided.", "success");
+      } else {
+        throw new Error(result.message || 'Unknown error');
+      }
+    } catch (error) {
+      addMessage("ai", `Sorry, I couldn't get a hint: ${error.message}. Please try again.`);
+      setStatus("Error getting hint.", "error");
     }
   }
 
   function saveChat() {
     const payloadHtml = chatLog.innerHTML;
-    // store in shared object under profiles.chatSession for cross-module persistence
     const data = loadData();
     data.profiles = data.profiles || {};
-    data.profiles.chatSession = { html: payloadHtml, savedAt: Date.now() };
+    data.profiles.chatSession = { 
+      html: payloadHtml, 
+      savedAt: Date.now() 
+    };
     saveData(data);
     setStatus("Session saved locally (shared).", "success");
-}
+  }
 
-function loadChat() {
+  function loadChat() {
     const data = loadData();
     const saved = data.profiles && data.profiles.chatSession;
     if (!saved || !saved.html) {
@@ -957,11 +536,10 @@ function loadChat() {
     }
     chatLog.innerHTML = saved.html;
     setStatus("Session loaded (shared).", "success");
-}
+  }
 
-function clearChat() {
+  function clearChat() {
     chatLog.innerHTML = '<div class="chat-hint">Try: "What should I know about Reuters?" or "Tell me about Fox News" or "Give me a hint about NPR."</div>';
-    lastMatchedSource = null;
     setStatus("Chat cleared.", "info");
   }
 

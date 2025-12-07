@@ -361,203 +361,197 @@ body {
 
 <script>
 (function() {
-  const statusBox = document.getElementById('ai-chat-status');
-  const queryInput = document.getElementById('source-query');
-  const chatLog = document.getElementById('source-chat-log');
-  let lastMatchedSource = null;
-
-  (function() {
-  // Import backend URL from your config
-  import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
   
-  const statusBox = document.getElementById('ai-chat-status');
-  const queryInput = document.getElementById('source-query');
-  const chatLog = document.getElementById('source-chat-log');
-
-  function setStatus(message, type = "info") {
-    statusBox.textContent = message;
-    statusBox.style.display = "block";
-    const colors = {
-      info: { bg: "rgba(122,210,249,0.14)", color: "#b4e4ff" },
-      success: { bg: "rgba(155,231,196,0.14)", color: "#b6f3d8" },
-      error: { bg: "rgba(255,204,204,0.18)", color: "#ffd6d6" }
-    };
-    const palette = colors[type] || colors.info;
-    statusBox.style.backgroundColor = palette.bg;
-    statusBox.style.color = palette.color;
-    if (type !== "info") {
-      setTimeout(() => { statusBox.style.display = "none"; }, 4000);
-    }
-  }
-
-  function addMessage(role, text) {
-    const bubble = document.createElement('div');
-    bubble.className = `chat-bubble ${role}`;
+    import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
     
-    // Format text with line breaks and bold
-    const formatted = text.split('\n').map(line => {
-      if (line.startsWith('**') && line.endsWith('**')) {
-        return `<strong>${line.slice(2, -2)}</strong>`;
+    const statusBox = document.getElementById('ai-chat-status');
+    const queryInput = document.getElementById('source-query');
+    const chatLog = document.getElementById('source-chat-log');
+
+    function setStatus(message, type = "info") {
+      statusBox.textContent = message;
+      statusBox.style.display = "block";
+      const colors = {
+        info: { bg: "rgba(122,210,249,0.14)", color: "#b4e4ff" },
+        success: { bg: "rgba(155,231,196,0.14)", color: "#b6f3d8" },
+        error: { bg: "rgba(255,204,204,0.18)", color: "#ffd6d6" }
+      };
+      const palette = colors[type] || colors.info;
+      statusBox.style.backgroundColor = palette.bg;
+      statusBox.style.color = palette.color;
+      if (type !== "info") {
+        setTimeout(() => { statusBox.style.display = "none"; }, 4000);
       }
-      return line;
-    }).join('<br>');
-    
-    bubble.innerHTML = formatted;
-    chatLog.appendChild(bubble);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-
-  async function callGeminiAPI(query, type = 'info') {
-    try {
-      const response = await fetch(`${pythonURI}/api/gemini/media-bias-chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query: query,
-          type: type
-        })
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || `API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Gemini API error:', error);
-      throw error;
-    }
-  }
-
-  async function handleAsk() {
-    const query = queryInput.value.trim();
-    if (!query) {
-      setStatus("Please enter a source name or question.", "error");
-      return;
     }
 
-    // Record the prompt in storage
-    try {
-      const d = loadData();
-      d.meta = d.meta || {};
-      d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
-      d.meta.currentChatPrompts.push({ 
-        type: 'query', 
-        text: query, 
-        at: Date.now() 
-      });
-      saveData(d);
-    } catch (err) {
-      console.warn('Record prompt failed', err);
-    }
-
-    addMessage("user", query);
-    queryInput.value = '';
-    setStatus("Asking Gemini AI...", "info");
-    
-    try {
-      const result = await callGeminiAPI(query, 'info');
+    function addMessage(role, text) {
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${role}`;
       
-      if (result.success) {
-        addMessage("ai", result.response);
-        setStatus("Response received.", "success");
-      } else {
-        throw new Error(result.message || 'Unknown error');
-      }
-    } catch (error) {
-      addMessage("ai", `Sorry, I encountered an error: ${error.message}. Please try again.`);
-      setStatus("Error getting response.", "error");
-    }
-  }
-
-  async function handleHint() {
-    const query = queryInput.value.trim();
-    
-    if (!query) {
-      addMessage("ai", "**General Hint:**\nThink about:\n• Who owns the organization?\n• How is it funded (ads, subscriptions, donations)?\n• What topics do they emphasize?\n• Is news separated from opinion?\n\nEnter a source name for a specific hint!");
-      setStatus("General hint provided.", "info");
-      return;
-    }
-
-    // Record the hint request
-    try {
-      const d = loadData();
-      d.meta = d.meta || {};
-      d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
-      d.meta.currentChatPrompts.push({ 
-        type: 'hint', 
-        text: query, 
-        at: Date.now() 
-      });
-      saveData(d);
-    } catch (err) {
-      console.warn('Record hint failed', err);
-    }
-
-    setStatus("Getting hint from Gemini AI...", "info");
-    
-    try {
-      const result = await callGeminiAPI(query, 'hint');
+      // Format text with line breaks and bold
+      const formatted = text.split('\n').map(line => {
+        if (line.startsWith('**') && line.endsWith('**')) {
+          return `<strong>${line.slice(2, -2)}</strong>`;
+        }
+        return line;
+      }).join('<br>');
       
-      if (result.success) {
-        addMessage("ai", `**Hint about your query:**\n${result.response}`);
-        setStatus("Hint provided.", "success");
-      } else {
-        throw new Error(result.message || 'Unknown error');
+      bubble.innerHTML = formatted;
+      chatLog.appendChild(bubble);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    async function callGeminiAPI(query, type = 'info') {
+      try {
+        const response = await fetch(`${pythonURI}/api/gemini/media-bias-chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: query,
+            type: type
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || `API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Gemini API error:', error);
+        throw error;
       }
-    } catch (error) {
-      addMessage("ai", `Sorry, I couldn't get a hint: ${error.message}. Please try again.`);
-      setStatus("Error getting hint.", "error");
     }
-  }
 
-  function saveChat() {
-    const payloadHtml = chatLog.innerHTML;
-    const data = loadData();
-    data.profiles = data.profiles || {};
-    data.profiles.chatSession = { 
-      html: payloadHtml, 
-      savedAt: Date.now() 
-    };
-    saveData(data);
-    setStatus("Session saved locally (shared).", "success");
-  }
+    async function handleAsk() {
+      const query = queryInput.value.trim();
+      if (!query) {
+        setStatus("Please enter a source name or question.", "error");
+        return;
+      }
 
-  function loadChat() {
-    const data = loadData();
-    const saved = data.profiles && data.profiles.chatSession;
-    if (!saved || !saved.html) {
-      setStatus("No saved session found.", "error");
-      return;
+      // Record the prompt in storage
+      try {
+        const d = loadData();
+        d.meta = d.meta || {};
+        d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
+        d.meta.currentChatPrompts.push({ 
+          type: 'query', 
+          text: query, 
+          at: Date.now() 
+        });
+        saveData(d);
+      } catch (err) {
+        console.warn('Record prompt failed', err);
+      }
+
+      addMessage("user", query);
+      queryInput.value = '';
+      setStatus("Asking Gemini AI...", "info");
+      
+      try {
+        const result = await callGeminiAPI(query, 'info');
+        
+        if (result.success) {
+          addMessage("ai", result.response);
+          setStatus("Response received.", "success");
+        } else {
+          throw new Error(result.message || 'Unknown error');
+        }
+      } catch (error) {
+        addMessage("ai", `Sorry, I encountered an error: ${error.message}. Please try again.`);
+        setStatus("Error getting response.", "error");
+      }
     }
-    chatLog.innerHTML = saved.html;
-    setStatus("Session loaded (shared).", "success");
-  }
 
-  function clearChat() {
-    chatLog.innerHTML = '<div class="chat-hint">Try: "What should I know about Reuters?" or "Tell me about Fox News" or "Give me a hint about NPR."</div>';
-    setStatus("Chat cleared.", "info");
-  }
+    async function handleHint() {
+      const query = queryInput.value.trim();
+      
+      if (!query) {
+        addMessage("ai", "**General Hint:**\nThink about:\n• Who owns the organization?\n• How is it funded (ads, subscriptions, donations)?\n• What topics do they emphasize?\n• Is news separated from opinion?\n\nEnter a source name for a specific hint!");
+        setStatus("General hint provided.", "info");
+        return;
+      }
 
-  // Event listeners
-  document.getElementById('ask-btn').addEventListener('click', handleAsk);
-  document.getElementById('hint-btn').addEventListener('click', handleHint);
-  document.getElementById('save-chat-btn').addEventListener('click', saveChat);
-  document.getElementById('load-chat-btn').addEventListener('click', loadChat);
-  document.getElementById('clear-chat-btn').addEventListener('click', clearChat);
+      // Record the hint request
+      try {
+        const d = loadData();
+        d.meta = d.meta || {};
+        d.meta.currentChatPrompts = d.meta.currentChatPrompts || [];
+        d.meta.currentChatPrompts.push({ 
+          type: 'hint', 
+          text: query, 
+          at: Date.now() 
+        });
+        saveData(d);
+      } catch (err) {
+        console.warn('Record hint failed', err);
+      }
 
-  // Allow Enter key to submit
-  queryInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleAsk();
+      setStatus("Getting hint from Gemini AI...", "info");
+      
+      try {
+        const result = await callGeminiAPI(query, 'hint');
+        
+        if (result.success) {
+          addMessage("ai", `**Hint about your query:**\n${result.response}`);
+          setStatus("Hint provided.", "success");
+        } else {
+          throw new Error(result.message || 'Unknown error');
+        }
+      } catch (error) {
+        addMessage("ai", `Sorry, I couldn't get a hint: ${error.message}. Please try again.`);
+        setStatus("Error getting hint.", "error");
+      }
     }
-  });
-})();
+
+    function saveChat() {
+      const payloadHtml = chatLog.innerHTML;
+      const data = loadData();
+      data.profiles = data.profiles || {};
+      data.profiles.chatSession = { 
+        html: payloadHtml, 
+        savedAt: Date.now() 
+      };
+      saveData(data);
+      setStatus("Session saved locally (shared).", "success");
+    }
+
+    function loadChat() {
+      const data = loadData();
+      const saved = data.profiles && data.profiles.chatSession;
+      if (!saved || !saved.html) {
+        setStatus("No saved session found.", "error");
+        return;
+      }
+      chatLog.innerHTML = saved.html;
+      setStatus("Session loaded (shared).", "success");
+    }
+
+    function clearChat() {
+      chatLog.innerHTML = '<div class="chat-hint">Try: "What should I know about Reuters?" or "Tell me about Fox News" or "Give me a hint about NPR."</div>';
+      setStatus("Chat cleared.", "info");
+    }
+
+    // Event listeners
+    document.getElementById('ask-btn').addEventListener('click', handleAsk);
+    document.getElementById('hint-btn').addEventListener('click', handleHint);
+    document.getElementById('save-chat-btn').addEventListener('click', saveChat);
+    document.getElementById('load-chat-btn').addEventListener('click', loadChat);
+    document.getElementById('clear-chat-btn').addEventListener('click', clearChat);
+
+    // Allow Enter key to submit
+    queryInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleAsk();
+      }
+    });
+  })();
 </script>
 
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->

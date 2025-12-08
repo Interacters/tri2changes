@@ -12,15 +12,30 @@ microblog: true
 author: "Interactors"
 date: 2025-12-2
 ---
-## Bias In Sources
+## Bias Media Sources
+<div class="page-content">
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   min-height: 100vh;
   background: url('{{ site.baseurl }}/MediaBiasChanges/media/assets/spacebackground.jpg') no-repeat center center fixed;
   background-size: cover;
-  background-color: #061226; /* fallback */
+  background-color: #061226;
+  padding: 20px;
 }
- .intro-text {
+
+/* Center everything */
+.page-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.intro-text {
   background: rgba(0,0,30,0.85);
   padding: 20px;
   border-radius: 12px;
@@ -28,7 +43,8 @@ body {
   font-size: 1.05rem;
   margin-bottom: 20px;
   line-height: 1.5;
- }
+  color: #e2e8f0;
+}
 .game-container {
     background: linear-gradient(135deg, #353e74ff, #9384d5ff);
     border-radius: 15px;
@@ -293,7 +309,7 @@ body {
         </div>
         <button class="btn btn-primary" id="auth-btn">Sign In</button>
     </div>
-
+    
     <div class="bins-container">
         <div class="bin" data-bin="Left">
             <div class="bin-label">Left</div>
@@ -336,30 +352,9 @@ body {
         </table>
     </div>
 </div>
-
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Chatbox with Hint / Info Mode</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
-
     .chat-container {
-      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      background: linear-gradient(145deg, #8373b9b3 0%, #5c77b6c1 100%);
       width: 480px;
       border-radius: 24px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
@@ -419,7 +414,7 @@ body {
       font-size: 0.95rem;
       border-radius: 12px;
       border: 2px solid #334155;
-      background: #0f172a;
+      background: #5a5681ff;
       color: #e2e8f0;
       box-sizing: border-box;
       margin-bottom: 20px;
@@ -428,7 +423,7 @@ body {
     }
 
     textarea::placeholder {
-      color: #475569;
+      color: #6f8eb8ff;
     }
 
     textarea:focus {
@@ -443,7 +438,7 @@ body {
       font-size: 0.95rem;
       border-radius: 12px;
       border: 2px solid #334155;
-      background: #0f172a;
+      background: #3b4f7fff;
       color: #e2e8f0;
       box-sizing: border-box;
       margin-bottom: 24px;
@@ -589,10 +584,9 @@ body {
       display: block;
     }
   </style>
-</head>
-<body>
+
   <div class="chat-container">
-    <h1>AI Chatbox</h1>
+    <h3>AI Chatbox</h3>
     <p class="description">
       Type your question, choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send.
     </p>
@@ -689,8 +683,6 @@ body {
       }
     });
   </script>
-</body>
-</html>
 
 
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->
@@ -1421,7 +1413,7 @@ async function submitFinalTime(username, elapsed) {
 
 <!-- Citation Generator -->
 <style>
-  .cite-card { background: linear-gradient(160deg,#2b3956,#21304a); color:#e6f2ff; padding:18px; border-radius:12px; margin:20px 0; }
+  .cite-card { background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); color:#e6f2ff; padding:18px; border-radius:12px; margin:20px 0; }
   .cite-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
   .cite-label { min-width:110px; font-weight:700; color:#d6e9ff; }
   .cite-input, .cite-select { flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:inherit; }

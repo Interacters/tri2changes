@@ -584,11 +584,11 @@ body {
       display: block;
     }
   </style>
-
-  <div class="chat-container">
-    <h3>AI Chatbox</h3>
+<div class="chat-container">
+    <h3>AI Chatbox with History</h3>
     <p class="description">
       Type your question, choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send.
+      Your conversation history is saved below!
     </p>
 
     <form id="chat-form">
@@ -603,41 +603,150 @@ body {
 
       <div class="actions">
         <button type="submit" id="send-btn">Send</button>
+        <button type="button" id="clear-history-btn">Clear History</button>
       </div>
     </form>
 
     <div id="status" class="status"></div>
     <div id="response" class="response-box" style="display:none;"></div>
+
+    <div class="history-section">
+      <h3>Conversation History</h3>
+      <div class="stats" id="stats"></div>
+      <div id="history-list"></div>
+    </div>
   </div>
 
   <script>
+    // ===== REQUIREMENT: LIST/COLLECTION TYPE =====
+    // This array stores all conversation history
+    let conversationHistory = [];
+
+    // DOM Elements
     const form = document.getElementById('chat-form');
     const messageInput = document.getElementById('message');
     const modeSelect = document.getElementById('mode');
     const statusEl = document.getElementById('status');
     const responseEl = document.getElementById('response');
     const sendBtn = document.getElementById('send-btn');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+    const historyList = document.getElementById('history-list');
+    const statsEl = document.getElementById('stats');
 
+    // ===== REQUIREMENT: STUDENT-DEVELOPED PROCEDURE =====
+    // Procedure name: processConversationHistory
+    // Parameters: historyArray (list), filterType (string), maxItems (number)
+    // Return type: array
+    // Purpose: Filter and process conversation history based on criteria
+    function processConversationHistory(historyArray, filterType, maxItems) {
+      // ===== ALGORITHM WITH SEQUENCING, SELECTION, AND ITERATION =====
+      
+      // SEQUENCING: Steps execute in order
+      let filteredHistory = [];
+      let hintCount = 0;
+      let infoCount = 0;
+      
+      // ITERATION: Loop through each item in history
+      for (let i = 0; i < historyArray.length; i++) {
+        let item = historyArray[i];
+        
+        // SELECTION: Conditional logic to filter and count
+        if (filterType === 'all' || item.type === filterType) {
+          filteredHistory.push(item);
+        }
+        
+        // Count different types
+        if (item.type === 'hint') {
+          hintCount++;
+        } else if (item.type === 'information') {
+          infoCount++;
+        }
+        
+        // SELECTION: Stop if we've reached maxItems
+        if (filteredHistory.length >= maxItems) {
+          break;
+        }
+      }
+      
+      // Return processed data
+      return {
+        filtered: filteredHistory,
+        stats: {
+          total: historyArray.length,
+          hints: hintCount,
+          information: infoCount
+        }
+      };
+    }
+
+    // Helper procedure to add item to history
+    function addToHistory(question, answer, type) {
+      const timestamp = new Date().toLocaleString();
+      conversationHistory.push({
+        question: question,
+        answer: answer,
+        type: type,
+        timestamp: timestamp
+      });
+      
+      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
+      updateHistoryDisplay();
+    }
+
+    // Display history using our procedure
+    function updateHistoryDisplay() {
+      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
+      // Call our student-developed procedure
+      const result = processConversationHistory(conversationHistory, 'all', 50);
+      
+      // Update statistics
+      statsEl.textContent = `Total conversations: ${result.stats.total} | Hints: ${result.stats.hints} | Information: ${result.stats.information}`;
+      
+      // Display filtered history
+      if (result.filtered.length === 0) {
+        historyList.innerHTML = '<p style="color: #999;">No conversation history yet. Start chatting!</p>';
+        return;
+      }
+      
+      historyList.innerHTML = '';
+      
+      // Show most recent first
+      for (let i = result.filtered.length - 1; i >= 0; i--) {
+        const item = result.filtered[i];
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+          <div class="history-question">Q: ${item.question}</div>
+          <div class="history-type">${item.type === 'hint' ? '💡 Hint' : '📚 Information'} - ${item.timestamp}</div>
+          <div class="history-answer">${item.answer}</div>
+        `;
+        historyList.appendChild(historyItem);
+      }
+    }
+
+    // Show status message
+    function showStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type} show`;
+    }
+
+    // Form submission handler
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
       const message = messageInput.value.trim();
-      const mode = modeSelect.value; // "hint" or "information"
+      const mode = modeSelect.value;
 
       if (!message) {
-        statusEl.textContent = 'Please enter a message.';
-        statusEl.className = 'status error';
+        showStatus('Please enter a message.', 'error');
         return;
       }
 
-      // Show sending state
       sendBtn.disabled = true;
-      statusEl.textContent = 'Thinking...';
-      statusEl.className = 'status';
+      showStatus('Thinking...', 'info');
       responseEl.style.display = 'none';
 
       try {
-        // Updated to port 8001 to match your Flask app
         const backendUrl = 'http://localhost:8001/api/chat';
 
         const res = await fetch(backendUrl, {
@@ -658,32 +767,43 @@ body {
 
         const data = await res.json();
 
-        statusEl.textContent = 'Response received!';
-        statusEl.className = 'status success';
+        showStatus('Response received!', 'success');
 
-        // Display the AI response in a nice format
         if (data.answer) {
           responseEl.style.display = 'block';
           responseEl.innerHTML = `
             <div class="label">${data.type === 'hint' ? '💡 Hint:' : '📚 Information:'}</div>
             <div class="answer">${data.answer}</div>
           `;
-        } else {
-          responseEl.style.display = 'block';
-          responseEl.textContent = JSON.stringify(data, null, 2);
+          
+          // Add to history
+          addToHistory(message, data.answer, data.type);
+          
+          // Clear input
+          messageInput.value = '';
         }
 
       } catch (err) {
         console.error(err);
-        statusEl.textContent = 'Error: ' + err.message;
-        statusEl.className = 'status error';
+        showStatus('Error: ' + err.message, 'error');
         responseEl.style.display = 'none';
       } finally {
         sendBtn.disabled = false;
       }
     });
-  </script>
 
+    // Clear history button
+    clearHistoryBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear all conversation history?')) {
+        conversationHistory = [];
+        updateHistoryDisplay();
+        showStatus('History cleared!', 'success');
+      }
+    });
+
+    // Initialize display
+    updateHistoryDisplay();
+  </script>
 
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->
 <script type="module">

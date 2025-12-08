@@ -1484,6 +1484,12 @@ async function submitFinalTime(username, elapsed) {
   const outEl = document.getElementById('cite-output');
   const fetchBtn = document.getElementById('cite-fetch-metadata');
 
+  // DEV default -> ensure this points to your Flask backend (no trailing slash)
+if (!window.fetchProxyBase) {
+    window.fetchProxyBase = 'http://localhost:8001/api/media';
+    console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
+}
+
   const KEY = 'biasGame_citations_v1';
 
   function safe(val, fallback='') { return (val || '').trim(); }
@@ -1522,7 +1528,7 @@ async function submitFinalTime(username, elapsed) {
       date: safe(dateEl.value),
       title: safe(titleEl.value),
       source: safe(sourceEl.value),
-      url: safe(urlEl.value)
+                     url: safe(urlEl.value)
     };
     const style = styleEl.value;
     let citation = '';
@@ -1625,22 +1631,63 @@ async function submitFinalTime(username, elapsed) {
     };
   }
   
+  // try server-side metadata fetch (Flask) — returns { title, author, published, site, url } or throws
+  async function fetchMetadataFromServer(targetUrl) {
+    const base = (window.fetchProxyBase || '').replace(/\/$/, '');
+    if (!base) {
+      console.warn('No fetchProxyBase set; skipping server fetch');
+      return null;
+    }
+
+    try {
+      const endpoint = `${base}/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
+      console.info('Calling server metadata endpoint:', endpoint);
+      const res = await fetch(endpoint, { method: 'GET' });
+
+      // read response body safely (JSON preferred)
+      const ct = res.headers.get('content-type') || '';
+      const body = ct.includes('application/json') ? await res.json().catch(()=>null) : await res.text().catch(()=>null);
+
+      if (!res.ok) {
+        console.warn('Server fetch_meta returned non-OK', res.status, body);
+        // show a helpful alert in dev so you know why client fell back
+        const detail = body && body.detail ? body.detail : (typeof body === 'string' ? body : JSON.stringify(body));
+        alert('Server metadata fetch failed: ' + (detail || res.status));
+        return null;
+      }
+
+      console.info('Server metadata response', body);
+      return body;
+    } catch (err) {
+      console.warn('Server metadata fetch failed (network)', err);
+      alert('Server metadata fetch network error: ' + (err && err.message ? err.message : err));
+      return null;
+    }
+  }
+
+  // try server first, then fallback to client fetch + AllOrigins proxy
   async function fetchAndFill() {
     const url = (urlEl.value || '').trim();
     if (!url) { alert('Enter a URL first.'); return; }
     fetchBtn.textContent = 'Fetching…';
     fetchBtn.disabled = true;
     try {
-      const html = await tryFetchHtml(url);
-      if (!html) {
-        alert('Failed to fetch page. CORS or proxy error. Consider using a server-side proxy.');
-        return;
+      // server attempt
+      let meta = await fetchMetadataFromServer(url);
+
+      // client fallback
+      if (!meta) {
+        const html = await tryFetchHtml(url);
+        if (!html) {
+          alert('Failed to fetch page. CORS or proxy error. Consider enabling your Flask proxy.');
+          return;
+        }
+        meta = parseMetadataFromHtml(html, url);
       }
-      const meta = parseMetadataFromHtml(html, url);
+
       if (meta.author) authorEl.value = meta.author;
       if (meta.published) {
         const fmt = formatPublishedDate(meta.published);
-        // choose default format based on selected style
         const style = (styleEl && styleEl.value) ? styleEl.value : 'apa';
         dateEl.value = (fmt && fmt[style]) ? fmt[style] : meta.published;
       }
@@ -1648,10 +1695,10 @@ async function submitFinalTime(username, elapsed) {
       if (meta.site) sourceEl.value = meta.site;
       urlEl.value = meta.url || url;
       generate();
-      setTimeout(()=>{ fetchBtn.textContent = 'Fetch from URL'; fetchBtn.disabled = false; }, 250);
     } catch (err) {
       console.warn(err);
       alert('Error fetching metadata.');
+    } finally {
       fetchBtn.textContent = 'Fetch from URL';
       fetchBtn.disabled = false;
     }

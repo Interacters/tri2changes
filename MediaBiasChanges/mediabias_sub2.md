@@ -2797,7 +2797,7 @@ if (!window.fetchProxyBase) {
 <body>
     <div class="performance-survey">
         <div class="survey-content">
-            <h3>📊 How do you feel about your performance?</h3>
+            <h3>How do you feel about your performance?</h3>
             <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
             
             <div class="rating-buttons">
@@ -2859,67 +2859,67 @@ if (!window.fetchProxyBase) {
             
             const resourcesByTier = {
                 1: {
-                    title: '📚 Building Foundations',
+                    title: 'Building Foundations',
                     intro: 'Start with these fundamentals to strengthen your English skills:',
                     items: [
-                        '<a href="https://www.grammarly.com/blog/category/handbook/" target="_blank">📖 Grammarly Handbook - Grammar Basics</a>',
-                        '<a href="https://www.khanacademy.org/humanities/grammar" target="_blank">🎓 Khan Academy Grammar Course (Free)</a>',
-                        '<a href="https://www.youtube.com/watch?v=sQEr5D1sSrU" target="_blank">🎥 Basic Essay Structure (YouTube)</a>',
-                        '<a href="https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html" target="_blank">✍️ Purdue OWL - Writing Process Guide</a>',
-                        '<a href="https://quizlet.com/subject/english-vocabulary/" target="_blank">📝 Quizlet - Vocabulary Building</a>'
+                        '<a href="https://www.grammarly.com/blog/category/handbook/" target="_blank">Grammarly Handbook - Grammar Basics</a>',
+                        '<a href="https://www.khanacademy.org/humanities/grammar" target="_blank">Khan Academy Grammar Course (Free)</a>',
+                        '<a href="https://www.youtube.com/watch?v=sQEr5D1sSrU" target="_blank">Basic Essay Structure (YouTube)</a>',
+                        '<a href="https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html" target="_blank">Purdue OWL - Writing Process Guide</a>',
+                        '<a href="https://quizlet.com/subject/english-vocabulary/" target="_blank">Quizlet - Vocabulary Building</a>'
                     ]
                 },
                 2: {
-                    title: '📖 Developing Skills',
+                    title: 'Developing Skills',
                     intro: 'You\'re on the right track! These resources will help you improve:',
                     items: [
-                        '<a href="https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html" target="_blank">📑 MLA Citation Guide - Purdue OWL</a>',
-                        '<a href="https://www.hemingwayapp.com/" target="_blank">✏️ Hemingway Editor - Improve Clarity</a>',
-                        '<a href="https://www.youtube.com/watch?v=AzcJP7WS_5A" target="_blank">🎥 How to Write a Thesis Statement</a>',
-                        '<a href="https://writingcenter.unc.edu/tips-and-tools/" target="_blank">💡 UNC Writing Center - Essay Tips</a>',
-                        '<a href="https://www.coursera.org/learn/writing-skills" target="_blank">🎓 Coursera - Academic English Writing (Free)</a>'
+                        '<a href="https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html" target="_blank">MLA Citation Guide - Purdue OWL</a>',
+                        '<a href="https://www.hemingwayapp.com/" target="_blank">Hemingway Editor - Improve Clarity</a>',
+                        '<a href="https://www.youtube.com/watch?v=AzcJP7WS_5A" target="_blank">How to Write a Thesis Statement</a>',
+                        '<a href="https://writingcenter.unc.edu/tips-and-tools/" target="_blank">UNC Writing Center - Essay Tips</a>',
+                        '<a href="https://www.coursera.org/learn/writing-skills" target="_blank">Coursera - Academic English Writing (Free)</a>'
                     ]
                 },
                 3: {
-                    title: '✅ Solidifying Skills',
+                    title: 'Solidifying Skills',
                     intro: 'You\'re right on track! Strengthen your skills with these:',
                     items: [
-                        '<a href="https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html" target="_blank">📋 APA Format Guide - Research Papers</a>',
-                        '<a href="https://www.thesaurus.com/" target="_blank">📚 Thesaurus.com - Vocabulary Enhancement</a>',
-                        '<a href="https://www.youtube.com/watch?v=mhHfnhh-pB4" target="_blank">🎥 Literary Analysis Techniques</a>',
-                        '<a href="https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing" target="_blank">🎯 Harvard Writing Center - Essay Strategies</a>',
-                        '<a href="https://www.edx.org/learn/english-grammar" target="_blank">📖 edX - Advanced Grammar Course</a>'
+                        '<a href="https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html" target="_blank">APA Format Guide - Research Papers</a>',
+                        '<a href="https://www.thesaurus.com/" target="_blank">Thesaurus.com - Vocabulary Enhancement</a>',
+                        '<a href="https://www.youtube.com/watch?v=mhHfnhh-pB4" target="_blank">Literary Analysis Techniques</a>',
+                        '<a href="https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing" target="_blank">Harvard Writing Center - Essay Strategies</a>',
+                        '<a href="https://www.edx.org/learn/english-grammar" target="_blank">edX - Advanced Grammar Course</a>'
                     ]
                 },
                 4: {
-                    title: '🌟 Advancing Excellence',
+                    title: 'Advancing Excellence',
                     intro: 'Great work! Take your skills to the next level:',
                     items: [
-                        '<a href="https://www.newyorker.com/culture/culture-desk" target="_blank">📰 The New Yorker - Literary Journalism</a>',
-                        '<a href="https://literarydevices.net/" target="_blank">🎭 Literary Devices Guide - Advanced Analysis</a>',
-                        '<a href="https://www.youtube.com/watch?v=QUF-5UDtRJs" target="_blank">🎥 Advanced Rhetorical Analysis</a>',
-                        '<a href="https://style.mla.org/" target="_blank">✍️ MLA Style Center - Advanced Citations</a>',
-                        '<a href="https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing" target="_blank">🎓 MasterClass - Creative Writing (Paid)</a>'
+                        '<a href="https://www.newyorker.com/culture/culture-desk" target="_blank">The New Yorker - Literary Journalism</a>',
+                        '<a href="https://literarydevices.net/" target="_blank">Literary Devices Guide - Advanced Analysis</a>',
+                        '<a href="https://www.youtube.com/watch?v=QUF-5UDtRJs" target="_blank">Advanced Rhetorical Analysis</a>',
+                        '<a href="https://style.mla.org/" target="_blank">MLA Style Center - Advanced Citations</a>',
+                        '<a href="https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing" target="_blank">MasterClass - Creative Writing (Paid)</a>'
                     ]
                 },
                 5: {
                     title: '🚀 Mastery Level',
                     intro: 'Exceptional! Challenge yourself with these advanced resources:',
                     items: [
-                        '<a href="https://www.lrb.co.uk/" target="_blank">📚 London Review of Books - Critical Essays</a>',
-                        '<a href="https://www.jstor.org/" target="_blank">🔬 JSTOR - Academic Research Database</a>',
-                        '<a href="https://www.youtube.com/watch?v=8y8BXcjUNVU" target="_blank">🎥 Yale Lecture Series - Literary Theory</a>',
-                        '<a href="https://www.chicagomanualofstyle.org/home.html" target="_blank">📖 Chicago Manual of Style - Professional Writing</a>',
-                        '<a href="https://www.poets.org/poetsorg/text/learning-guide-poetry-terms" target="_blank">✨ Poetry Foundation - Advanced Literary Forms</a>',
-                        '<a href="https://philosophy.stanford.edu/teaching-guide" target="_blank">🧠 Stanford Philosophy - Critical Thinking</a>'
+                        '<a href="https://www.lrb.co.uk/" target="_blank">London Review of Books - Critical Essays</a>',
+                        '<a href="https://www.jstor.org/" target="_blank">JSTOR - Academic Research Database</a>',
+                        '<a href="https://www.youtube.com/watch?v=8y8BXcjUNVU" target="_blank">Yale Lecture Series - Literary Theory</a>',
+                        '<a href="https://www.chicagomanualofstyle.org/home.html" target="_blank">Chicago Manual of Style - Professional Writing</a>',
+                        '<a href="https://www.poets.org/poetsorg/text/learning-guide-poetry-terms" target="_blank">Poetry Foundation - Advanced Literary Forms</a>',
+                        '<a href="https://philosophy.stanford.edu/teaching-guide" target="_blank">Stanford Philosophy - Critical Thinking</a>'
                     ]
                 }
             };
             
             const titles = {
-                'underprepared': '📚 Let\'s Build Your Skills!',
-                'overprepared': '🌟 Excellent Work!',
-                'average': '✅ You\'re On Track!'
+                'underprepared': 'Let\'s Build Your Skills!',
+                'overprepared': 'Excellent Work!',
+                'average': 'You\'re On Track!'
             };
             
             title.textContent = titles[data.status] || 'Your Results';

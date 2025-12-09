@@ -1612,33 +1612,35 @@ if (!window.fetchProxyBase) {
 
   function safe(val, fallback='') { return (val || '').trim(); }
 
-  function fmtAPA({author, date, title, source, url}) {
-    const d = date || 'n.d.';
-    const auth = author || 'Doe, J.';
-    const src = source ? `${source}.` : '';
-    const link = url ? ` ${url}` : '';
-    return `${auth} (${d}). ${title ? `<i>${title}</i>` : '<i>Untitled</i>'} ${src}${link}`;
-  }
+function fmtAPA({author, date, title, source, url}) {
+  let parts = [];
+  if (author) parts.push(author);
+  if (date) parts.push(`(${date})`);
+  if (title) parts.push(title ? `<i>${title}</i>` : null);
+  if (source) parts.push(`${source}.`);
+  if (url) parts.push(url);
+  return parts.filter(Boolean).join(' ').trim();
+}
 
-  function fmtMLA9({author, date, title, source, url}) {
-    // Simple MLA 9th ed web citation: Author. "Title." Source, Day Month Year, URL.
-    const auth = author ? `${author}.` : 'Doe, John.';
-    const t = title ? `"${title}."` : `"Untitled."`;
-    const src = source ? `${source},` : '';
-    const d = date ? `${date},` : '';
-    const link = url ? ` ${url}` : '';
-    return `${auth} ${t} ${src} ${d}${link}`.replace(/\s+/g,' ').trim();
-  }
+function fmtMLA9({author, date, title, source, url}) {
+  let parts = [];
+  if (author) parts.push(`${author}.`);
+  if (title) parts.push(title ? `"${title}."` : null);
+  if (source) parts.push(source + ',');
+  if (date) parts.push(date + ',');
+  if (url) parts.push(url);
+  return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+}
 
-  function fmtChicago({author, date, title, source, url}) {
-    // Chicago author-date simple web citation: Author. Year. "Title." Source. URL.
-    const auth = author || 'Doe, John';
-    const year = (date || '').split(',')[0].trim() || 'n.d.';
-    const t = title ? `"${title}."` : `"Untitled."`;
-    const src = source ? `${source}.` : '';
-    const link = url ? ` ${url}` : '';
-    return `${auth}. ${year}. ${t} ${src}${link}`.replace(/\s+/g,' ').trim();
-  }
+function fmtChicago({author, date, title, source, url}) {
+  let parts = [];
+  if (author) parts.push(author);
+  if (date) parts.push(date);
+  if (title) parts.push(title ? `"${title}."` : null);
+  if (source) parts.push(source ? source + '.' : null);
+  if (url) parts.push(url);
+  return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+}
 
   function generate() {
     const payload = {
@@ -1824,13 +1826,12 @@ if (!window.fetchProxyBase) {
 
   fetchBtn.addEventListener('click', fetchAndFill);
 
-  // show a default sample on load
-  authorEl.value = 'Doe, J.';
-  dateEl.value = '2025, May 10';
-  titleEl.value = 'Harvard revokes tenure of Francesca Gino after misconduct findings.';
-  sourceEl.value = 'The New York Times';
-  urlEl.value = 'https://www.nytimes.com/article-link';
-  generate();
+// authorEl.value = '';
+// dateEl.value = '';
+// titleEl.value = '';
+// sourceEl.value = '';
+// urlEl.value = '';
+// generate();
 })();
 </script>
 

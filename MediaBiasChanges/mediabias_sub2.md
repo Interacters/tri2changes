@@ -2400,275 +2400,555 @@ if (!window.fetchProxyBase) {
     document.getElementById('thesis-clear').addEventListener('click', clearThesisForm);
 </script>
 </body>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Survey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .performance-survey {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 30px;
+            border-radius: 25px;
+            margin: 30px 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .performance-survey::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(10%, 10%) scale(1.1); }
+        }
+
+        .survey-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .performance-survey h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .performance-survey p {
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            animation: fadeIn 1s ease-out 0.3s backwards;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .rating-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .rating-btn {
+            width: 100px;
+            height: 100px;
+            border: 4px solid rgba(255,255,255,0.8);
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .rating-btn:nth-child(1) { animation-delay: 0.1s; }
+        .rating-btn:nth-child(2) { animation-delay: 0.2s; }
+        .rating-btn:nth-child(3) { animation-delay: 0.3s; }
+        .rating-btn:nth-child(4) { animation-delay: 0.4s; }
+        .rating-btn:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .rating-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .rating-btn:hover::before {
+            opacity: 1;
+        }
+
+        .rating-btn span {
+            font-size: 11px;
+            margin-top: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rating-btn:hover {
+            background: white;
+            color: #667eea;
+            transform: scale(1.15) translateY(-5px);
+            border-color: white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .rating-btn:active {
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 3% auto;
+            padding: 50px;
+            border-radius: 30px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            color: white;
+            position: relative;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            animation: slideInScale 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.4);
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.6);
+        }
+
+        @keyframes slideInScale {
+            from {
+                transform: translateY(-100px) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            position: absolute;
+            right: 25px;
+            top: 20px;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close:hover {
+            background: rgba(255,255,255,0.2);
+            transform: rotate(90deg);
+        }
+
+        #result-title {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #result-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        #result-resources {
+            background: rgba(0,0,0,0.2);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            text-align: left;
+            border: 2px solid rgba(255,255,255,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #result-resources::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #result-resources::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+
+        #result-resources::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+
+        #result-resources h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        #result-resources p {
+            font-style: italic;
+            margin-bottom: 20px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        #result-resources div {
+            padding: 12px 15px;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        #result-resources div:hover {
+            background: rgba(255,255,255,0.1);
+            padding-left: 25px;
+        }
+
+        #result-resources a {
+            color: #b3e5fc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+            display: block;
+        }
+
+        #result-resources a:hover {
+            color: #ffffff;
+        }
+
+        .close-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 25px;
+            font-size: 18px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .close-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .performance-survey {
+                padding: 40px 20px;
+            }
+
+            .performance-survey h3 {
+                font-size: 1.5rem;
+            }
+
+            .performance-survey p {
+                font-size: 1rem;
+            }
+
+            .rating-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 24px;
+            }
+
+            .rating-btn span {
+                font-size: 9px;
+            }
+
+            .modal-content {
+                padding: 30px 25px;
+                width: 95%;
+            }
+
+            #result-title {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="performance-survey">
+        <div class="survey-content">
+            <h3>📊 How do you feel about your performance?</h3>
+            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+            
+            <div class="rating-buttons">
+                <button class="rating-btn" onclick="submitRating(1)">1<br><span>Poor</span></button>
+                <button class="rating-btn" onclick="submitRating(2)">2<br><span>Fair</span></button>
+                <button class="rating-btn" onclick="submitRating(3)">3<br><span>Good</span></button>
+                <button class="rating-btn" onclick="submitRating(4)">4<br><span>Excellent</span></button>
+                <button class="rating-btn" onclick="submitRating(5)">5<br><span>Superior</span></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="result-title">Your Results</h2>
+            <p id="result-message"></p>
+            <div id="result-resources"></div>
+            <button class="close-btn" onclick="closeModal()">Got it, thanks!</button>
+        </div>
+    </div>
+
+    <script>
+        async function submitRating(rating) {
+            // Show loading state
+            const btn = event.target;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<div class="loading"></div>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:8001/api/performance/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: rating })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResults(data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to submit. Is your Flask server running?');
+                console.error(error);
+            } finally {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        }
+
+        function showResults(data) {
+            const modal = document.getElementById('results-modal');
+            const title = document.getElementById('result-title');
+            const message = document.getElementById('result-message');
+            const resources = document.getElementById('result-resources');
+            
+            const resourcesByTier = {
+                1: {
+                    title: '📚 Building Foundations',
+                    intro: 'Start with these fundamentals to strengthen your English skills:',
+                    items: [
+                        '<a href="https://www.grammarly.com/blog/category/handbook/" target="_blank">📖 Grammarly Handbook - Grammar Basics</a>',
+                        '<a href="https://www.khanacademy.org/humanities/grammar" target="_blank">🎓 Khan Academy Grammar Course (Free)</a>',
+                        '<a href="https://www.youtube.com/watch?v=sQEr5D1sSrU" target="_blank">🎥 Basic Essay Structure (YouTube)</a>',
+                        '<a href="https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html" target="_blank">✍️ Purdue OWL - Writing Process Guide</a>',
+                        '<a href="https://quizlet.com/subject/english-vocabulary/" target="_blank">📝 Quizlet - Vocabulary Building</a>'
+                    ]
+                },
+                2: {
+                    title: '📖 Developing Skills',
+                    intro: 'You\'re on the right track! These resources will help you improve:',
+                    items: [
+                        '<a href="https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html" target="_blank">📑 MLA Citation Guide - Purdue OWL</a>',
+                        '<a href="https://www.hemingwayapp.com/" target="_blank">✏️ Hemingway Editor - Improve Clarity</a>',
+                        '<a href="https://www.youtube.com/watch?v=AzcJP7WS_5A" target="_blank">🎥 How to Write a Thesis Statement</a>',
+                        '<a href="https://writingcenter.unc.edu/tips-and-tools/" target="_blank">💡 UNC Writing Center - Essay Tips</a>',
+                        '<a href="https://www.coursera.org/learn/writing-skills" target="_blank">🎓 Coursera - Academic English Writing (Free)</a>'
+                    ]
+                },
+                3: {
+                    title: '✅ Solidifying Skills',
+                    intro: 'You\'re right on track! Strengthen your skills with these:',
+                    items: [
+                        '<a href="https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html" target="_blank">📋 APA Format Guide - Research Papers</a>',
+                        '<a href="https://www.thesaurus.com/" target="_blank">📚 Thesaurus.com - Vocabulary Enhancement</a>',
+                        '<a href="https://www.youtube.com/watch?v=mhHfnhh-pB4" target="_blank">🎥 Literary Analysis Techniques</a>',
+                        '<a href="https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing" target="_blank">🎯 Harvard Writing Center - Essay Strategies</a>',
+                        '<a href="https://www.edx.org/learn/english-grammar" target="_blank">📖 edX - Advanced Grammar Course</a>'
+                    ]
+                },
+                4: {
+                    title: '🌟 Advancing Excellence',
+                    intro: 'Great work! Take your skills to the next level:',
+                    items: [
+                        '<a href="https://www.newyorker.com/culture/culture-desk" target="_blank">📰 The New Yorker - Literary Journalism</a>',
+                        '<a href="https://literarydevices.net/" target="_blank">🎭 Literary Devices Guide - Advanced Analysis</a>',
+                        '<a href="https://www.youtube.com/watch?v=QUF-5UDtRJs" target="_blank">🎥 Advanced Rhetorical Analysis</a>',
+                        '<a href="https://style.mla.org/" target="_blank">✍️ MLA Style Center - Advanced Citations</a>',
+                        '<a href="https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing" target="_blank">🎓 MasterClass - Creative Writing (Paid)</a>'
+                    ]
+                },
+                5: {
+                    title: '🚀 Mastery Level',
+                    intro: 'Exceptional! Challenge yourself with these advanced resources:',
+                    items: [
+                        '<a href="https://www.lrb.co.uk/" target="_blank">📚 London Review of Books - Critical Essays</a>',
+                        '<a href="https://www.jstor.org/" target="_blank">🔬 JSTOR - Academic Research Database</a>',
+                        '<a href="https://www.youtube.com/watch?v=8y8BXcjUNVU" target="_blank">🎥 Yale Lecture Series - Literary Theory</a>',
+                        '<a href="https://www.chicagomanualofstyle.org/home.html" target="_blank">📖 Chicago Manual of Style - Professional Writing</a>',
+                        '<a href="https://www.poets.org/poetsorg/text/learning-guide-poetry-terms" target="_blank">✨ Poetry Foundation - Advanced Literary Forms</a>',
+                        '<a href="https://philosophy.stanford.edu/teaching-guide" target="_blank">🧠 Stanford Philosophy - Critical Thinking</a>'
+                    ]
+                }
+            };
+            
+            const titles = {
+                'underprepared': '📚 Let\'s Build Your Skills!',
+                'overprepared': '🌟 Excellent Work!',
+                'average': '✅ You\'re On Track!'
+            };
+            
+            title.textContent = titles[data.status] || 'Your Results';
+            message.textContent = data.message;
+            
+            const userResources = resourcesByTier[data.your_rating];
+            
+            resources.innerHTML = `
+                <h3>${userResources.title}</h3>
+                <p>${userResources.intro}</p>
+                ${userResources.items.map(r => `<div>${r}</div>`).join('')}
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('results-modal');
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('results-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
 </html>
-<div class="performance-survey">
-  <h3>📊 How do you feel about your performance in these English activities?</h3>
-  <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
-  
-  <div class="rating-buttons">
-    <button class="rating-btn" onclick="submitRating(1)">1<br><span>Poor performance</span></button>
-    <button class="rating-btn" onclick="submitRating(2)">2<br><span>Fair performance</span></button>
-    <button class="rating-btn" onclick="submitRating(3)">3<br><span>Good Performance</span></button>
-    <button class="rating-btn" onclick="submitRating(4)">4<br><span>Excellent Performance</span></button>
-    <button class="rating-btn" onclick="submitRating(5)">5<br><span>Superior Performance</span></button>
-  </div>
-</div>
-
-<div id="results-modal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <h2 id="result-title">Your Results</h2>
-    <p id="result-message"></p>
-    <div id="result-resources"></div>
-    <button class="close-btn" onclick="closeModal()">Close</button>
-  </div>
-</div>
-
-<style>
-.performance-survey {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 30px;
-  border-radius: 15px;
-  margin: 30px 0;
-  color: white;
-  text-align: center;
-}
-
-.rating-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
-
-.rating-btn {
-  width: 80px;
-  height: 80px;
-  border: 3px solid white;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.rating-btn span {
-  font-size: 10px;
-  margin-top: 5px;
-}
-
-.rating-btn:hover {
-  background: white;
-  color: #667eea;
-  transform: scale(1.1);
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 10000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.7);
-}
-
-.modal-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  margin: 10% auto;
-  padding: 40px;
-  border-radius: 20px;
-  width: 80%;
-  max-width: 600px;
-  color: white;
-  position: relative;
-  animation: slideDown 0.3s;
-}
-
-@keyframes slideDown {
-  from { transform: translateY(-50px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.close {
-  position: absolute;
-  right: 20px;
-  top: 10px;
-  font-size: 35px;
-  font-weight: bold;
-  color: white;
-  cursor: pointer;
-}
-
-.close:hover {
-  color: #ddd;
-}
-
-#result-resources {
-  background: rgba(255,255,255,0.1);
-  padding: 20px;
-  border-radius: 10px;
-  margin: 20px 0;
-  text-align: left;
-}
-
-#result-resources div {
-  padding: 8px 0;
-  font-size: 16px;
-}
-
-#result-resources a {
-  color: #b3e5fc;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s;
-}
-
-#result-resources a:hover {
-  color: #ffffff;
-  text-decoration: underline;
-}
-
-.close-btn {
-  background: white;
-  color: #667eea;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 25px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 20px;
-  font-size: 16px;
-}
-
-.close-btn:hover {
-  background: #f0f0f0;
-}
-</style>
-
-<script>
-async function submitRating(rating) {
-  try {
-    const response = await fetch('http://localhost:8001/api/performance/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating: rating })
-    });
-    
-    const data = await response.json();
-    
-    if (response.ok) {
-      showResults(data);
-    } else {
-      alert('Error: ' + data.error);
-    }
-  } catch (error) {
-    alert('Failed to submit. Is your Flask server running?');
-    console.error(error);
-  }
-}
-
-function showResults(data) {
-  const modal = document.getElementById('results-modal');
-  const title = document.getElementById('result-title');
-  const message = document.getElementById('result-message');
-  const resources = document.getElementById('result-resources');
-  
-  const resourcesByTier = {
-    1: {
-      title: '📚 Building Foundations (Poor Performance)',
-      intro: 'Start with these fundamentals to strengthen your English skills:',
-      items: [
-        '<a href="https://www.grammarly.com/blog/category/handbook/" target="_blank">📖 Grammarly Handbook - Grammar Basics</a>',
-        '<a href="https://www.khanacademy.org/humanities/grammar" target="_blank">🎓 Khan Academy Grammar Course (Free)</a>',
-        '<a href="https://www.youtube.com/watch?v=sQEr5D1sSrU" target="_blank">🎥 Basic Essay Structure (YouTube)</a>',
-        '<a href="https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html" target="_blank">✍️ Purdue OWL - Writing Process Guide</a>',
-        '<a href="https://quizlet.com/subject/english-vocabulary/" target="_blank">📝 Quizlet - Vocabulary Building</a>'
-      ]
-    },
-    2: {
-      title: '📖 Developing Skills (Fair Performance)',
-      intro: 'You\'re on the right track! These resources will help you improve:',
-      items: [
-        '<a href="https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html" target="_blank">📑 MLA Citation Guide - Purdue OWL</a>',
-        '<a href="https://www.hemingwayapp.com/" target="_blank">✏️ Hemingway Editor - Improve Clarity</a>',
-        '<a href="https://www.youtube.com/watch?v=AzcJP7WS_5A" target="_blank">🎥 How to Write a Thesis Statement</a>',
-        '<a href="https://writingcenter.unc.edu/tips-and-tools/" target="_blank">💡 UNC Writing Center - Essay Tips</a>',
-        '<a href="https://www.coursera.org/learn/writing-skills" target="_blank">🎓 Coursera - Academic English Writing (Free)</a>'
-      ]
-    },
-    3: {
-      title: '✅ Solidifying Skills (Good Performance)',
-      intro: 'You\'re right on track! Strengthen your skills with these:',
-      items: [
-        '<a href="https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html" target="_blank">📋 APA Format Guide - Research Papers</a>',
-        '<a href="https://www.thesaurus.com/" target="_blank">📚 Thesaurus.com - Vocabulary Enhancement</a>',
-        '<a href="https://www.youtube.com/watch?v=mhHfnhh-pB4" target="_blank">🎥 Literary Analysis Techniques</a>',
-        '<a href="https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing" target="_blank">🎯 Harvard Writing Center - Essay Strategies</a>',
-        '<a href="https://www.edx.org/learn/english-grammar" target="_blank">📖 edX - Advanced Grammar Course</a>'
-      ]
-    },
-    4: {
-      title: '🌟 Advancing Excellence (Excellent Performance)',
-      intro: 'Great work! Take your skills to the next level:',
-      items: [
-        '<a href="https://www.newyorker.com/culture/culture-desk" target="_blank">📰 The New Yorker - Literary Journalism</a>',
-        '<a href="https://literarydevices.net/" target="_blank">🎭 Literary Devices Guide - Advanced Analysis</a>',
-        '<a href="https://www.youtube.com/watch?v=QUF-5UDtRJs" target="_blank">🎥 Advanced Rhetorical Analysis</a>',
-        '<a href="https://style.mla.org/" target="_blank">✍️ MLA Style Center - Advanced Citations</a>',
-        '<a href="https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing" target="_blank">🎓 MasterClass - Creative Writing (Paid)</a>'
-      ]
-    },
-    5: {
-      title: '🚀 Mastery Level (Superior Performance)',
-      intro: 'Exceptional! Challenge yourself with these advanced resources:',
-      items: [
-        '<a href="https://www.lrb.co.uk/" target="_blank">📚 London Review of Books - Critical Essays</a>',
-        '<a href="https://www.jstor.org/" target="_blank">🔬 JSTOR - Academic Research Database</a>',
-        '<a href="https://www.youtube.com/watch?v=8y8BXcjUNVU" target="_blank">🎥 Yale Lecture Series - Literary Theory</a>',
-        '<a href="https://www.chicagomanualofstyle.org/home.html" target="_blank">📖 Chicago Manual of Style - Professional Writing</a>',
-        '<a href="https://www.poets.org/poetsorg/text/learning-guide-poetry-terms" target="_blank">✨ Poetry Foundation - Advanced Literary Forms</a>',
-        '<a href="https://philosophy.stanford.edu/teaching-guide" target="_blank">🧠 Stanford Philosophy - Critical Thinking</a>'
-      ]
-    }
-  };
-  
-  const titles = {
-    'underprepared': '📚 Let\'s Build Your Skills!',
-    'overprepared': '🌟 Excellent Work!',
-    'average': '✅ You\'re On Track!'
-  };
-  
-  title.textContent = titles[data.status] || 'Your Results';
-  message.textContent = data.message;
-  
-  const userResources = resourcesByTier[data.your_rating];
-  
-  resources.innerHTML = `
-    <h3>${userResources.title}</h3>
-    <p style="margin-bottom: 15px; font-style: italic;">${userResources.intro}</p>
-    ${userResources.items.map(r => `<div style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">${r}</div>`).join('')}
-  `;
-  
-  modal.style.display = 'block';
-}
-
-function closeModal() {
-  document.getElementById('results-modal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-  const modal = document.getElementById('results-modal');
-  if (event.target == modal) {
-    modal.style.display = 'none';
-  }
-}
-</script>

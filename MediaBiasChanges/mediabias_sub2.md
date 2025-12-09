@@ -354,8 +354,8 @@ body {
 </div>
   <style>
     .chat-container {
-      background: linear-gradient(145deg, #8373b9b3 0%, #5c77b6c1 100%);
-      width: 480px;
+      background: linear-gradient(145deg, #8668e6b3 0%, #586ed0c1 100%);
+      width: 740px;
       border-radius: 24px;
       padding: 32px;
       backdrop-filter: blur(10px);

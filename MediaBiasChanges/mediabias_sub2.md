@@ -2799,8 +2799,8 @@ if (!window.fetchProxyBase) {
 <body>
     <div class="performance-survey">
         <div class="survey-content">
-            <h3>📊 How do you feel about your performance?</h3>
-            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+            <h3> How do you feel about your performance?</h3>
+            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time. Based on your results, this performance survey will provide you with resources to help you develop and refine your English knowledge/skills</p>
             
             <div class="rating-buttons">
                 <button class="rating-btn" onclick="submitRating(1)">1<br><span>Poor</span></button>

@@ -357,8 +357,6 @@ body {
       background: linear-gradient(145deg, #8373b9b3 0%, #5c77b6c1 100%);
       width: 480px;
       border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
-                  0 0 0 1px rgba(255, 255, 255, 0.05);
       padding: 32px;
       backdrop-filter: blur(10px);
     }

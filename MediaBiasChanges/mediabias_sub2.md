@@ -2047,221 +2047,190 @@ async function submitFinalTime(username, elapsed) {
         </div>
     </div>
 
-    <script>
-        const API_URL = 'https://api.anthropic.com/v1/messages';
+<script type="module">
+    import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
 
-        function addThesisPoint() {
-            const container = document.getElementById('thesis-points-container');
-            const pointDiv = document.createElement('div');
-            pointDiv.className = 'thesis-point-row';
-            pointDiv.innerHTML = `
-                <input type="text" class="thesis-input thesis-supporting-point" placeholder="Supporting point ${container.children.length + 1}">
-                <button class="thesis-btn-remove" onclick="removeThesisPoint(this)">×</button>
-            `;
-            container.appendChild(pointDiv);
-        }
+    const API_BASE = pythonURI || 'http://localhost:8001';
 
-        window.removeThesisPoint = function(btn) {
-            btn.parentElement.remove();
-        };
-
-        function showThesisStatus(message, type) {
-            const statusDiv = document.getElementById('thesis-status');
-            statusDiv.textContent = message;
-            statusDiv.className = `thesis-status ${type}`;
-            statusDiv.style.display = 'block';
-            
-            if (type !== 'info') {
-                setTimeout(() => statusDiv.style.display = 'none', 5000);
-            }
-        }
-
-        async function generateThesis() {
-            const topic = document.getElementById('thesis-topic').value.trim();
-            const position = document.getElementById('thesis-position').value.trim();
-            
-            if (!topic || !position) {
-                showThesisStatus('Please fill in both Topic and Position fields', 'error');
-                return;
-            }
-
-            const pointInputs = document.querySelectorAll('.thesis-supporting-point');
-            const supportingPoints = Array.from(pointInputs)
-                .map(input => input.value.trim())
-                .filter(point => point.length > 0);
-
-            const thesisType = document.getElementById('thesis-type').value;
-            const audience = document.getElementById('thesis-audience').value.trim();
-
-            const outputSection = document.getElementById('thesis-output-section');
-            const thesisOutput = document.getElementById('thesis-output');
-            outputSection.style.display = 'block';
-            thesisOutput.innerHTML = '<div class="thesis-loading"><div class="thesis-spinner"></div><p>Generating your thesis statements...</p></div>';
-
-            try {
-                const prompt = `Generate 3 high-quality thesis statements for an essay with the following details:
-
-Topic: ${topic}
-Position/Argument: ${position}
-${supportingPoints.length > 0 ? `Supporting Points: ${supportingPoints.join(', ')}` : ''}
-Thesis Type: ${thesisType}
-${audience ? `Target Audience: ${audience}` : ''}
-
-For each thesis statement, provide:
-1. The thesis statement itself
-2. A strength rating (1-10)
-3. A brief explanation of why it's strong or weak
-4. 2-3 supporting arguments that could be used
-5. 2-3 potential counterarguments to address
-
-Also provide overall recommendations for improving the thesis.
-
-Format your response as a JSON object with this structure:
-{
-  "theses": [
-    {
-      "statement": "...",
-      "strength": 8,
-      "strengthExplanation": "...",
-      "supportingArguments": ["...", "...", "..."],
-      "counterarguments": ["...", "...", "..."]
+    function addThesisPoint() {
+        const container = document.getElementById('thesis-points-container');
+        const pointDiv = document.createElement('div');
+        pointDiv.className = 'thesis-point-row';
+        pointDiv.innerHTML = `
+            <input type="text" class="thesis-input thesis-supporting-point" placeholder="Supporting point ${container.children.length + 1}">
+            <button class="thesis-btn-remove" onclick="removeThesisPoint(this)">×</button>
+        `;
+        container.appendChild(pointDiv);
     }
-  ],
-  "recommendations": "..."
-}`;
 
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: prompt
-                            }
-                        ]
-                    })
-                });
+    window.removeThesisPoint = function(btn) {
+        btn.parentElement.remove();
+    };
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
+    function showThesisStatus(message, type) {
+        const statusDiv = document.getElementById('thesis-status');
+        statusDiv.textContent = message;
+        statusDiv.className = `thesis-status ${type}`;
+        statusDiv.style.display = 'block';
+        
+        if (type !== 'info') {
+            setTimeout(() => statusDiv.style.display = 'none', 5000);
+        }
+    }
 
-                const data = await response.json();
-                const content = data.content.find(item => item.type === 'text')?.text;
-                
-                if (!content) {
-                    throw new Error('No response content received');
-                }
-
-                // Parse JSON from response
-                const jsonMatch = content.match(/\{[\s\S]*\}/);
-                if (!jsonMatch) {
-                    throw new Error('Could not parse JSON response');
-                }
-
-                const result = JSON.parse(jsonMatch[0]);
-                displayTheses(result);
-                showThesisStatus('✅ Thesis statements generated successfully!', 'success');
-            } catch (error) {
-                console.error('Error:', error);
-                thesisOutput.innerHTML = '';
-                outputSection.style.display = 'none';
-                showThesisStatus('❌ Error: ' + error.message, 'error');
-            }
+    async function generateThesis() {
+        const topic = document.getElementById('thesis-topic').value.trim();
+        const position = document.getElementById('thesis-position').value.trim();
+        
+        if (!topic || !position) {
+            showThesisStatus('Please fill in both Topic and Position fields', 'error');
+            return;
         }
 
-        function displayTheses(data) {
-            const thesisOutput = document.getElementById('thesis-output');
-            const recommendationsOutput = document.getElementById('thesis-recommendations');
+        const pointInputs = document.querySelectorAll('.thesis-supporting-point');
+        const supportingPoints = Array.from(pointInputs)
+            .map(input => input.value.trim())
+            .filter(point => point.length > 0);
+
+        const thesisType = document.getElementById('thesis-type').value;
+        const audience = document.getElementById('thesis-audience').value.trim();
+
+        const outputSection = document.getElementById('thesis-output-section');
+        const thesisOutput = document.getElementById('thesis-output');
+        outputSection.style.display = 'block';
+        thesisOutput.innerHTML = '<div class="thesis-loading"><div class="thesis-spinner"></div><p>Generating your thesis statements...</p></div>';
+
+        try {
+            const response = await fetch(`${API_BASE}/api/thesis/generate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    topic: topic,
+                    position: position,
+                    supportingPoints: supportingPoints,
+                    thesisType: thesisType,
+                    audience: audience
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
             
+            if (!result.success || !result.data) {
+                throw new Error('Invalid response from server');
+            }
+
+            displayTheses(result.data);
+            showThesisStatus('✅ Thesis statements generated successfully!', 'success');
+        } catch (error) {
+            console.error('Error:', error);
             thesisOutput.innerHTML = '';
+            outputSection.style.display = 'none';
+            showThesisStatus('❌ Error: ' + error.message, 'error');
+        }
+    }
 
-            if (!data.theses || data.theses.length === 0) {
-                thesisOutput.innerHTML = '<p>No theses generated. Please try again.</p>';
-                return;
-            }
+    function displayTheses(data) {
+        const thesisOutput = document.getElementById('thesis-output');
+        const recommendationsOutput = document.getElementById('thesis-recommendations');
+        
+        thesisOutput.innerHTML = '';
 
-            data.theses.forEach((thesis) => {
-                const strengthClass = thesis.strength >= 8 ? 'thesis-strength-high' : 
-                                     thesis.strength >= 6 ? 'thesis-strength-medium' : 'thesis-strength-low';
-                
-                const card = document.createElement('div');
-                card.className = 'thesis-card';
-                card.innerHTML = `
-                    <div class="thesis-statement">${thesis.statement}</div>
-                    <span class="thesis-strength-badge ${strengthClass}">Strength: ${thesis.strength}/10</span>
-                    <p style="color: #c8d7eb; margin-top: 10px; font-size: 0.9rem;">${thesis.strengthExplanation}</p>
-                    
-                    ${thesis.supportingArguments && thesis.supportingArguments.length > 0 ? `
-                        <div class="thesis-details">
-                            <h5>📚 Supporting Arguments</h5>
-                            <ul>
-                                ${thesis.supportingArguments.map(arg => `<li>${arg}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    ${thesis.counterarguments && thesis.counterarguments.length > 0 ? `
-                        <div class="thesis-details">
-                            <h5>⚖️ Counterarguments to Address</h5>
-                            <ul>
-                                ${thesis.counterarguments.map(counter => `<li>${counter}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    <button class="thesis-btn-use" onclick="useThesis(\`${thesis.statement.replace(/`/g, '\\`')}\`)">
-                        Use This Thesis
-                    </button>
-                `;
-                
-                thesisOutput.appendChild(card);
-            });
-
-            if (data.recommendations) {
-                recommendationsOutput.innerHTML = `
-                    <div class="thesis-recommendations">
-                        <h5>💡 Recommendations</h5>
-                        <p>${data.recommendations}</p>
-                    </div>
-                `;
-            }
+        if (!data.theses || data.theses.length === 0) {
+            thesisOutput.innerHTML = '<p>No theses generated. Please try again.</p>';
+            return;
         }
 
-        window.useThesis = function(statement) {
-            navigator.clipboard.writeText(statement).then(() => {
-                showThesisStatus('📋 Thesis copied to clipboard!', 'success');
-            }).catch(() => {
-                showThesisStatus('⚠️ Please manually copy the thesis', 'error');
-            });
-        };
-
-        function clearThesisForm() {
-            document.getElementById('thesis-topic').value = '';
-            document.getElementById('thesis-position').value = '';
-            document.getElementById('thesis-audience').value = '';
-            document.getElementById('thesis-type').value = 'Argumentative';
+        data.theses.forEach((thesis) => {
+            const strengthClass = thesis.strength >= 8 ? 'thesis-strength-high' : 
+                                 thesis.strength >= 6 ? 'thesis-strength-medium' : 'thesis-strength-low';
             
-            const pointsContainer = document.getElementById('thesis-points-container');
-            pointsContainer.innerHTML = `
-                <div class="thesis-point-row">
-                    <input type="text" class="thesis-input thesis-supporting-point" placeholder="Supporting point 1">
+            const card = document.createElement('div');
+            card.className = 'thesis-card';
+            card.innerHTML = `
+                <div class="thesis-statement">${thesis.statement}</div>
+                <span class="thesis-strength-badge ${strengthClass}">Strength: ${thesis.strength}/10</span>
+                <p style="color: #c8d7eb; margin-top: 10px; font-size: 0.9rem;">${thesis.strengthExplanation}</p>
+                
+                ${thesis.supportingArguments && thesis.supportingArguments.length > 0 ? `
+                    <div class="thesis-details">
+                        <h5>📚 Supporting Arguments</h5>
+                        <ul>
+                            ${thesis.supportingArguments.map(arg => `<li>${arg}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                ${thesis.counterarguments && thesis.counterarguments.length > 0 ? `
+                    <div class="thesis-details">
+                        <h5>⚖️ Counterarguments to Address</h5>
+                        <ul>
+                            ${thesis.counterarguments.map(counter => `<li>${counter}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                <button class="thesis-btn-use" data-statement="${thesis.statement.replace(/"/g, '&quot;')}">
+                    Use This Thesis
+                </button>
+            `;
+            
+            thesisOutput.appendChild(card);
+        });
+
+        // Add event listeners to "Use This Thesis" buttons
+        document.querySelectorAll('.thesis-btn-use').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const statement = this.getAttribute('data-statement');
+                useThesis(statement);
+            });
+        });
+
+        if (data.recommendations) {
+            recommendationsOutput.innerHTML = `
+                <div class="thesis-recommendations">
+                    <h5>💡 Recommendations</h5>
+                    <p>${data.recommendations}</p>
                 </div>
             `;
-            
-            document.getElementById('thesis-output-section').style.display = 'none';
-            showThesisStatus('Form cleared', 'info');
         }
+    }
 
-        // Event listeners
-        document.getElementById('thesis-add-point').addEventListener('click', addThesisPoint);
-        document.getElementById('thesis-generate').addEventListener('click', generateThesis);
-        document.getElementById('thesis-clear').addEventListener('click', clearThesisForm);
-    </script>
+    function useThesis(statement) {
+        navigator.clipboard.writeText(statement).then(() => {
+            showThesisStatus('📋 Thesis copied to clipboard!', 'success');
+        }).catch(() => {
+            showThesisStatus('⚠️ Please manually copy the thesis', 'error');
+        });
+    }
+
+    function clearThesisForm() {
+        document.getElementById('thesis-topic').value = '';
+        document.getElementById('thesis-position').value = '';
+        document.getElementById('thesis-audience').value = '';
+        document.getElementById('thesis-type').value = 'Argumentative';
+        
+        const pointsContainer = document.getElementById('thesis-points-container');
+        pointsContainer.innerHTML = `
+            <div class="thesis-point-row">
+                <input type="text" class="thesis-input thesis-supporting-point" placeholder="Supporting point 1">
+            </div>
+        `;
+        
+        document.getElementById('thesis-output-section').style.display = 'none';
+        showThesisStatus('Form cleared', 'info');
+    }
+
+    // Event listeners
+    document.getElementById('thesis-add-point').addEventListener('click', addThesisPoint);
+    document.getElementById('thesis-generate').addEventListener('click', generateThesis);
+    document.getElementById('thesis-clear').addEventListener('click', clearThesisForm);
+</script>
 </body>
 </html>

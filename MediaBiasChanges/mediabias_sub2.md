@@ -584,11 +584,11 @@ body {
       display: block;
     }
   </style>
-
-  <div class="chat-container">
-    <h3>AI Chatbox</h3>
+<div class="chat-container">
+    <h3>AI Chatbox with History</h3>
     <p class="description">
       Type your question, choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send.
+      Your conversation history is saved below!
     </p>
 
     <form id="chat-form">
@@ -603,41 +603,150 @@ body {
 
       <div class="actions">
         <button type="submit" id="send-btn">Send</button>
+        <button type="button" id="clear-history-btn">Clear History</button>
       </div>
     </form>
 
     <div id="status" class="status"></div>
     <div id="response" class="response-box" style="display:none;"></div>
+
+    <div class="history-section">
+      <h3>Conversation History</h3>
+      <div class="stats" id="stats"></div>
+      <div id="history-list"></div>
+    </div>
   </div>
 
   <script>
+    // ===== REQUIREMENT: LIST/COLLECTION TYPE =====
+    // This array stores all conversation history
+    let conversationHistory = [];
+
+    // DOM Elements
     const form = document.getElementById('chat-form');
     const messageInput = document.getElementById('message');
     const modeSelect = document.getElementById('mode');
     const statusEl = document.getElementById('status');
     const responseEl = document.getElementById('response');
     const sendBtn = document.getElementById('send-btn');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+    const historyList = document.getElementById('history-list');
+    const statsEl = document.getElementById('stats');
 
+    // ===== REQUIREMENT: STUDENT-DEVELOPED PROCEDURE =====
+    // Procedure name: processConversationHistory
+    // Parameters: historyArray (list), filterType (string), maxItems (number)
+    // Return type: array
+    // Purpose: Filter and process conversation history based on criteria
+    function processConversationHistory(historyArray, filterType, maxItems) {
+      // ===== ALGORITHM WITH SEQUENCING, SELECTION, AND ITERATION =====
+      
+      // SEQUENCING: Steps execute in order
+      let filteredHistory = [];
+      let hintCount = 0;
+      let infoCount = 0;
+      
+      // ITERATION: Loop through each item in history
+      for (let i = 0; i < historyArray.length; i++) {
+        let item = historyArray[i];
+        
+        // SELECTION: Conditional logic to filter and count
+        if (filterType === 'all' || item.type === filterType) {
+          filteredHistory.push(item);
+        }
+        
+        // Count different types
+        if (item.type === 'hint') {
+          hintCount++;
+        } else if (item.type === 'information') {
+          infoCount++;
+        }
+        
+        // SELECTION: Stop if we've reached maxItems
+        if (filteredHistory.length >= maxItems) {
+          break;
+        }
+      }
+      
+      // Return processed data
+      return {
+        filtered: filteredHistory,
+        stats: {
+          total: historyArray.length,
+          hints: hintCount,
+          information: infoCount
+        }
+      };
+    }
+
+    // Helper procedure to add item to history
+    function addToHistory(question, answer, type) {
+      const timestamp = new Date().toLocaleString();
+      conversationHistory.push({
+        question: question,
+        answer: answer,
+        type: type,
+        timestamp: timestamp
+      });
+      
+      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
+      updateHistoryDisplay();
+    }
+
+    // Display history using our procedure
+    function updateHistoryDisplay() {
+      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
+      // Call our student-developed procedure
+      const result = processConversationHistory(conversationHistory, 'all', 50);
+      
+      // Update statistics
+      statsEl.textContent = `Total conversations: ${result.stats.total} | Hints: ${result.stats.hints} | Information: ${result.stats.information}`;
+      
+      // Display filtered history
+      if (result.filtered.length === 0) {
+        historyList.innerHTML = '<p style="color: #999;">No conversation history yet. Start chatting!</p>';
+        return;
+      }
+      
+      historyList.innerHTML = '';
+      
+      // Show most recent first
+      for (let i = result.filtered.length - 1; i >= 0; i--) {
+        const item = result.filtered[i];
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+          <div class="history-question">Q: ${item.question}</div>
+          <div class="history-type">${item.type === 'hint' ? '💡 Hint' : '📚 Information'} - ${item.timestamp}</div>
+          <div class="history-answer">${item.answer}</div>
+        `;
+        historyList.appendChild(historyItem);
+      }
+    }
+
+    // Show status message
+    function showStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type} show`;
+    }
+
+    // Form submission handler
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
       const message = messageInput.value.trim();
-      const mode = modeSelect.value; // "hint" or "information"
+      const mode = modeSelect.value;
 
       if (!message) {
-        statusEl.textContent = 'Please enter a message.';
-        statusEl.className = 'status error';
+        showStatus('Please enter a message.', 'error');
         return;
       }
 
-      // Show sending state
       sendBtn.disabled = true;
-      statusEl.textContent = 'Thinking...';
-      statusEl.className = 'status';
+      showStatus('Thinking...', 'info');
       responseEl.style.display = 'none';
 
       try {
-        // Updated to port 8001 to match your Flask app
         const backendUrl = 'http://localhost:8001/api/chat';
 
         const res = await fetch(backendUrl, {
@@ -658,32 +767,43 @@ body {
 
         const data = await res.json();
 
-        statusEl.textContent = 'Response received!';
-        statusEl.className = 'status success';
+        showStatus('Response received!', 'success');
 
-        // Display the AI response in a nice format
         if (data.answer) {
           responseEl.style.display = 'block';
           responseEl.innerHTML = `
             <div class="label">${data.type === 'hint' ? '💡 Hint:' : '📚 Information:'}</div>
             <div class="answer">${data.answer}</div>
           `;
-        } else {
-          responseEl.style.display = 'block';
-          responseEl.textContent = JSON.stringify(data, null, 2);
+          
+          // Add to history
+          addToHistory(message, data.answer, data.type);
+          
+          // Clear input
+          messageInput.value = '';
         }
 
       } catch (err) {
         console.error(err);
-        statusEl.textContent = 'Error: ' + err.message;
-        statusEl.className = 'status error';
+        showStatus('Error: ' + err.message, 'error');
         responseEl.style.display = 'none';
       } finally {
         sendBtn.disabled = false;
       }
     });
-  </script>
 
+    // Clear history button
+    clearHistoryBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear all conversation history?')) {
+        conversationHistory = [];
+        updateHistoryDisplay();
+        showStatus('History cleared!', 'success');
+      }
+    });
+
+    // Initialize display
+    updateHistoryDisplay();
+  </script>
 
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->
 <script type="module">
@@ -1484,6 +1604,12 @@ async function submitFinalTime(username, elapsed) {
   const outEl = document.getElementById('cite-output');
   const fetchBtn = document.getElementById('cite-fetch-metadata');
 
+  // DEV default -> ensure this points to your Flask backend (no trailing slash)
+if (!window.fetchProxyBase) {
+    window.fetchProxyBase = 'http://localhost:8001/api/media';
+    console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
+}
+
   const KEY = 'biasGame_citations_v1';
 
   function safe(val, fallback='') { return (val || '').trim(); }
@@ -1522,7 +1648,7 @@ async function submitFinalTime(username, elapsed) {
       date: safe(dateEl.value),
       title: safe(titleEl.value),
       source: safe(sourceEl.value),
-      url: safe(urlEl.value)
+                     url: safe(urlEl.value)
     };
     const style = styleEl.value;
     let citation = '';
@@ -1625,22 +1751,63 @@ async function submitFinalTime(username, elapsed) {
     };
   }
   
+  // try server-side metadata fetch (Flask) — returns { title, author, published, site, url } or throws
+  async function fetchMetadataFromServer(targetUrl) {
+    const base = (window.fetchProxyBase || '').replace(/\/$/, '');
+    if (!base) {
+      console.warn('No fetchProxyBase set; skipping server fetch');
+      return null;
+    }
+
+    try {
+      const endpoint = `${base}/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
+      console.info('Calling server metadata endpoint:', endpoint);
+      const res = await fetch(endpoint, { method: 'GET' });
+
+      // read response body safely (JSON preferred)
+      const ct = res.headers.get('content-type') || '';
+      const body = ct.includes('application/json') ? await res.json().catch(()=>null) : await res.text().catch(()=>null);
+
+      if (!res.ok) {
+        console.warn('Server fetch_meta returned non-OK', res.status, body);
+        // show a helpful alert in dev so you know why client fell back
+        const detail = body && body.detail ? body.detail : (typeof body === 'string' ? body : JSON.stringify(body));
+        alert('Server metadata fetch failed: ' + (detail || res.status));
+        return null;
+      }
+
+      console.info('Server metadata response', body);
+      return body;
+    } catch (err) {
+      console.warn('Server metadata fetch failed (network)', err);
+      alert('Server metadata fetch network error: ' + (err && err.message ? err.message : err));
+      return null;
+    }
+  }
+
+  // try server first, then fallback to client fetch + AllOrigins proxy
   async function fetchAndFill() {
     const url = (urlEl.value || '').trim();
     if (!url) { alert('Enter a URL first.'); return; }
     fetchBtn.textContent = 'Fetching…';
     fetchBtn.disabled = true;
     try {
-      const html = await tryFetchHtml(url);
-      if (!html) {
-        alert('Failed to fetch page. CORS or proxy error. Consider using a server-side proxy.');
-        return;
+      // server attempt
+      let meta = await fetchMetadataFromServer(url);
+
+      // client fallback
+      if (!meta) {
+        const html = await tryFetchHtml(url);
+        if (!html) {
+          alert('Failed to fetch page. CORS or proxy error. Consider enabling your Flask proxy.');
+          return;
+        }
+        meta = parseMetadataFromHtml(html, url);
       }
-      const meta = parseMetadataFromHtml(html, url);
+
       if (meta.author) authorEl.value = meta.author;
       if (meta.published) {
         const fmt = formatPublishedDate(meta.published);
-        // choose default format based on selected style
         const style = (styleEl && styleEl.value) ? styleEl.value : 'apa';
         dateEl.value = (fmt && fmt[style]) ? fmt[style] : meta.published;
       }
@@ -1648,10 +1815,10 @@ async function submitFinalTime(username, elapsed) {
       if (meta.site) sourceEl.value = meta.site;
       urlEl.value = meta.url || url;
       generate();
-      setTimeout(()=>{ fetchBtn.textContent = 'Fetch from URL'; fetchBtn.disabled = false; }, 250);
     } catch (err) {
       console.warn(err);
       alert('Error fetching metadata.');
+    } finally {
       fetchBtn.textContent = 'Fetch from URL';
       fetchBtn.disabled = false;
     }
@@ -2234,3 +2401,274 @@ async function submitFinalTime(username, elapsed) {
 </script>
 </body>
 </html>
+<div class="performance-survey">
+  <h3>📊 How do you feel about your performance in these English activities?</h3>
+  <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+  
+  <div class="rating-buttons">
+    <button class="rating-btn" onclick="submitRating(1)">1<br><span>Poor performance</span></button>
+    <button class="rating-btn" onclick="submitRating(2)">2<br><span>Fair performance</span></button>
+    <button class="rating-btn" onclick="submitRating(3)">3<br><span>Good Performance</span></button>
+    <button class="rating-btn" onclick="submitRating(4)">4<br><span>Excellent Performance</span></button>
+    <button class="rating-btn" onclick="submitRating(5)">5<br><span>Superior Performance</span></button>
+  </div>
+</div>
+
+<div id="results-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2 id="result-title">Your Results</h2>
+    <p id="result-message"></p>
+    <div id="result-resources"></div>
+    <button class="close-btn" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<style>
+.performance-survey {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px;
+  border-radius: 15px;
+  margin: 30px 0;
+  color: white;
+  text-align: center;
+}
+
+.rating-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.rating-btn {
+  width: 80px;
+  height: 80px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-btn span {
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+.rating-btn:hover {
+  background: white;
+  color: #667eea;
+  transform: scale(1.1);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 10% auto;
+  padding: 40px;
+  border-radius: 20px;
+  width: 80%;
+  max-width: 600px;
+  color: white;
+  position: relative;
+  animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.close {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  font-size: 35px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #ddd;
+}
+
+#result-resources {
+  background: rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+#result-resources div {
+  padding: 8px 0;
+  font-size: 16px;
+}
+
+#result-resources a {
+  color: #b3e5fc;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+#result-resources a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.close-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.close-btn:hover {
+  background: #f0f0f0;
+}
+</style>
+
+<script>
+async function submitRating(rating) {
+  try {
+    const response = await fetch('http://localhost:8001/api/performance/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: rating })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showResults(data);
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (error) {
+    alert('Failed to submit. Is your Flask server running?');
+    console.error(error);
+  }
+}
+
+function showResults(data) {
+  const modal = document.getElementById('results-modal');
+  const title = document.getElementById('result-title');
+  const message = document.getElementById('result-message');
+  const resources = document.getElementById('result-resources');
+  
+  const resourcesByTier = {
+    1: {
+      title: '📚 Building Foundations (Poor Performance)',
+      intro: 'Start with these fundamentals to strengthen your English skills:',
+      items: [
+        '<a href="https://www.grammarly.com/blog/category/handbook/" target="_blank">📖 Grammarly Handbook - Grammar Basics</a>',
+        '<a href="https://www.khanacademy.org/humanities/grammar" target="_blank">🎓 Khan Academy Grammar Course (Free)</a>',
+        '<a href="https://www.youtube.com/watch?v=sQEr5D1sSrU" target="_blank">🎥 Basic Essay Structure (YouTube)</a>',
+        '<a href="https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html" target="_blank">✍️ Purdue OWL - Writing Process Guide</a>',
+        '<a href="https://quizlet.com/subject/english-vocabulary/" target="_blank">📝 Quizlet - Vocabulary Building</a>'
+      ]
+    },
+    2: {
+      title: '📖 Developing Skills (Fair Performance)',
+      intro: 'You\'re on the right track! These resources will help you improve:',
+      items: [
+        '<a href="https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html" target="_blank">📑 MLA Citation Guide - Purdue OWL</a>',
+        '<a href="https://www.hemingwayapp.com/" target="_blank">✏️ Hemingway Editor - Improve Clarity</a>',
+        '<a href="https://www.youtube.com/watch?v=AzcJP7WS_5A" target="_blank">🎥 How to Write a Thesis Statement</a>',
+        '<a href="https://writingcenter.unc.edu/tips-and-tools/" target="_blank">💡 UNC Writing Center - Essay Tips</a>',
+        '<a href="https://www.coursera.org/learn/writing-skills" target="_blank">🎓 Coursera - Academic English Writing (Free)</a>'
+      ]
+    },
+    3: {
+      title: '✅ Solidifying Skills (Good Performance)',
+      intro: 'You\'re right on track! Strengthen your skills with these:',
+      items: [
+        '<a href="https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html" target="_blank">📋 APA Format Guide - Research Papers</a>',
+        '<a href="https://www.thesaurus.com/" target="_blank">📚 Thesaurus.com - Vocabulary Enhancement</a>',
+        '<a href="https://www.youtube.com/watch?v=mhHfnhh-pB4" target="_blank">🎥 Literary Analysis Techniques</a>',
+        '<a href="https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing" target="_blank">🎯 Harvard Writing Center - Essay Strategies</a>',
+        '<a href="https://www.edx.org/learn/english-grammar" target="_blank">📖 edX - Advanced Grammar Course</a>'
+      ]
+    },
+    4: {
+      title: '🌟 Advancing Excellence (Excellent Performance)',
+      intro: 'Great work! Take your skills to the next level:',
+      items: [
+        '<a href="https://www.newyorker.com/culture/culture-desk" target="_blank">📰 The New Yorker - Literary Journalism</a>',
+        '<a href="https://literarydevices.net/" target="_blank">🎭 Literary Devices Guide - Advanced Analysis</a>',
+        '<a href="https://www.youtube.com/watch?v=QUF-5UDtRJs" target="_blank">🎥 Advanced Rhetorical Analysis</a>',
+        '<a href="https://style.mla.org/" target="_blank">✍️ MLA Style Center - Advanced Citations</a>',
+        '<a href="https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing" target="_blank">🎓 MasterClass - Creative Writing (Paid)</a>'
+      ]
+    },
+    5: {
+      title: '🚀 Mastery Level (Superior Performance)',
+      intro: 'Exceptional! Challenge yourself with these advanced resources:',
+      items: [
+        '<a href="https://www.lrb.co.uk/" target="_blank">📚 London Review of Books - Critical Essays</a>',
+        '<a href="https://www.jstor.org/" target="_blank">🔬 JSTOR - Academic Research Database</a>',
+        '<a href="https://www.youtube.com/watch?v=8y8BXcjUNVU" target="_blank">🎥 Yale Lecture Series - Literary Theory</a>',
+        '<a href="https://www.chicagomanualofstyle.org/home.html" target="_blank">📖 Chicago Manual of Style - Professional Writing</a>',
+        '<a href="https://www.poets.org/poetsorg/text/learning-guide-poetry-terms" target="_blank">✨ Poetry Foundation - Advanced Literary Forms</a>',
+        '<a href="https://philosophy.stanford.edu/teaching-guide" target="_blank">🧠 Stanford Philosophy - Critical Thinking</a>'
+      ]
+    }
+  };
+  
+  const titles = {
+    'underprepared': '📚 Let\'s Build Your Skills!',
+    'overprepared': '🌟 Excellent Work!',
+    'average': '✅ You\'re On Track!'
+  };
+  
+  title.textContent = titles[data.status] || 'Your Results';
+  message.textContent = data.message;
+  
+  const userResources = resourcesByTier[data.your_rating];
+  
+  resources.innerHTML = `
+    <h3>${userResources.title}</h3>
+    <p style="margin-bottom: 15px; font-style: italic;">${userResources.intro}</p>
+    ${userResources.items.map(r => `<div style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">${r}</div>`).join('')}
+  `;
+  
+  modal.style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('results-modal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('results-modal');
+  if (event.target == modal) {
+    modal.style.display = 'none';
+  }
+}
+</script>

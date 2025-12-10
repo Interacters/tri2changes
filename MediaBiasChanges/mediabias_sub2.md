@@ -2410,7 +2410,7 @@ function fmtChicago({author, date, title, source, url}) {
 </script>
 </body>
 
-<html>
+<<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2421,55 +2421,52 @@ function fmtChicago({author, date, title, source, url}) {
             padding: 0;
             box-sizing: border-box;
         }
-
-        .performance-survey {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 50px 30px;
-            border-radius: 25px;
-            margin: 30px 0;
-            color: white;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        .survey-container {
+            background: rgba(113, 117, 193, 0.82);
+            backdrop-filter: blur(20px);
+            padding: 60px 50px;
+            border-radius: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
         }
 
-        .performance-survey::before {
+        .survey-container::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 15s ease-in-out infinite;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 300% 300%;
+            animation: gradientShift 4s ease infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(10%, 10%) scale(1.1); }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
-        .survey-content {
-            position: relative;
-            z-index: 1;
+        .survey-header {
+            text-align: center;
+            margin-bottom: 45px;
         }
 
-        .performance-survey h3 {
-            font-size: 2rem;
+        .survey-header h2 {
+            font-size: 2.5rem;
+            background: #fff
+            background-clip: text;
             margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            animation: fadeInDown 0.8s ease-out;
+            font-weight: 800;
         }
 
-        .performance-survey p {
+        .survey-header p {
+            color: #4a5568;
             font-size: 1.1rem;
-            margin-bottom: 40px;
-            opacity: 0.95;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
+            line-height: 1.7;
             animation: fadeIn 1s ease-out 0.3s backwards;
         }
 
@@ -2489,39 +2486,24 @@ function fmtChicago({author, date, title, source, url}) {
             to { opacity: 1; }
         }
 
-        .rating-buttons {
-            display: flex;
-            justify-content: center;
+        .rating-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 30px;
+            margin: 40px 0;
         }
 
-        .rating-btn {
-            width: 100px;
-            height: 100px;
-            border: 4px solid rgba(255,255,255,0.8);
-            border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .rating-option {
             position: relative;
+            cursor: pointer;
             animation: fadeInUp 0.6s ease-out backwards;
         }
 
-        .rating-btn:nth-child(1) { animation-delay: 0.1s; }
-        .rating-btn:nth-child(2) { animation-delay: 0.2s; }
-        .rating-btn:nth-child(3) { animation-delay: 0.3s; }
-        .rating-btn:nth-child(4) { animation-delay: 0.4s; }
-        .rating-btn:nth-child(5) { animation-delay: 0.5s; }
+        .rating-option:nth-child(1) { animation-delay: 0.1s; }
+        .rating-option:nth-child(2) { animation-delay: 0.2s; }
+        .rating-option:nth-child(3) { animation-delay: 0.3s; }
+        .rating-option:nth-child(4) { animation-delay: 0.4s; }
+        .rating-option:nth-child(5) { animation-delay: 0.5s; }
 
         @keyframes fadeInUp {
             from {
@@ -2534,39 +2516,138 @@ function fmtChicago({author, date, title, source, url}) {
             }
         }
 
-        .rating-btn::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: -1;
+        .rating-option input {
+            display: none;
         }
 
-        .rating-btn:hover::before {
+        .rating-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 15px;
+            border: 3px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rating-label::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 0;
+        }
+
+        .rating-label > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .rating-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #667eea;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .rating-text {
+            font-size: 0.9rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .rating-option:hover .rating-label {
+            border-color: #667eea;
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .rating-option input:checked + .rating-label {
+            border-color: #667eea;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            transform: scale(1.05);
+        }
+
+        .rating-option input:checked + .rating-label::before {
             opacity: 1;
         }
 
-        .rating-btn span {
-            font-size: 11px;
-            margin-top: 8px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .rating-option input:checked + .rating-label .rating-number,
+        .rating-option input:checked + .rating-label .rating-text {
+            color: white;
         }
 
-        .rating-btn:hover {
-            background: white;
-            color: #667eea;
-            transform: scale(1.15) translateY(-5px);
-            border-color: white;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
         }
 
-        .rating-btn:active {
-            transform: scale(1.05);
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .submit-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .submit-btn:hover::before {
+            opacity: 1;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Modal Styles */
@@ -2578,42 +2659,22 @@ function fmtChicago({author, date, title, source, url}) {
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
             animation: fadeIn 0.3s ease-out;
+            overflow-y: auto;
         }
 
         .modal-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #9281b3ff
             margin: 3% auto;
             padding: 50px;
             border-radius: 30px;
             width: 90%;
             max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            color: white;
-            position: relative;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
             animation: slideInScale 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .modal-content::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.4);
-            border-radius: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb:hover {
-            background: rgba(255,255,255,0.6);
+            position: relative;
         }
 
         @keyframes slideInScale {
@@ -2627,224 +2688,350 @@ function fmtChicago({author, date, title, source, url}) {
             }
         }
 
-        .close {
+        .modal-close {
             position: absolute;
             right: 25px;
-            top: 20px;
-            font-size: 40px;
-            font-weight: bold;
-            color: white;
+            top: 25px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: none;
+            font-size: 24px;
             cursor: pointer;
-            transition: all 0.3s;
-            width: 45px;
-            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            transition: all 0.3s;
+            color: #4a5568;
         }
 
-        .close:hover {
-            background: rgba(255,255,255,0.2);
+        .modal-close:hover {
+            background: #e2e8f0;
             transform: rotate(90deg);
         }
 
-        #result-title {
+        .result-badge {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .badge-underprepared {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .badge-average {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .badge-overprepared {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .result-title {
             font-size: 2.2rem;
+            color: #1a202c;
             margin-bottom: 20px;
-            animation: bounceIn 0.8s ease-out;
+            font-weight: 800;
         }
 
-        @keyframes bounceIn {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        #result-message {
+        .result-message {
             font-size: 1.2rem;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            opacity: 0.95;
+            color: #4a5568;
+            line-height: 1.8;
+            margin-bottom: 35px;
         }
 
-        #result-resources {
-            background: rgba(0,0,0,0.2);
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 25px;
             border-radius: 15px;
-            margin: 30px 0;
-            text-align: left;
-            border: 2px solid rgba(255,255,255,0.1);
-            max-height: 300px;
-            overflow-y: auto;
+            color: white;
+            text-align: center;
         }
 
-        #result-resources::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #result-resources::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-        }
-
-        #result-resources::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.3);
-            border-radius: 10px;
-        }
-
-        #result-resources h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #ffd700;
-        }
-
-        #result-resources p {
-            font-style: italic;
-            margin-bottom: 20px;
-            color: rgba(255,255,255,0.9);
-        }
-
-        #result-resources div {
-            padding: 12px 15px;
-            font-size: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
-            border-radius: 8px;
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
             margin-bottom: 5px;
         }
 
-        #result-resources div:hover {
-            background: rgba(255,255,255,0.1);
-            padding-left: 25px;
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        #result-resources a {
-            color: #b3e5fc;
+        .resources-section {
+            background: #7973a8ff;
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .resources-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .resources-intro {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .resource-item {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .resource-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .resource-item a {
+            color: #667eea;
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.2s;
             display: block;
         }
 
-        #result-resources a:hover {
-            color: #ffffff;
+        .resource-item a:hover {
+            color: #764ba2;
         }
 
-        .close-btn {
-            background: white;
-            color: #667eea;
+        .modal-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            padding: 15px 40px;
-            border-radius: 30px;
-            font-weight: bold;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 25px;
-            font-size: 18px;
             transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-top: 25px;
         }
 
-        .close-btn:hover {
-            background: #f0f0f0;
+        .modal-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
-        .close-btn:active {
-            transform: translateY(-1px);
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Responsive design */
         @media (max-width: 768px) {
-            .performance-survey {
-                padding: 40px 20px;
+            .survey-container {
+                padding: 40px 30px;
             }
 
-            .performance-survey h3 {
-                font-size: 1.5rem;
+            .survey-header h2 {
+                font-size: 2rem;
             }
 
-            .performance-survey p {
-                font-size: 1rem;
+            .rating-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 15px;
             }
 
-            .rating-btn {
-                width: 80px;
-                height: 80px;
-                font-size: 24px;
-            }
-
-            .rating-btn span {
-                font-size: 9px;
+            .rating-number {
+                font-size: 2.5rem;
             }
 
             .modal-content {
-                padding: 30px 25px;
+                padding: 35px 25px;
                 width: 95%;
             }
 
-            #result-title {
-                font-size: 1.6rem;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-
-    <div class="performance-survey">
-        <div class="survey-content">
-            <h3>How do you feel about your performance?</h3>
+    <div class="survey-container">
+        <div class="survey-header">
+            <h2>Performance Reflection</h2>
             <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
-            
-            <div class="rating-buttons">
-                <button class="rating-btn" onclick="submitRating(1)">1<br><span>Poor</span></button>
-                <button class="rating-btn" onclick="submitRating(2)">2<br><span>Fair</span></button>
-                <button class="rating-btn" onclick="submitRating(3)">3<br><span>Good</span></button>
-                <button class="rating-btn" onclick="submitRating(4)">4<br><span>Excellent</span></button>
-                <button class="rating-btn" onclick="submitRating(5)">5<br><span>Superior</span></button>
-            </div>
         </div>
+
+        <form id="survey-form">
+            <div class="rating-grid">
+                <div class="rating-option">
+                    <input type="radio" id="rating-1" name="rating" value="1">
+                    <label for="rating-1" class="rating-label">
+                        <span class="rating-number">1</span>
+                        <span class="rating-text">Poor</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-2" name="rating" value="2">
+                    <label for="rating-2" class="rating-label">
+                        <span class="rating-number">2</span>
+                        <span class="rating-text">Fair</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-3" name="rating" value="3">
+                    <label for="rating-3" class="rating-label">
+                        <span class="rating-number">3</span>
+                        <span class="rating-text">Good</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-4" name="rating" value="4">
+                    <label for="rating-4" class="rating-label">
+                        <span class="rating-number">4</span>
+                        <span class="rating-text">Excellent</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-5" name="rating" value="5">
+                    <label for="rating-5" class="rating-label">
+                        <span class="rating-number">5</span>
+                        <span class="rating-text">Superior</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                <span>Submit Rating</span>
+            </button>
+        </form>
     </div>
 
     <div id="results-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2 id="result-title">Your Results</h2>
-            <p id="result-message"></p>
-            <div id="result-resources"></div>
-            <button class="close-btn" onclick="closeModal()">Got it, thanks!</button>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            
+            <div id="result-badge"></div>
+            <h2 class="result-title" id="result-title"></h2>
+            <p class="result-message" id="result-message"></p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="your-rating">-</div>
+                    <div class="stat-label">Your Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="class-avg">-</div>
+                    <div class="stat-label">Class Average</div>
+                </div>
+            </div>
+
+            <div class="resources-section">
+                <h3 class="resources-title" id="resources-title"></h3>
+                <p class="resources-intro" id="resources-intro"></p>
+                <div id="resources-list"></div>
+            </div>
+
+            <button class="modal-btn" onclick="closeModal()">Got it, thanks!</button>
         </div>
     </div>
 
     <script>
-        async function submitRating(rating) {
-            // Show loading state
-            const btn = event.target;
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<div class="loading"></div>';
-            btn.disabled = true;
+        const resourcesByTier = {
+            1: {
+                title: 'Building Foundations',
+                intro: 'Start with these fundamentals to strengthen your English skills:',
+                items: [
+                    { text: 'Grammarly Handbook - Grammar Basics', url: 'https://www.grammarly.com/blog/category/handbook/' },
+                    { text: 'Khan Academy Grammar Course (Free)', url: 'https://www.khanacademy.org/humanities/grammar' },
+                    { text: 'Basic Essay Structure (YouTube)', url: 'https://www.youtube.com/watch?v=sQEr5D1sSrU' },
+                    { text: 'Purdue OWL - Writing Process Guide', url: 'https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html' },
+                    { text: 'Quizlet - Vocabulary Building', url: 'https://quizlet.com/subject/english-vocabulary/' }
+                ]
+            },
+            2: {
+                title: 'Developing Skills',
+                intro: "You're on the right track! These resources will help you improve:",
+                items: [
+                    { text: 'MLA Citation Guide - Purdue OWL', url: 'https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html' },
+                    { text: 'Hemingway Editor - Improve Clarity', url: 'https://www.hemingwayapp.com/' },
+                    { text: 'How to Write a Thesis Statement', url: 'https://www.youtube.com/watch?v=AzcJP7WS_5A' },
+                    { text: 'UNC Writing Center - Essay Tips', url: 'https://writingcenter.unc.edu/tips-and-tools/' },
+                    { text: 'Coursera - Academic English Writing (Free)', url: 'https://www.coursera.org/learn/writing-skills' }
+                ]
+            },
+            3: {
+                title: 'Solidifying Skills',
+                intro: "You're right on track! Strengthen your skills with these:",
+                items: [
+                    { text: 'APA Format Guide - Research Papers', url: 'https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html' },
+                    { text: 'Thesaurus.com - Vocabulary Enhancement', url: 'https://www.thesaurus.com/' },
+                    { text: 'Literary Analysis Techniques', url: 'https://www.youtube.com/watch?v=mhHfnhh-pB4' },
+                    { text: 'Harvard Writing Center - Essay Strategies', url: 'https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing' },
+                    { text: 'edX - Advanced Grammar Course', url: 'https://www.edx.org/learn/english-grammar' }
+                ]
+            },
+            4: {
+                title: 'Advancing Excellence',
+                intro: 'Great work! Take your skills to the next level:',
+                items: [
+                    { text: 'The New Yorker - Literary Journalism', url: 'https://www.newyorker.com/culture/culture-desk' },
+                    { text: 'Literary Devices Guide - Advanced Analysis', url: 'https://literarydevices.net/' },
+                    { text: 'Advanced Rhetorical Analysis', url: 'https://www.youtube.com/watch?v=QUF-5UDtRJs' },
+                    { text: 'MLA Style Center - Advanced Citations', url: 'https://style.mla.org/' },
+                    { text: 'MasterClass - Creative Writing (Paid)', url: 'https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing' }
+                ]
+            },
+            5: {
+                title: '🚀 Mastery Level',
+                intro: 'Exceptional! Challenge yourself with these advanced resources:',
+                items: [
+                    { text: 'London Review of Books - Critical Essays', url: 'https://www.lrb.co.uk/' },
+                    { text: 'JSTOR - Academic Research Database', url: 'https://www.jstor.org/' },
+                    { text: 'Yale Lecture Series - Literary Theory', url: 'https://www.youtube.com/watch?v=8y8BXcjUNVU' },
+                    { text: 'Chicago Manual of Style - Professional Writing', url: 'https://www.chicagomanualofstyle.org/home.html' },
+                    { text: 'Poetry Foundation - Advanced Literary Forms', url: 'https://www.poets.org/poetsorg/text/learning-guide-poetry-terms' },
+                    { text: 'Stanford Philosophy - Critical Thinking', url: 'https://philosophy.stanford.edu/teaching-guide' }
+                ]
+            }
+        };
+
+        document.getElementById('survey-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rating = document.querySelector('input[name="rating"]:checked');
+            if (!rating) {
+                alert('Please select a rating before submitting.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading"></div>';
 
             try {
                 const response = await fetch('http://localhost:8001/api/performance/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rating: rating })
+                    body: JSON.stringify({ rating: parseInt(rating.value) })
                 });
                 
                 const data = await response.json();
@@ -2852,110 +3039,58 @@ function fmtChicago({author, date, title, source, url}) {
                 if (response.ok) {
                     showResults(data);
                 } else {
-                    alert('Error: ' + data.error);
+                    alert('Error: ' + (data.error || 'Unknown error occurred'));
                 }
             } catch (error) {
-                alert('Failed to submit. Is your Flask server running?');
+                alert('Failed to submit. Please ensure your Flask server is running on port 8001.');
                 console.error(error);
             } finally {
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Submit Rating</span>';
             }
-        }
+        });
 
         function showResults(data) {
-            const modal = document.getElementById('results-modal');
-            const title = document.getElementById('result-title');
-            const message = document.getElementById('result-message');
-            const resources = document.getElementById('result-resources');
-            
-            const resourcesByTier = {
-                1: {
-                    title: 'Building Foundations',
-                    intro: 'Start with these fundamentals to strengthen your English skills:',
-                    items: [
-                        '<a href="https://www.grammarly.com/blog/category/handbook/" target="_blank">Grammarly Handbook - Grammar Basics</a>',
-                        '<a href="https://www.khanacademy.org/humanities/grammar" target="_blank">Khan Academy Grammar Course (Free)</a>',
-                        '<a href="https://www.youtube.com/watch?v=sQEr5D1sSrU" target="_blank">Basic Essay Structure (YouTube)</a>',
-                        '<a href="https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html" target="_blank">Purdue OWL - Writing Process Guide</a>',
-                        '<a href="https://quizlet.com/subject/english-vocabulary/" target="_blank">Quizlet - Vocabulary Building</a>'
-                    ]
-                },
-                2: {
-                    title: 'Developing Skills',
-                    intro: 'You\'re on the right track! These resources will help you improve:',
-                    items: [
-                        '<a href="https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html" target="_blank">MLA Citation Guide - Purdue OWL</a>',
-                        '<a href="https://www.hemingwayapp.com/" target="_blank">Hemingway Editor - Improve Clarity</a>',
-                        '<a href="https://www.youtube.com/watch?v=AzcJP7WS_5A" target="_blank">How to Write a Thesis Statement</a>',
-                        '<a href="https://writingcenter.unc.edu/tips-and-tools/" target="_blank">UNC Writing Center - Essay Tips</a>',
-                        '<a href="https://www.coursera.org/learn/writing-skills" target="_blank">Coursera - Academic English Writing (Free)</a>'
-                    ]
-                },
-                3: {
-                    title: 'Solidifying Skills',
-                    intro: 'You\'re right on track! Strengthen your skills with these:',
-                    items: [
-                        '<a href="https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html" target="_blank">APA Format Guide - Research Papers</a>',
-                        '<a href="https://www.thesaurus.com/" target="_blank">Thesaurus.com - Vocabulary Enhancement</a>',
-                        '<a href="https://www.youtube.com/watch?v=mhHfnhh-pB4" target="_blank">Literary Analysis Techniques</a>',
-                        '<a href="https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing" target="_blank">Harvard Writing Center - Essay Strategies</a>',
-                        '<a href="https://www.edx.org/learn/english-grammar" target="_blank">edX - Advanced Grammar Course</a>'
-                    ]
-                },
-                4: {
-                    title: 'Advancing Excellence',
-                    intro: 'Great work! Take your skills to the next level:',
-                    items: [
-                        '<a href="https://www.newyorker.com/culture/culture-desk" target="_blank">The New Yorker - Literary Journalism</a>',
-                        '<a href="https://literarydevices.net/" target="_blank">Literary Devices Guide - Advanced Analysis</a>',
-                        '<a href="https://www.youtube.com/watch?v=QUF-5UDtRJs" target="_blank">Advanced Rhetorical Analysis</a>',
-                        '<a href="https://style.mla.org/" target="_blank">MLA Style Center - Advanced Citations</a>',
-                        '<a href="https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing" target="_blank">MasterClass - Creative Writing (Paid)</a>'
-                    ]
-                },
-                5: {
-                    title: '🚀 Mastery Level',
-                    intro: 'Exceptional! Challenge yourself with these advanced resources:',
-                    items: [
-                        '<a href="https://www.lrb.co.uk/" target="_blank">London Review of Books - Critical Essays</a>',
-                        '<a href="https://www.jstor.org/" target="_blank">JSTOR - Academic Research Database</a>',
-                        '<a href="https://www.youtube.com/watch?v=8y8BXcjUNVU" target="_blank">Yale Lecture Series - Literary Theory</a>',
-                        '<a href="https://www.chicagomanualofstyle.org/home.html" target="_blank">Chicago Manual of Style - Professional Writing</a>',
-                        '<a href="https://www.poets.org/poetsorg/text/learning-guide-poetry-terms" target="_blank">Poetry Foundation - Advanced Literary Forms</a>',
-                        '<a href="https://philosophy.stanford.edu/teaching-guide" target="_blank">Stanford Philosophy - Critical Thinking</a>'
-                    ]
-                }
+            const badgeColors = {
+                'underprepared': 'badge-underprepared',
+                'average': 'badge-average',
+                'overprepared': 'badge-overprepared'
             };
-            
+
             const titles = {
-                'underprepared': 'Let\'s Build Your Skills!',
+                'underprepared': "Let's Build Your Skills!",
                 'overprepared': 'Excellent Work!',
-                'average': 'You\'re On Track!'
+                'average': "You're On Track!"
             };
+
+            document.getElementById('result-badge').innerHTML = 
+                `<span class="result-badge ${badgeColors[data.status]}">${data.status.toUpperCase()}</span>`;
+            document.getElementById('result-title').textContent = titles[data.status] || 'Your Results';
+            document.getElementById('result-message').textContent = data.message;
+            document.getElementById('your-rating').textContent = data.your_rating;
+            document.getElementById('class-avg').textContent = data.average_rating;
+
+            const resources = resourcesByTier[data.your_rating];
+            document.getElementById('resources-title').textContent = resources.title;
+            document.getElementById('resources-intro').textContent = resources.intro;
             
-            title.textContent = titles[data.status] || 'Your Results';
-            message.textContent = data.message;
-            
-            const userResources = resourcesByTier[data.your_rating];
-            
-            resources.innerHTML = `
-                <h3>${userResources.title}</h3>
-                <p>${userResources.intro}</p>
-                ${userResources.items.map(r => `<div>${r}</div>`).join('')}
-            `;
-            
-            modal.style.display = 'block';
+            const resourcesList = document.getElementById('resources-list');
+            resourcesList.innerHTML = resources.items.map(item => 
+                `<div class="resource-item">
+                    <a href="${item.url}" target="_blank">${item.text}</a>
+                </div>`
+            ).join('');
+
+            document.getElementById('results-modal').style.display = 'block';
         }
 
         function closeModal() {
-            const modal = document.getElementById('results-modal');
-            modal.style.display = 'none';
+            document.getElementById('results-modal').style.display = 'none';
         }
 
         window.onclick = function(event) {
             const modal = document.getElementById('results-modal');
-            if (event.target == modal) {
+            if (event.target === modal) {
                 closeModal();
             }
         }

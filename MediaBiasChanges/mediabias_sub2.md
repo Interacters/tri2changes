@@ -12,7 +12,6 @@ microblog: true
 author: "Interactors"
 date: 2025-12-2
 ---
-## Bias Media Sources
 <div class="page-content">
 <style>
 * {
@@ -196,11 +195,11 @@ body {
 .leaderboard-table td {
   padding: 10px;
   text-align: left;
-  color: inherit; /* use leaderboard color (light) */
+  color: #b2c7deff
 }
 
 .leaderboard-table tr:nth-child(even) {
-  background: rgba(255,255,255,0.02);
+  background: rgba(29, 31, 75, 1);
 }
 
 /* --- Source Intel Chat styles --- */
@@ -300,7 +299,10 @@ body {
   font-size: 0.95rem;
 }
 </style>
-
+<div class="intro-text">
+   <h2>Media Bias</h2>
+    <p>When writing a paper, checking the bias of sources is very important. Drag the news sources to the correct bins. Ask the chatbox below for help. Sign in to save your best time to the leaderboard!</p>
+</div>
 <div class="game-container">
     <div class="game-header">
         <div class="player-info">
@@ -359,6 +361,7 @@ body {
       border-radius: 24px;
       padding: 32px;
       backdrop-filter: blur(10px);
+      margin: 20px
     }
 
     .chat-container h1 {
@@ -582,13 +585,13 @@ body {
       display: block;
     }
   </style>
-<div class="chat-container">
-    <h3>AI Chatbox with History</h3>
-    <p class="description">
-      Type your question, choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send.
+<div class="intro-text">
+   <h2>AI Chatbox with History</h2>
+    <p>Type your question about a news source you're stuck on, choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send. You can even ask about popular shows!
       Your conversation history is saved below!
     </p>
-
+</div>
+<div class="chat-container">
     <form id="chat-form">
       <label for="message">Your message</label>
       <textarea id="message" placeholder="Ask a question here..." required></textarea>
@@ -1543,8 +1546,12 @@ async function submitFinalTime(username, elapsed) {
   .cite-small { font-size:0.9rem; color:#9fb7da; margin-top:6px; }
 </style>
 
+<div class="intro-text">
+   <h2>Citation Generator</h2>
+    <p>It's important to include correct citations for your work. There are many types of formats for citations including: MLA, APA, Chicago. This tool can help you create citations for your sources.
+    </p>
+</div>
 <div class="cite-card" id="citation-tool">
-  <h3 style="margin:0 0 8px 0;">Citation Generator</h3>
   <div class="cite-row">
     <div class="cite-label">Style</div>
     <select id="cite-style" class="cite-select">
@@ -1843,7 +1850,7 @@ function fmtChicago({author, date, title, source, url}) {
     <title>Thesis Generator</title>
     <style>
         .thesis-gen-card {
-            background: linear-gradient(160deg, #3b3567ff, #33417aff);
+            background: linear-gradient(160deg, #856ccadd, #5b6ebce1);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 24px;
@@ -2159,9 +2166,12 @@ function fmtChicago({author, date, title, source, url}) {
     </style>
 </head>
 <body>
+<div class="intro-text">
+   <h2>Thesis Generator</h2>
+    <p>Starting your essay can be challenging. Using this Thesis Generator tool, you can recieve an AI-powered starting block to outline your essay. 
+    </p>
+</div>
     <div class="thesis-gen-card">
-        <h3>✍️ AI Thesis Generator</h3>
-        <p>Transform your ideas into powerful thesis statements using AI</p>
 
         <div class="thesis-form-group">
             <label class="thesis-label" for="thesis-topic">Topic *</label>
@@ -2200,7 +2210,7 @@ function fmtChicago({author, date, title, source, url}) {
         </div>
 
         <div class="thesis-actions">
-            <button class="thesis-btn thesis-btn-primary" id="thesis-generate">✨ Generate Thesis</button>
+            <button class="thesis-btn thesis-btn-primary" id="thesis-generate">Generate Thesis</button>
             <button class="thesis-btn thesis-btn-secondary" id="thesis-clear">🔄 Clear Form</button>
         </div>
 
@@ -2326,7 +2336,7 @@ function fmtChicago({author, date, title, source, url}) {
                 
                 ${thesis.supportingArguments && thesis.supportingArguments.length > 0 ? `
                     <div class="thesis-details">
-                        <h5>📚 Supporting Arguments</h5>
+                        <h5>Supporting Arguments</h5>
                         <ul>
                             ${thesis.supportingArguments.map(arg => `<li>${arg}</li>`).join('')}
                         </ul>
@@ -2335,7 +2345,7 @@ function fmtChicago({author, date, title, source, url}) {
                 
                 ${thesis.counterarguments && thesis.counterarguments.length > 0 ? `
                     <div class="thesis-details">
-                        <h5>⚖️ Counterarguments to Address</h5>
+                        <h5>Counterarguments to Address</h5>
                         <ul>
                             ${thesis.counterarguments.map(counter => `<li>${counter}</li>`).join('')}
                         </ul>
@@ -2361,7 +2371,7 @@ function fmtChicago({author, date, title, source, url}) {
         if (data.recommendations) {
             recommendationsOutput.innerHTML = `
                 <div class="thesis-recommendations">
-                    <h5>💡 Recommendations</h5>
+                    <h5>Recommendations</h5>
                     <p>${data.recommendations}</p>
                 </div>
             `;
@@ -2370,9 +2380,9 @@ function fmtChicago({author, date, title, source, url}) {
 
     function useThesis(statement) {
         navigator.clipboard.writeText(statement).then(() => {
-            showThesisStatus('📋 Thesis copied to clipboard!', 'success');
+            showThesisStatus('Thesis copied to clipboard!', 'success');
         }).catch(() => {
-            showThesisStatus('⚠️ Please manually copy the thesis', 'error');
+            showThesisStatus('Please manually copy the thesis', 'error');
         });
     }
 
@@ -2796,6 +2806,7 @@ function fmtChicago({author, date, title, source, url}) {
     </style>
 </head>
 <body>
+
     <div class="performance-survey">
         <div class="survey-content">
             <h3>How do you feel about your performance?</h3>

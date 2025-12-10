@@ -810,29 +810,111 @@ body {
 <script type="module">
 import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
 
-// Register name with backend
-async function registerPlayer(name) {
-    try {
-        const response = await fetch(pythonURI + '/api/media/person/get', {
+// Authentication Manager Class
+class AuthManager {
+    constructor() {
+        this.currentUser = null;
+    }
+
+    async login(uid, password) {
+        const requestOptions = {
+            ...fetchOptions,
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name })
-        });
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Player registered:', data);
-            return data;
-        } else {
-            console.error('Failed to register player:', response.status);
-            return null;
+            body: JSON.stringify({ uid, password })
+        };
+
+        const response = await fetch(`${pythonURI}/api/users/authenticate`, requestOptions);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Login failed');
         }
-    } catch (error) {
-        console.error('Error registering player:', error);
+
+        const data = await response.json();
+        this.currentUser = data.user;
+        sessionStorage.setItem('currentUser', JSON.stringify(data.user));
+        return data.user;
+    }
+
+    async signup(name, uid, password) {
+        const requestOptions = {
+            ...fetchOptions,
+            method: 'POST',
+            body: JSON.stringify({ 
+                name, 
+                uid, 
+                password,
+                email: '?',
+                sid: '?',
+                school: '?'
+            })
+        };
+
+        const response = await fetch(`${pythonURI}/api/users/user`, requestOptions);
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Signup failed');
+        }
+
+        return await response.json();
+    }
+
+    async logout() {
+        const requestOptions = {
+            ...fetchOptions,
+            method: 'DELETE'
+        };
+
+        try {
+            await fetch(`${pythonURI}/api/users/authenticate`, requestOptions);
+        } catch (error) {
+            console.warn('Logout request failed:', error);
+        }
+
+        this.currentUser = null;
+        sessionStorage.removeItem('currentUser');
+    }
+
+    setGuestUser() {
+        this.currentUser = {
+            uid: 'guest',
+            name: 'Guest Player',
+            role: 'Guest'
+        };
+        sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+    }
+
+    checkExistingSession() {
+        const savedUser = sessionStorage.getItem('currentUser');
+        if (savedUser) {
+            try {
+                this.currentUser = JSON.parse(savedUser);
+                return this.currentUser;
+            } catch (error) {
+                console.error('Failed to parse saved user:', error);
+                sessionStorage.removeItem('currentUser');
+            }
+        }
         return null;
     }
+
+    getCurrentUser() {
+        return this.currentUser;
+    }
+}
+
+// Initialize auth manager
+const authManager = new AuthManager();
+
+// Register name with backend (updated version)
+async function registerPlayer(name) {
+    // This is now handled by AuthManager.login() or AuthManager.signup()
+    return authManager.getCurrentUser();
 }
 // expose register for global usage
 window.registerPlayer = registerPlayer;
+window.authManager = authManager; // Expose authManager globally
 
 // Build modal DOM
 function buildSignInModal() {
@@ -842,7 +924,7 @@ function buildSignInModal() {
     modal.innerHTML = `
         <div style="background:linear-gradient(135deg, #353e74ff, #9384d5ff);padding:40px;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center;max-width:420px;">
             <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.6rem;">Sign In</h2>
-            <p style="color:#c8d7eb;margin-bottom:18px;">Enter your name to save your scores</p>
+            <p style="color:#c8d7eb;margin-bottom:18pxF">Enter your name to save your scores</p>
             <input type="text" id="signin-name-input" placeholder="Your Name" style="width:100%;padding:12px;border-radius:10px;border:2px solid #4299e1;font-size:1rem;margin-bottom:14px;background:rgba(136, 134, 172, 0.9);" />
             <div style="display:flex;gap:10px;">
                 <button id="signin-cancel-btn" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Cancel</button>
@@ -855,74 +937,169 @@ function buildSignInModal() {
 }
 
 // Show sign-in modal on-demand (called by #auth-btn)
+// Show sign-in modal with full login/signup (called by #auth-btn)
 window.showSignInPrompt = async function() {
-    // if modal already present, focus input
     if (document.getElementById('auth-modal')) {
-        const input = document.getElementById('signin-name-input');
-        if (input) input.focus();
-        return;
+        document.getElementById('auth-modal').remove();
     }
-    const modal = buildSignInModal();
+    
+    const modal = document.createElement('div');
+    modal.id = 'auth-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    modal.innerHTML = `
+        <div style="background:linear-gradient(135deg, #353e74ff, #9384d5ff);padding:40px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.4);max-width:420px;width:90%;">
+            <!-- Login Form -->
+            <div id="login-form-container">
+                <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">User Login</h2>
+                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">Sign in to save your scores</p>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Username:</label>
+                    <input type="text" id="login-uid" placeholder="Enter username" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Password:</label>
+                    <input type="password" id="login-password" placeholder="Enter password" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                </div>
+                <div style="display:flex;gap:12px;">
+                    <button id="guest-btn" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Play as Guest</button>
+                    <button id="login-btn" style="flex:1;padding:12px;border-radius:10px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;">Login</button>
+                </div>
+                <p id="login-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
+                <p id="login-success" style="color:#4ade80;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
+                <p style="text-align:center;margin-top:20px;color:#c8d7eb;font-size:0.9rem;">
+                    Don't have an account? <a href="#" id="show-signup" style="color:#4299e1;text-decoration:none;font-weight:600;">Sign up</a>
+                </p>
+            </div>
+            
+            <!-- Signup Form -->
+            <div id="signup-form-container" style="display:none;">
+                <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">Create Account</h2>
+                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">Join to track your progress</p>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Full Name:</label>
+                    <input type="text" id="signup-name" placeholder="Enter your name" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Username:</label>
+                    <input type="text" id="signup-uid" placeholder="Choose username" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Password:</label>
+                    <input type="password" id="signup-password" placeholder="8+ characters" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                </div>
+                <div style="display:flex;gap:12px;">
+                    <button id="back-to-login" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Back</button>
+                    <button id="signup-btn" style="flex:1;padding:12px;border-radius:10px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;">Sign Up</button>
+                </div>
+                <p id="signup-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
+                <p id="signup-success" style="color:#4ade80;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
+            </div>
+            
+            <button id="close-modal" style="width:100%;margin-top:15px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.1);color:#d6e6ff;border:1px solid rgba(255,255,255,0.15);cursor:pointer;font-weight:600;">Close</button>
+        </div>
+    `;
     document.body.appendChild(modal);
 
-    const input = document.getElementById('signin-name-input');
-    const submitBtn = document.getElementById('signin-submit-btn');
-    const cancelBtn = document.getElementById('signin-cancel-btn');
-    const errorMsg = document.getElementById('signin-error');
+    // Event handlers
+    document.getElementById('close-modal').addEventListener('click', () => modal.remove());
+    document.getElementById('guest-btn').addEventListener('click', () => {
+        window.authManager.setGuestUser();
+        modal.remove();
+        window.updateAuthButton();
+    });
+    
+    // Toggle between login and signup
+    document.getElementById('show-signup').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('login-form-container').style.display = 'none';
+        document.getElementById('signup-form-container').style.display = 'block';
+    });
+    
+    document.getElementById('back-to-login').addEventListener('click', () => {
+        document.getElementById('signup-form-container').style.display = 'none';
+        document.getElementById('login-form-container').style.display = 'block';
+    });
 
-    cancelBtn.addEventListener('click', () => modal.remove());
-
-    submitBtn.addEventListener('click', async () => {
-        const name = input.value.trim();
-        if (name.length < 2) {
-            errorMsg.textContent = 'Name must be at least 2 characters';
+    // Login handler
+    document.getElementById('login-btn').addEventListener('click', async () => {
+        const uid = document.getElementById('login-uid').value.trim();
+        const password = document.getElementById('login-password').value;
+        const errorMsg = document.getElementById('login-error');
+        const successMsg = document.getElementById('login-success');
+        
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        
+        if (!uid || !password) {
+            errorMsg.textContent = 'Please enter both username and password';
             errorMsg.style.display = 'block';
             return;
         }
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Signing in...';
-
-        let result = true;
+        
         try {
-            if (typeof window.registerPlayer === 'function') {
-                result = await window.registerPlayer(name);
-            }
-        } catch (err) {
-            console.warn('registerPlayer call failed or not available', err);
-            result = true;
-        }
-
-        if (result) {
-            // persist name and reload so other module picks it up (simplest reliable approach)
-            sessionStorage.setItem('playerName', name);
-            window.location.reload();
-        } else {
-            errorMsg.textContent = 'Failed to sign in. Please try again.';
+            await window.authManager.login(uid, password);
+            successMsg.textContent = 'Login successful!';
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                modal.remove();
+                window.updateAuthButton();
+                window.location.reload(); // Reload to update player name
+            }, 1000);
+        } catch (error) {
+            errorMsg.textContent = error.message;
             errorMsg.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Sign In';
         }
     });
 
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') submitBtn.click();
+// Signup handler
+    document.getElementById('signup-btn').addEventListener('click', async () => {
+        const name = document.getElementById('signup-name').value.trim();
+        const uid = document.getElementById('signup-uid').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const errorMsg = document.getElementById('signup-error');
+        const successMsg = document.getElementById('signup-success');
+        
+        errorMsg.style.display = 'none';
+        successMsg.style.display = 'none';
+        
+        if (!name || !uid || !password) {
+            errorMsg.textContent = 'Please fill in all fields';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        if (password.length < 8) {
+            errorMsg.textContent = 'Password must be at least 8 characters';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        try {
+            await window.authManager.signup(name, uid, password);
+            successMsg.textContent = 'Account created! Logging in...';
+            successMsg.style.display = 'block';
+            setTimeout(async () => {
+                await window.authManager.login(uid, password);
+                modal.remove();
+                window.updateAuthButton();
+                window.location.reload();
+            }, 1500);
+        } catch (error) {
+            errorMsg.textContent = error.message;
+            errorMsg.style.display = 'block';
+        }
     });
-
-    input.focus();
-};
-
-// Sign out (clears session and reloads)
-window.signOut = function() {
-    sessionStorage.removeItem('playerName');
-    window.location.reload();
 };
 
 // Update auth button text/handler
 window.updateAuthButton = function() {
     const authBtn = document.getElementById('auth-btn');
     if (!authBtn) return;
-    const name = sessionStorage.getItem('playerName');
-    if (name) {
+    
+    // Check if user is logged in (not guest)
+    const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+    
+    if (currentUser && currentUser.uid !== 'guest') {
         authBtn.textContent = 'Sign Out';
         authBtn.onclick = () => window.signOut();
     } else {
@@ -931,8 +1108,20 @@ window.updateAuthButton = function() {
     }
 };
 
+// Sign out (clears session and reloads)
+window.signOut = async function() {
+    await window.authManager.logout();
+    window.authManager.setGuestUser();
+    window.location.reload();
+};
+
 // Initialize auth state when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
+    // Check for existing session
+    const existingUser = window.authManager.checkExistingSession();
+    if (!existingUser || existingUser.uid === 'guest') {
+        window.authManager.setGuestUser();
+    }
     window.updateAuthButton();
 });
 </script>
@@ -1262,24 +1451,15 @@ function clearGameStateForIds(ids = []) {
     });
 
 async function fetchUser() {
-    // Check if name is already set from name entry modal
-    const savedName = sessionStorage.getItem('playerName');
-    if (savedName) {
-        currentPlayer = savedName;
-        updateDisplays();
-        return;
+    // Get current user from authManager
+    const user = window.authManager ? window.authManager.getCurrentUser() : null;
+    
+    if (user && user.uid !== 'guest') {
+        currentPlayer = user.name || user.uid;
+    } else {
+        currentPlayer = 'Guest';
     }
     
-    // Fallback to old method
-    try {
-        const response = await fetch(pythonURI + '/api/person/get', fetchOptions);
-        if (response.ok) {
-            const data = await response.json();
-            currentPlayer = data.name || data.username || 'Guest';
-        }
-    } catch (err) {
-        console.warn('Failed to fetch user:', err);
-    }
     updateDisplays();
 }
 
@@ -1288,6 +1468,7 @@ async function postScore(username, finalTime) {
         const response = await fetch(`${pythonURI}/api/media/score/${encodeURIComponent(username)}/${finalTime}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'}
+            credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to save score');
         fetchLeaderboard();
@@ -1414,6 +1595,7 @@ async function submitFinalTime(username, elapsed) {
         const response = await fetch(`${pythonURI}/api/media/score/${encodeURIComponent(username)}/${elapsed}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'}
+            credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to save score');
         console.log(`✅ Score saved: ${username} - ${elapsed}s`);

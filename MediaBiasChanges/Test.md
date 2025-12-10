@@ -837,6 +837,9 @@ function buildLoginModal() {
             
             <p id="login-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;"></p>
             <p style="color:#9ca3af;margin-top:12px;font-size:0.85rem;">Test account: student1 / pass123</p>
+            <p style="color:#9ca3af;margin-top:15px;font-size:0.9rem;">
+    Don't have an account? <a href="#" id="goto-signup" style="color:#4299e1;font-weight:600;">Sign Up</a>
+</p>
         </div>
     `;
     return modal;
@@ -866,7 +869,14 @@ window.showLoginModal = async function() {
         const uid = uidInput.value.trim();
         const password = passwordInput.value;
         
-        if (!uid || !password) {
+    
+    // 🔍 DEBUG: Log what we're sending
+        console.log('🔍 LOGIN DEBUG:');
+        console.log('  uid:', uid);
+        console.log('  password:', password);
+        console.log('  URL:', `${pythonURI}/api/authenticate`);
+    
+         if (!uid || !password) {
             errorMsg.textContent = 'Please enter both username and password';
             errorMsg.style.display = 'block';
             return;
@@ -911,6 +921,14 @@ window.showLoginModal = async function() {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Login';
         }
+        const gotoSignup = document.getElementById('goto-signup');
+        if (gotoSignup) {
+            gotoSignup.addEventListener('click', (e) => {
+                e.preventDefault();
+                hideLoginModal();
+                showSignupModal();
+            });
+        }
     }
 
     submitBtn.addEventListener('click', handleLogin);
@@ -924,6 +942,139 @@ window.showLoginModal = async function() {
     });
 
     uidInput.focus();
+};
+
+function buildSignupModal() {
+    const modal = document.createElement('div');
+    modal.id = 'signup-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    modal.innerHTML = `
+        <div style="background:linear-gradient(135deg, #353e74ff, #9384d5ff);padding:40px;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center;max-width:420px;">
+            <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.6rem;">Create Account</h2>
+            <p style="color:#c8d7eb;margin-bottom:18px;">Sign up to save your scores</p>
+            
+            <div style="text-align:left;margin-bottom:15px;">
+                <label style="color:#e0e7ff;display:block;margin-bottom:5px;font-weight:600;">Username</label>
+                <input type="text" id="signup-username" placeholder="YourGitHubID" style="width:100%;padding:12px;border-radius:10px;border:2px solid #4299e1;font-size:1rem;background:rgba(136, 134, 172, 0.9);color:white;" />
+            </div>
+            
+            <div style="text-align:left;margin-bottom:15px;">
+                <label style="color:#e0e7ff;display:block;margin-bottom:5px;font-weight:600;">Name</label>
+                <input type="text" id="signup-name" placeholder="Your Name" style="width:100%;padding:12px;border-radius:10px;border:2px solid #4299e1;font-size:1rem;background:rgba(136, 134, 172, 0.9);color:white;" />
+            </div>
+            
+            <div style="text-align:left;margin-bottom:15px;">
+                <label style="color:#e0e7ff;display:block;margin-bottom:5px;font-weight:600;">Password</label>
+                <input type="password" id="signup-password" placeholder="Create a password" style="width:100%;padding:12px;border-radius:10px;border:2px solid #4299e1;font-size:1rem;background:rgba(136, 134, 172, 0.9);color:white;" />
+            </div>
+            
+            <div style="display:flex;gap:10px;">
+                <button id="signup-cancel-btn" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Cancel</button>
+                <button id="signup-submit-btn" style="flex:1;padding:12px;border-radius:10px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;">Sign Up</button>
+            </div>
+            
+            <p id="signup-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;"></p>
+            
+            <p style="color:#9ca3af;margin-top:15px;font-size:0.9rem;">
+                Already have an account? <a href="#" id="goto-login" style="color:#4299e1;font-weight:600;">Login</a>
+            </p>
+        </div>
+    `;
+    return modal;
+}
+
+window.showSignupModal = function() {
+    if (document.getElementById('signup-modal')) {
+        document.getElementById('signup-username').focus();
+        return;
+    }
+    
+    const modal = buildSignupModal();
+    document.body.appendChild(modal);
+
+    const usernameInput = document.getElementById('signup-username');
+    const nameInput = document.getElementById('signup-name');
+    const passwordInput = document.getElementById('signup-password');
+    const submitBtn = document.getElementById('signup-submit-btn');
+    const cancelBtn = document.getElementById('signup-cancel-btn');
+    const errorMsg = document.getElementById('signup-error');
+    const gotoLogin = document.getElementById('goto-login');
+
+    cancelBtn.addEventListener('click', () => modal.remove());
+    
+    gotoLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.remove();
+        showLoginModal();
+    });
+
+    async function handleSignup() {
+        const username = usernameInput.value.trim();
+        const name = nameInput.value.trim();
+        const password = passwordInput.value;
+        
+        if (!username || !name || !password) {
+            errorMsg.textContent = 'All fields are required';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        if (username.length < 2) {
+            errorMsg.textContent = 'Username must be at least 2 characters';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        if (password.length < 6) {
+            errorMsg.textContent = 'Password must be at least 6 characters';
+            errorMsg.style.display = 'block';
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
+        errorMsg.style.display = 'none';
+
+        try {
+            const response = await fetch(`${pythonURI}/api/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    uid: username,
+                    name: name,
+                    password: password
+                })
+            });
+            
+            if (response.ok) {
+                alert('Account created! Please login.');
+                modal.remove();
+                showLoginModal();
+            } else {
+                const error = await response.json();
+                errorMsg.textContent = error.message || 'Signup failed';
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign Up';
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            errorMsg.textContent = 'Network error. Please try again.';
+            errorMsg.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign Up';
+        }
+    }
+
+    submitBtn.addEventListener('click', handleSignup);
+    
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSignup();
+    });
+
+    usernameInput.focus();
 };
 
 // Sign out (clears session and reloads)
@@ -943,8 +1094,8 @@ window.updateAuthButton = function() {
         authBtn.textContent = 'Sign Out';
         authBtn.onclick = () => window.signOut();
     } else {
-        authBtn.textContent = 'Sign In';
-        authBtn.onclick = () => window.showLoginModal(); // Changed from showSignInPrompt
+        authBtn.textContent = 'Sign Up / Login';
+        authBtn.onclick = () => showSignupModal(); // Show signup first
     }
 };
 
@@ -1279,25 +1430,12 @@ function clearGameStateForIds(ids = []) {
     });
 
 async function fetchUser() {
-    // Check if name is already set from name entry modal
+    // Just get the name from sessionStorage (set by login)
     const savedName = sessionStorage.getItem('playerName');
     if (savedName) {
         currentPlayer = savedName;
         updateDisplays();
-        return;
     }
-    
-    // Fallback to old method
-    try {
-        const response = await fetch(pythonURI + '/api/person/get', fetchOptions);
-        if (response.ok) {
-            const data = await response.json();
-            currentPlayer = data.name || data.username || 'Guest';
-        }
-    } catch (err) {
-        console.warn('Failed to fetch user:', err);
-    }
-    updateDisplays();
 }
 
 async function postScore(username, finalTime) {

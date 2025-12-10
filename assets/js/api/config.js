@@ -23,7 +23,7 @@ export const fetchOptions = {
     method: 'GET',  // Default method is GET
     mode: 'cors', // Enable CORS (Cross-Origin Resource Sharing)
     cache: 'default', // Default caching behavior
-    credentials: 'include', // Include credentials (cookies, etc.)
+    credentials: "include", // Include cookies in requests
     headers: {
         'Content-Type': 'application/json',
         'X-Origin': 'client' // Custom header to identify source

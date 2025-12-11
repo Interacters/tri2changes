@@ -808,7 +808,7 @@ body {
 
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->
 <script type="module">
-import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
+import {pythonURI,fetchOptions} from '{{site.baseurl}}/assets/js/api/config.js';
 
 // Authentication Manager Class
 class AuthManager {
@@ -823,7 +823,7 @@ class AuthManager {
             body: JSON.stringify({ uid, password })
         };
 
-        const response = await fetch(`${pythonURI}/api/users/authenticate`, requestOptions);
+        const response = await fetch(`${pythonURI}/api/authenticate`, requestOptions);
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -840,17 +840,15 @@ class AuthManager {
         const requestOptions = {
             ...fetchOptions,
             method: 'POST',
-            body: JSON.stringify({ 
-                name, 
-                uid, 
-                password,
-                email: '?',
-                sid: '?',
-                school: '?'
+            body: JSON.stringify({
+                name: name,
+                uid: uid, 
+                password: password,
+                email: '',
             })
         };
 
-        const response = await fetch(`${pythonURI}/api/users/user`, requestOptions);
+        const response = await fetch(`${pythonURI}/api/user/`, requestOptions);
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -867,7 +865,7 @@ class AuthManager {
         };
 
         try {
-            await fetch(`${pythonURI}/api/users/authenticate`, requestOptions);
+            await fetch(`${pythonURI}/api/authenticate`, requestOptions);
         } catch (error) {
             console.warn('Logout request failed:', error);
         }

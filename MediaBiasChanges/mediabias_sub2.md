@@ -356,12 +356,10 @@ body {
 </div>
   <style>
     .chat-container {
-      background: linear-gradient(145deg, #8668e6b3 0%, #586ed0c1 100%);
-      width: 740px;
+      background: linear-gradient(145deg, #8568e694 0%, #586ed09f 100%);
       border-radius: 24px;
       padding: 32px;
       backdrop-filter: blur(10px);
-      margin: 20px
     }
 
     .chat-container h1 {

@@ -809,8 +809,11 @@ body {
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->
 <script type="module">
 import {pythonURI,fetchOptions} from '{{site.baseurl}}/assets/js/api/config.js';
+window.pythonURI = pythonURI;
 
 // Authentication Manager Class
+// Fixed Authentication Manager with proper CORS and GitHub validation
+
 class AuthManager {
     constructor() {
         this.currentUser = null;
@@ -818,15 +821,20 @@ class AuthManager {
 
     async login(uid, password) {
         const requestOptions = {
-            ...fetchOptions,
             method: 'POST',
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'client'
+            },
             body: JSON.stringify({ uid, password })
         };
 
-        const response = await fetch(`${pythonURI}/api/authenticate`, requestOptions);
+        const response = await fetch(`${window.pythonURI}/api/authenticate`, requestOptions);
         
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.message || 'Login failed');
         }
 
@@ -837,35 +845,79 @@ class AuthManager {
     }
 
     async signup(name, uid, password) {
+        // First verify GitHub ID exists
+        const isValidGitHub = await this.verifyGitHubAccount(uid);
+        if (!isValidGitHub) {
+            throw new Error(`GitHub account "${uid}" not found. Please use your actual GitHub username.`);
+        }
+
         const requestOptions = {
-            ...fetchOptions,
             method: 'POST',
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'client',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify({
                 name: name,
-                uid: uid, 
+                uid: uid,
                 password: password,
-                email: '',
+                email: `${uid}@github.user`
             })
         };
 
-        const response = await fetch(`${pythonURI}/api/user/`, requestOptions);
+        const response = await fetch(`${window.pythonURI}/api/user`, requestOptions);
         
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.message || 'Signup failed');
         }
 
         return await response.json();
     }
 
+    async verifyGitHubAccount(username) {
+        if (!username || username.length < 1) return false;
+        
+        try {
+            const response = await fetch(`https://api.github.com/users/${username}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            if (response.status === 404) {
+                return false;
+            }
+            
+            if (response.ok) {
+                const data = await response.json();
+                return data.login.toLowerCase() === username.toLowerCase();
+            }
+            
+            return false;
+        } catch (error) {
+            console.error('GitHub verification error:', error);
+            return false;
+        }
+    }
+
     async logout() {
         const requestOptions = {
-            ...fetchOptions,
-            method: 'DELETE'
+            method: 'DELETE',
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'client'
+            }
         };
 
         try {
-            await fetch(`${pythonURI}/api/authenticate`, requestOptions);
+            await fetch(`${window.pythonURI}/api/authenticate`, requestOptions);
         } catch (error) {
             console.warn('Logout request failed:', error);
         }
@@ -902,41 +954,8 @@ class AuthManager {
     }
 }
 
-// Initialize auth manager
-const authManager = new AuthManager();
-
-// Register name with backend (updated version)
-async function registerPlayer(name) {
-    // This is now handled by AuthManager.login() or AuthManager.signup()
-    return authManager.getCurrentUser();
-}
-// expose register for global usage
-window.registerPlayer = registerPlayer;
-window.authManager = authManager; // Expose authManager globally
-
-// Build modal DOM
-function buildSignInModal() {
-    const modal = document.createElement('div');
-    modal.id = 'auth-modal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;';
-    modal.innerHTML = `
-        <div style="background:linear-gradient(135deg, #353e74ff, #9384d5ff);padding:40px;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.3);text-align:center;max-width:420px;">
-            <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.6rem;">Sign In</h2>
-            <p style="color:#c8d7eb;margin-bottom:18pxF">Enter your name to save your scores</p>
-            <input type="text" id="signin-name-input" placeholder="Your Name" style="width:100%;padding:12px;border-radius:10px;border:2px solid #4299e1;font-size:1rem;margin-bottom:14px;background:rgba(136, 134, 172, 0.9);" />
-            <div style="display:flex;gap:10px;">
-                <button id="signin-cancel-btn" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Cancel</button>
-                <button id="signin-submit-btn" style="flex:1;padding:12px;border-radius:10px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;">Sign In</button>
-            </div>
-            <p id="signin-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;"></p>
-        </div>
-    `;
-    return modal;
-}
-
-// Show sign-in modal on-demand (called by #auth-btn)
-// Show sign-in modal with full login/signup (called by #auth-btn)
-window.showSignInPrompt = async function() {
+// Enhanced modal with better GitHub verification UI
+function showSignInPrompt() {
     if (document.getElementById('auth-modal')) {
         document.getElementById('auth-modal').remove();
     }
@@ -951,8 +970,8 @@ window.showSignInPrompt = async function() {
                 <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">User Login</h2>
                 <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">Sign in to save your scores</p>
                 <div style="margin-bottom:20px;">
-                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Username:</label>
-                    <input type="text" id="login-uid" placeholder="Enter username" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">GitHub Username:</label>
+                    <input type="text" id="login-uid" placeholder="Your GitHub username" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
                 </div>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Password:</label>
@@ -972,14 +991,18 @@ window.showSignInPrompt = async function() {
             <!-- Signup Form -->
             <div id="signup-form-container" style="display:none;">
                 <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">Create Account</h2>
-                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">Join to track your progress</p>
+                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;font-size:0.9rem;">⚠️ You must have a GitHub account</p>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Full Name:</label>
                     <input type="text" id="signup-name" placeholder="Enter your name" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
                 </div>
                 <div style="margin-bottom:20px;">
-                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Username:</label>
-                    <input type="text" id="signup-uid" placeholder="Choose username" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">GitHub Username:</label>
+                    <div style="position:relative;">
+                        <input type="text" id="signup-uid" placeholder="Your GitHub username" style="width:100%;padding:12px;padding-right:45px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                        <div id="github-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1.2rem;display:none;"></div>
+                    </div>
+                    <p style="color:#9bb3d6;font-size:0.85rem;margin-top:6px;">We'll verify this is a real GitHub account</p>
                 </div>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Password:</label>
@@ -998,12 +1021,18 @@ window.showSignInPrompt = async function() {
     `;
     document.body.appendChild(modal);
 
+    // Initialize AuthManager if not already
+    if (!window.authManager) {
+        window.authManager = new AuthManager();
+    }
+
     // Event handlers
     document.getElementById('close-modal').addEventListener('click', () => modal.remove());
+    
     document.getElementById('guest-btn').addEventListener('click', () => {
         window.authManager.setGuestUser();
         modal.remove();
-        window.updateAuthButton();
+        if (window.updateAuthButton) window.updateAuthButton();
     });
     
     // Toggle between login and signup
@@ -1018,12 +1047,42 @@ window.showSignInPrompt = async function() {
         document.getElementById('login-form-container').style.display = 'block';
     });
 
+    // Real-time GitHub verification
+    let verifyTimeout;
+    document.getElementById('signup-uid').addEventListener('input', (e) => {
+        const username = e.target.value.trim();
+        const statusEl = document.getElementById('github-status');
+        
+        clearTimeout(verifyTimeout);
+        
+        if (username.length === 0) {
+            statusEl.style.display = 'none';
+            return;
+        }
+        
+        statusEl.style.display = 'block';
+        statusEl.textContent = '⏳';
+        statusEl.style.color = '#fbbf24';
+        
+        verifyTimeout = setTimeout(async () => {
+            const isValid = await window.authManager.verifyGitHubAccount(username);
+            if (isValid) {
+                statusEl.textContent = '✓';
+                statusEl.style.color = '#4ade80';
+            } else {
+                statusEl.textContent = '✗';
+                statusEl.style.color = '#ff6b6b';
+            }
+        }, 800);
+    });
+
     // Login handler
     document.getElementById('login-btn').addEventListener('click', async () => {
         const uid = document.getElementById('login-uid').value.trim();
         const password = document.getElementById('login-password').value;
         const errorMsg = document.getElementById('login-error');
         const successMsg = document.getElementById('login-success');
+        const loginBtn = document.getElementById('login-btn');
         
         errorMsg.style.display = 'none';
         successMsg.style.display = 'none';
@@ -1034,28 +1093,35 @@ window.showSignInPrompt = async function() {
             return;
         }
         
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+        
         try {
             await window.authManager.login(uid, password);
             successMsg.textContent = 'Login successful!';
             successMsg.style.display = 'block';
             setTimeout(() => {
                 modal.remove();
-                window.updateAuthButton();
-                window.location.reload(); // Reload to update player name
+                if (window.updateAuthButton) window.updateAuthButton();
+                window.location.reload();
             }, 1000);
         } catch (error) {
             errorMsg.textContent = error.message;
             errorMsg.style.display = 'block';
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Login';
         }
     });
 
-// Signup handler
+    // Signup handler - FIXED auto-login
     document.getElementById('signup-btn').addEventListener('click', async () => {
         const name = document.getElementById('signup-name').value.trim();
         const uid = document.getElementById('signup-uid').value.trim();
         const password = document.getElementById('signup-password').value;
         const errorMsg = document.getElementById('signup-error');
         const successMsg = document.getElementById('signup-success');
+        const signupBtn = document.getElementById('signup-btn');
         
         errorMsg.style.display = 'none';
         successMsg.style.display = 'none';
@@ -1072,29 +1138,47 @@ window.showSignInPrompt = async function() {
             return;
         }
         
+        signupBtn.disabled = true;
+        signupBtn.textContent = 'Verifying GitHub...';
+        
         try {
             await window.authManager.signup(name, uid, password);
             successMsg.textContent = 'Account created! Logging in...';
             successMsg.style.display = 'block';
-            setTimeout(async () => {
+            signupBtn.textContent = 'Logging in...';
+            
+            // Wait a moment for backend to process, then login
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            try {
                 await window.authManager.login(uid, password);
                 modal.remove();
-                window.updateAuthButton();
+                if (window.updateAuthButton) window.updateAuthButton();
                 window.location.reload();
-            }, 1500);
+            } catch (loginError) {
+                console.error('Auto-login failed:', loginError);
+                successMsg.textContent = 'Account created! Please click "Back" and login.';
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Sign Up';
+            }
         } catch (error) {
             errorMsg.textContent = error.message;
             errorMsg.style.display = 'block';
+            signupBtn.disabled = false;
+            signupBtn.textContent = 'Sign Up';
         }
     });
-};
+}
+
+// Make functions available globally
+window.AuthManager = AuthManager;
+window.showSignInPrompt = showSignInPrompt;
 
 // Update auth button text/handler
 window.updateAuthButton = function() {
     const authBtn = document.getElementById('auth-btn');
     if (!authBtn) return;
     
-    // Check if user is logged in (not guest)
     const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
     
     if (currentUser && currentUser.uid !== 'guest') {
@@ -1106,16 +1190,18 @@ window.updateAuthButton = function() {
     }
 };
 
-// Sign out (clears session and reloads)
+// Sign out function
 window.signOut = async function() {
     await window.authManager.logout();
     window.authManager.setGuestUser();
     window.location.reload();
 };
 
-// Initialize auth state when DOM is ready
+// Initialize on load
 window.addEventListener('DOMContentLoaded', () => {
-    // Check for existing session
+    if (!window.authManager) {
+        window.authManager = new AuthManager();
+    }
     const existingUser = window.authManager.checkExistingSession();
     if (!existingUser || existingUser.uid === 'guest') {
         window.authManager.setGuestUser();
@@ -1453,7 +1539,7 @@ async function fetchUser() {
     const user = window.authManager ? window.authManager.getCurrentUser() : null;
     
     if (user && user.uid !== 'guest') {
-        currentPlayer = user.name || user.uid;
+        currentPlayer = user.uid;
     } else {
         currentPlayer = 'Guest';
     }

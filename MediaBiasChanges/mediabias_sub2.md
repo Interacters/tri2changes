@@ -3,12 +3,7 @@ layout: post
 title: "English Essay Help"
 permalink: /digital-famine/media-lit/submodule_2/
 parent: "Analytics/Admin"
-team: "Scratchers"
 submodule: 2
-categories: [CSP, Submodule, Analytics/Admin]
-tags: [analytics, submodule, curators]
-breadcrumb: true
-microblog: true
 author: "Interactors"
 date: 2025-12-2
 ---
@@ -360,6 +355,7 @@ body {
       border-radius: 24px;
       padding: 32px;
       backdrop-filter: blur(10px);
+      margin-bottom: 20px
     }
 
     .chat-container h1 {

@@ -10,14 +10,6 @@ date: 2025-12-12
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Essay Help - Media Literacy Module</title>
     <style>
-  /* Force full width for all containers */
-  body, .container, .wrapper {
-    max-width: 900px !important;
-    width: 900px !important;
-  }
-
-</style>
-    <style>
         * {
             margin: 0;
             padding: 0;
@@ -35,6 +27,7 @@ date: 2025-12-12
         .container {
             max-width: 100%;
             margin: 0 auto;
+            background: #31285cff 
         }
 
         /* Progress Tracker */

@@ -1,9 +1,4 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thesis Generator</title>
-    <style>
+<style>
         .thesis-gen-card {
             background: linear-gradient(160deg, #856ccadd, #5b6ebce1);
             border: 1px solid rgba(255,255,255,0.08);

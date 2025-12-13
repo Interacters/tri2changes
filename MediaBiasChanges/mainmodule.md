@@ -10,6 +10,16 @@ date: 2025-12-12
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Essay Help - Media Literacy Module</title>
     <style>
+  * {
+    max-width: none !important;
+  }
+  
+  .container {
+    max-width: 900px !important;
+    padding: 40px;
+  }
+</style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -1608,9 +1618,7 @@ async function submitFinalTime(username, elapsed) {
       resize: vertical;
       padding: 14px 16px;
       font-size: 0.95rem;
-      border-radius: 12px;
-      border: 2px solid #334155;
-      background: #5a5681ff;
+      background: #302c5a;
       color: #e2e8f0;
       box-sizing: border-box;
       margin-bottom: 20px;
@@ -1634,7 +1642,7 @@ async function submitFinalTime(username, elapsed) {
       font-size: 0.95rem;
       border-radius: 12px;
       border: 2px solid #334155;
-      background: #3b4f7fff;
+      background: #302c5a;
       color: #e2e8f0;
       box-sizing: border-box;
       margin-bottom: 24px;
@@ -2668,7 +2676,6 @@ function fmtChicago({author, date, title, source, url}) {
             font-size: 0.9rem;
         }
     </style>
-</head>
 <body>
     <div class="thesis-gen-card">
 
@@ -3391,7 +3398,6 @@ function fmtChicago({author, date, title, source, url}) {
             }
         }
     </style>
-</head>
 <body>
     <div class="survey-container">
 

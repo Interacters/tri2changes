@@ -628,7 +628,10 @@ const PROMPT_TEMPLATES = [
 ];
 
 const PROMPTS_API_BASE = 'http://localhost:8001';
+const PROMPTS_REFRESH_INTERVAL = 5000;
 let promptsWithClicks = [];
+let currentSource = '';
+let promptRefreshTimer;
 
 const newsSourceInput = document.getElementById('news-source');
 const smartPromptsSection = document.getElementById('smart-prompts-section');
@@ -640,32 +643,48 @@ const aiClearBtn = document.getElementById('ai-clear-btn');
 const aiStatusEl = document.getElementById('ai-status');
 const aiChatLog = document.getElementById('ai-chat-log');
 
+function havePromptClicksChanged(nextPrompts) {
+    if (promptsWithClicks.length !== nextPrompts.length) return true;
+    return nextPrompts.some(next => {
+        const existing = promptsWithClicks.find(p => p.id === next.id);
+        return !existing || existing.clicks !== next.clicks;
+    });
+}
+
 // Load prompt click data
 async function loadPromptClicks() {
+    let nextPrompts;
     try {
         const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/clicks`);
         if (response.ok) {
             const data = await response.json();
-            promptsWithClicks = PROMPT_TEMPLATES.map(prompt => ({
+            nextPrompts = PROMPT_TEMPLATES.map(prompt => ({
                 ...prompt,
                 clicks: data[prompt.id] || 0
             }));
         } else {
-            promptsWithClicks = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
+            nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
         }
     } catch (error) {
         console.warn('Could not load prompt clicks:', error);
-        promptsWithClicks = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
+        nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
     }
+
+    const changed = havePromptClicksChanged(nextPrompts);
+    promptsWithClicks = nextPrompts;
+    return changed;
 }
 
 // Render prompts sorted by popularity
 function renderSmartPrompts(source) {
-    if (!source || source.length < 2) {
+    const trimmedSource = (source || '').trim();
+    if (!trimmedSource || trimmedSource.length < 2) {
+        currentSource = '';
         smartPromptsSection.style.display = 'none';
         return;
     }
 
+    currentSource = trimmedSource;
     const sorted = [...promptsWithClicks].sort((a, b) => b.clicks - a.clicks);
     smartPromptsGrid.innerHTML = '';
     
@@ -674,10 +693,10 @@ function renderSmartPrompts(source) {
         btn.type = 'button';
         btn.className = 'ai-prompt-btn';
         
-        const promptText = prompt.text.replace('{source}', source);
+        const promptText = prompt.text.replace('{source}', trimmedSource);
         btn.innerHTML = `<span style="flex: 1;">${promptText}</span> <span style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;">${prompt.clicks}</span>`;
         
-        btn.addEventListener('click', () => handlePromptClick(prompt, source));
+        btn.addEventListener('click', () => handlePromptClick(prompt, trimmedSource));
         smartPromptsGrid.appendChild(btn);
     });
 
@@ -716,6 +735,18 @@ if (newsSourceInput) {
         const source = e.target.value.trim();
         debounceTimeout = setTimeout(() => renderSmartPrompts(source), 300);
     });
+}
+
+async function refreshPromptsFromServer() {
+    const changed = await loadPromptClicks();
+    if (changed && currentSource) {
+        renderSmartPrompts(currentSource);
+    }
+}
+
+function startPromptLiveUpdates() {
+    clearInterval(promptRefreshTimer);
+    promptRefreshTimer = setInterval(refreshPromptsFromServer, PROMPTS_REFRESH_INTERVAL);
 }
 
 // Show status
@@ -793,6 +824,7 @@ aiClearBtn.addEventListener('click', () => {
         aiMessageInput.value = '';
         newsSourceInput.value = '';
         smartPromptsSection.style.display = 'none';
+        currentSource = '';
         showAIStatus('Chat cleared');
         setTimeout(() => {
             aiStatusEl.style.display = 'none';
@@ -801,7 +833,16 @@ aiClearBtn.addEventListener('click', () => {
 });
 
 // Initialize
-loadPromptClicks();
+loadPromptClicks()
+    .then(() => {
+        const prefilledSource = newsSourceInput?.value?.trim();
+        if (prefilledSource) {
+            renderSmartPrompts(prefilledSource);
+        }
+    })
+    .finally(() => {
+        startPromptLiveUpdates();
+    });
 </script>
 
 <!-- REPLACE YOUR ENTIRE SCRIPT SECTION WITH THIS -->

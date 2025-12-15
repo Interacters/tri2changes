@@ -37,7 +37,7 @@ date: 2025-12-12
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: #31285cff 
+            background: #31285cbc 
         }
 
         /* Progress Tracker */

@@ -1561,7 +1561,7 @@ async function submitFinalTime(username, elapsed) {
                 <div class="content-placeholder">
                     <p>
 <style>
-   .chat-container {
+    .chat-container {
       background: linear-gradient(145deg, #8568e694 0%, #586ed09f 100%);
       border-radius: 24px;
       padding: 32px;
@@ -1618,7 +1618,9 @@ async function submitFinalTime(username, elapsed) {
       resize: vertical;
       padding: 14px 16px;
       font-size: 0.95rem;
-      background: #302c5a;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: #5a5681ff;
       color: #e2e8f0;
       box-sizing: border-box;
       margin-bottom: 20px;
@@ -1642,7 +1644,7 @@ async function submitFinalTime(username, elapsed) {
       font-size: 0.95rem;
       border-radius: 12px;
       border: 2px solid #334155;
-      background: #302c5a;
+      background: #3b4f7fff;
       color: #e2e8f0;
       box-sizing: border-box;
       margin-bottom: 24px;
@@ -1788,220 +1790,267 @@ async function submitFinalTime(username, elapsed) {
       display: block;
     }
   </style>
-<div class="chat-container">
-    <form id="chat-form">
-      <label for="message">Your message</label>
-      <textarea id="message" placeholder="Ask a question here..." required></textarea>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      <label for="mode">What do you want?</label>
-      <select id="mode">
+<div class="ai-card">
+    <h3>Source Intel Chat</h3>
+    <p>Get help analyzing news sources with AI-powered suggestions</p>
+    
+    <label>News Source (Optional)</label>
+    <textarea id="news-source" placeholder="Type a news source like 'Fox News', 'CNN', 'NBC'..." style="min-height: 60px;"></textarea>
+    
+    <!-- Smart Prompts -->
+    <div id="smart-prompts-section" style="display: none;">
+        <p class="chat-hint" style="margin: 8px 0 4px;">💡 Quick Prompts (Most Popular First)</p>
+        <div class="ai-prompts" id="smart-prompts-grid"></div>
+    </div>
+    
+    <label>Your Question</label>
+    <textarea id="ai-message" placeholder="Ask a question about this news source..." required></textarea>
+    
+    <label>What do you want?</label>
+    <select id="ai-mode" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eaf6ff; margin-bottom: 12px;">
         <option value="hint">Hint</option>
         <option value="information">Information</option>
-      </select>
-
-      <div class="actions">
-        <button type="submit" id="send-btn">Send</button>
-        <button type="button" id="clear-history-btn">Clear History</button>
-      </div>
-    </form>
-
-    <div id="status" class="status"></div>
-    <div id="response" class="response-box" style="display:none;"></div>
-
-    <div class="history-section">
-      <h3>Conversation History</h3>
-      <div class="stats" id="stats"></div>
-      <div id="history-list"></div>
+    </select>
+    
+    <div class="ai-controls">
+        <button type="button" class="ai-btn primary" id="ai-send-btn">Send</button>
+        <button type="button" class="ai-btn ghost" id="ai-clear-btn">Clear</button>
     </div>
-  </div>
+    
+    <div class="ai-status" id="ai-status"></div>
+    <div class="ai-chat-log" id="ai-chat-log" style="display: none;"></div>
+</div>
 
-  <script>
-    // ===== REQUIREMENT: LIST/COLLECTION TYPE =====
-    // This array stores all conversation history
-    let conversationHistory = [];
+<script>
+// Smart Prompts Feature
+const PROMPT_TEMPLATES = [
+    { id: 1, text: "What is the political bias of {source}?" },
+    { id: 2, text: "Show me recent top stories from {source}" },
+    { id: 3, text: "How does {source} compare to other news outlets?" },
+    { id: 4, text: "What are the most controversial topics covered by {source}?" },
+    { id: 5, text: "Is {source} a reliable news source?" }
+];
 
-    // DOM Elements
-    const form = document.getElementById('chat-form');
-    const messageInput = document.getElementById('message');
-    const modeSelect = document.getElementById('mode');
-    const statusEl = document.getElementById('status');
-    const responseEl = document.getElementById('response');
-    const sendBtn = document.getElementById('send-btn');
-    const clearHistoryBtn = document.getElementById('clear-history-btn');
-    const historyList = document.getElementById('history-list');
-    const statsEl = document.getElementById('stats');
+const PROMPTS_API_BASE = 'http://localhost:8001';
+const PROMPTS_REFRESH_INTERVAL = 5000;
+let promptsWithClicks = [];
+let currentSource = '';
+let promptRefreshTimer;
 
-    // ===== REQUIREMENT: STUDENT-DEVELOPED PROCEDURE =====
-    // Procedure name: processConversationHistory
-    // Parameters: historyArray (list), filterType (string), maxItems (number)
-    // Return type: array
-    // Purpose: Filter and process conversation history based on criteria
-    function processConversationHistory(historyArray, filterType, maxItems) {
-      // ===== ALGORITHM WITH SEQUENCING, SELECTION, AND ITERATION =====
-      
-      // SEQUENCING: Steps execute in order
-      let filteredHistory = [];
-      let hintCount = 0;
-      let infoCount = 0;
-      
-      // ITERATION: Loop through each item in history
-      for (let i = 0; i < historyArray.length; i++) {
-        let item = historyArray[i];
-        
-        // SELECTION: Conditional logic to filter and count
-        if (filterType === 'all' || item.type === filterType) {
-          filteredHistory.push(item);
+const newsSourceInput = document.getElementById('news-source');
+const smartPromptsSection = document.getElementById('smart-prompts-section');
+const smartPromptsGrid = document.getElementById('smart-prompts-grid');
+const aiMessageInput = document.getElementById('ai-message');
+const aiModeSelect = document.getElementById('ai-mode');
+const aiSendBtn = document.getElementById('ai-send-btn');
+const aiClearBtn = document.getElementById('ai-clear-btn');
+const aiStatusEl = document.getElementById('ai-status');
+const aiChatLog = document.getElementById('ai-chat-log');
+
+function havePromptClicksChanged(nextPrompts) {
+    if (promptsWithClicks.length !== nextPrompts.length) return true;
+    return nextPrompts.some(next => {
+        const existing = promptsWithClicks.find(p => p.id === next.id);
+        return !existing || existing.clicks !== next.clicks;
+    });
+}
+
+// Load prompt click data
+async function loadPromptClicks() {
+    let nextPrompts;
+    try {
+        const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/clicks`);
+        if (response.ok) {
+            const data = await response.json();
+            nextPrompts = PROMPT_TEMPLATES.map(prompt => ({
+                ...prompt,
+                clicks: data[prompt.id] || 0
+            }));
+        } else {
+            nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
         }
-        
-        // Count different types
-        if (item.type === 'hint') {
-          hintCount++;
-        } else if (item.type === 'information') {
-          infoCount++;
-        }
-        
-        // SELECTION: Stop if we've reached maxItems
-        if (filteredHistory.length >= maxItems) {
-          break;
-        }
-      }
-      
-      // Return processed data
-      return {
-        filtered: filteredHistory,
-        stats: {
-          total: historyArray.length,
-          hints: hintCount,
-          information: infoCount
-        }
-      };
+    } catch (error) {
+        console.warn('Could not load prompt clicks:', error);
+        nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
     }
 
-    // Helper procedure to add item to history
-    function addToHistory(question, answer, type) {
-      const timestamp = new Date().toLocaleString();
-      conversationHistory.push({
-        question: question,
-        answer: answer,
-        type: type,
-        timestamp: timestamp
-      });
-      
-      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
-      updateHistoryDisplay();
-    }
+    const changed = havePromptClicksChanged(nextPrompts);
+    promptsWithClicks = nextPrompts;
+    return changed;
+}
 
-    // Display history using our procedure
-    function updateHistoryDisplay() {
-      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
-      // Call our student-developed procedure
-      const result = processConversationHistory(conversationHistory, 'all', 50);
-      
-      // Update statistics
-      statsEl.textContent = `Total conversations: ${result.stats.total} | Hints: ${result.stats.hints} | Information: ${result.stats.information}`;
-      
-      // Display filtered history
-      if (result.filtered.length === 0) {
-        historyList.innerHTML = '<p style="color: #999;">No conversation history yet. Start chatting!</p>';
+// Render prompts sorted by popularity
+function renderSmartPrompts(source) {
+    const trimmedSource = (source || '').trim();
+    if (!trimmedSource || trimmedSource.length < 2) {
+        currentSource = '';
+        smartPromptsSection.style.display = 'none';
         return;
-      }
-      
-      historyList.innerHTML = '';
-      
-      // Show most recent first
-      for (let i = result.filtered.length - 1; i >= 0; i--) {
-        const item = result.filtered[i];
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item';
-        historyItem.innerHTML = `
-          <div class="history-question">Q: ${item.question}</div>
-          <div class="history-type">${item.type === 'hint' ? '💡 Hint' : '📚 Information'} - ${item.timestamp}</div>
-          <div class="history-answer">${item.answer}</div>
-        `;
-        historyList.appendChild(historyItem);
-      }
     }
 
-    // Show status message
-    function showStatus(message, type) {
-      statusEl.textContent = message;
-      statusEl.className = `status ${type} show`;
+    currentSource = trimmedSource;
+    const sorted = [...promptsWithClicks].sort((a, b) => b.clicks - a.clicks);
+    smartPromptsGrid.innerHTML = '';
+    
+    sorted.forEach(prompt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ai-prompt-btn';
+        
+        const promptText = prompt.text.replace('{source}', trimmedSource);
+        btn.innerHTML = `<span style="flex: 1;">${promptText}</span> <span style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;">${prompt.clicks}</span>`;
+        
+        btn.addEventListener('click', () => handlePromptClick(prompt, trimmedSource));
+        smartPromptsGrid.appendChild(btn);
+    });
+
+    smartPromptsSection.style.display = 'block';
+}
+
+// Handle prompt click
+async function handlePromptClick(prompt, source) {
+    const filledPrompt = prompt.text.replace('{source}', source);
+    aiMessageInput.value = filledPrompt;
+
+    try {
+        const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/${prompt.id}/click`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const localPrompt = promptsWithClicks.find(p => p.id === prompt.id);
+            if (localPrompt) localPrompt.clicks = data.clicks;
+            renderSmartPrompts(source);
+        }
+    } catch (error) {
+        console.error('Failed to increment click count:', error);
     }
 
-    // Form submission handler
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+    aiMessageInput.focus();
+}
 
-      const message = messageInput.value.trim();
-      const mode = modeSelect.value;
+// Listen for news source input
+let debounceTimeout;
+if (newsSourceInput) {
+    newsSourceInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimeout);
+        const source = e.target.value.trim();
+        debounceTimeout = setTimeout(() => renderSmartPrompts(source), 300);
+    });
+}
 
-      if (!message) {
-        showStatus('Please enter a message.', 'error');
+async function refreshPromptsFromServer() {
+    const changed = await loadPromptClicks();
+    if (changed && currentSource) {
+        renderSmartPrompts(currentSource);
+    }
+}
+
+function startPromptLiveUpdates() {
+    clearInterval(promptRefreshTimer);
+    promptRefreshTimer = setInterval(refreshPromptsFromServer, PROMPTS_REFRESH_INTERVAL);
+}
+
+// Show status
+function showAIStatus(message, isError = false) {
+    aiStatusEl.textContent = message;
+    aiStatusEl.style.display = 'block';
+    aiStatusEl.style.background = isError ? 'rgba(248, 113, 113, 0.15)' : 'rgba(122, 210, 249, 0.15)';
+    aiStatusEl.style.border = isError ? '1px solid rgba(248, 113, 113, 0.3)' : '1px solid rgba(122, 210, 249, 0.3)';
+    aiStatusEl.style.color = isError ? '#fca5a5' : '#7ad2f9';
+}
+
+// Send message
+aiSendBtn.addEventListener('click', async () => {
+    const message = aiMessageInput.value.trim();
+    const mode = aiModeSelect.value;
+
+    if (!message) {
+        showAIStatus('Please enter a message', true);
         return;
-      }
+    }
 
-      sendBtn.disabled = true;
-      showStatus('Thinking...', 'info');
-      responseEl.style.display = 'none';
-
-      try {
-        const backendUrl = 'http://localhost:8001/api/chat';
-
-        const res = await fetch(backendUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            type: mode,
-            message: message
-          })
+    aiSendBtn.disabled = true;
+    aiSendBtn.textContent = 'Thinking...';
+    showAIStatus('Processing your request...');
+    
+    try {
+        const response = await fetch('http://localhost:8001/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: mode, message: message })
         });
 
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || `Server error: ${res.status}`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Server error: ${response.status}`);
         }
 
-        const data = await res.json();
+        const data = await response.json();
+        
+        // Add to chat log
+        const userBubble = document.createElement('div');
+        userBubble.className = 'chat-bubble user';
+        userBubble.textContent = `You: ${message}`;
+        
+        const aiBubble = document.createElement('div');
+        aiBubble.className = 'chat-bubble ai';
+        aiBubble.innerHTML = `<strong>${data.type === 'hint' ? '💡 Hint' : '📚 Info'}:</strong> ${data.answer}`;
+        
+        aiChatLog.appendChild(userBubble);
+        aiChatLog.appendChild(aiBubble);
+        aiChatLog.style.display = 'block';
+        aiChatLog.scrollTop = aiChatLog.scrollHeight;
+        
+        showAIStatus('Response received!');
+        aiMessageInput.value = '';
+        
+        setTimeout(() => {
+            aiStatusEl.style.display = 'none';
+        }, 2000);
+        
+    } catch (error) {
+        console.error(error);
+        showAIStatus('Error: ' + error.message, true);
+    } finally {
+        aiSendBtn.disabled = false;
+        aiSendBtn.textContent = 'Send';
+    }
+});
 
-        showStatus('Response received!', 'success');
+// Clear chat
+aiClearBtn.addEventListener('click', () => {
+    if (confirm('Clear conversation history?')) {
+        aiChatLog.innerHTML = '';
+        aiChatLog.style.display = 'none';
+        aiMessageInput.value = '';
+        newsSourceInput.value = '';
+        smartPromptsSection.style.display = 'none';
+        currentSource = '';
+        showAIStatus('Chat cleared');
+        setTimeout(() => {
+            aiStatusEl.style.display = 'none';
+        }, 2000);
+    }
+});
 
-        if (data.answer) {
-          responseEl.style.display = 'block';
-          responseEl.innerHTML = `
-            <div class="label">${data.type === 'hint' ? '💡 Hint:' : '📚 Information:'}</div>
-            <div class="answer">${data.answer}</div>
-          `;
-          
-          // Add to history
-          addToHistory(message, data.answer, data.type);
-          
-          // Clear input
-          messageInput.value = '';
+// Initialize
+loadPromptClicks()
+    .then(() => {
+        const prefilledSource = newsSourceInput?.value?.trim();
+        if (prefilledSource) {
+            renderSmartPrompts(prefilledSource);
         }
-
-      } catch (err) {
-        console.error(err);
-        showStatus('Error: ' + err.message, 'error');
-        responseEl.style.display = 'none';
-      } finally {
-        sendBtn.disabled = false;
-      }
+    })
+    .finally(() => {
+        startPromptLiveUpdates();
     });
-
-    // Clear history button
-    clearHistoryBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to clear all conversation history?')) {
-        conversationHistory = [];
-        updateHistoryDisplay();
-        showStatus('History cleared!', 'success');
-      }
-    });
-
-    // Initialize display
-    updateHistoryDisplay();
-  </script></p>
+</script></p>
                     <p style="margin-top: 20px; font-size: 0.9rem;">
                     </p>
                 </div>
@@ -2017,350 +2066,19 @@ async function submitFinalTime(username, elapsed) {
             </div>
         </div>
 
-        <!-- Section 2: Citation Generator -->
+        <!-- Section 2: Thesis Generator -->
         <div class="section-container" id="section-2">
-            <div class="section-header">
-                <h2 class="section-title">Citation Generator</h2>
-                <p class="section-description">
-                    It's important to include correct citations for your work. 
-                    There are many formats including MLA, APA, and Chicago. 
-                    This tool helps you create proper citations for your sources.
-                </p>
-            </div>
-
-            <div class="content-placeholder">
-                <p>
-<style>
-  .cite-card { background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); color:#e6f2ff; padding:18px; border-radius:12px; margin:20px 0; }
-  .cite-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
-  .cite-label { min-width:110px; font-weight:700; color:#d6e9ff; }
-  .cite-input, .cite-select { flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:inherit; }
-  .cite-actions { display:flex; gap:10px; margin-top:12px; justify-content:flex-end; }
-  .cite-btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
-  .cite-btn.primary { background:#7ad2f9; color:#082033; }
-  .cite-btn.ghost { background:rgba(255,255,255,0.06); color:#d6e6ff; border:1px solid rgba(255,255,255,0.04); }
-  .cite-output { margin-top:12px; background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; font-family:system-ui, -apple-system, sans-serif; color:#eaf6ff; }
-  .cite-small { font-size:0.9rem; color:#9fb7da; margin-top:6px; }
-</style>
-
-<div class="cite-card" id="citation-tool">
-  <div class="cite-row">
-    <div class="cite-label">Style</div>
-    <select id="cite-style" class="cite-select">
-      <option value="apa">APA</option>
-      <option value="mla">MLA (9th ed.)</option>
-      <option value="chicago">Chicago (author-date)</option>
-    </select>
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">Author(s)</div>
-    <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">Date</div>
-    <input id="cite-date" class="cite-input" placeholder="e.g., 2025, May 10 or 2025" />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">Title</div>
-    <input id="cite-title" class="cite-input" placeholder="Article title (no italics markup)" />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">Source</div>
-    <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="https://..." />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Fetch metadata from URL" style="margin-left:8px;min-width:120px;">Fetch from URL</button>
-  </div>
-
-  <div class="cite-actions">
-    <button id="cite-generate" class="cite-btn primary">Generate</button>
-    <button id="cite-copy" class="cite-btn ghost">Copy</button>
-    <button id="cite-save" class="cite-btn ghost" title="Save locally">Save</button>
-    <button id="cite-load" class="cite-btn ghost" title="Load last">Load</button>
-  </div>
-
-  <div id="cite-output" class="cite-output" aria-live="polite"></div>
-  <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
-</div>
-
-<script>
-(function(){
-  const styleEl = document.getElementById('cite-style');
-  const authorEl = document.getElementById('cite-author');
-  const dateEl = document.getElementById('cite-date');
-  const titleEl = document.getElementById('cite-title');
-  const sourceEl = document.getElementById('cite-source');
-  const urlEl = document.getElementById('cite-url');
-  const outEl = document.getElementById('cite-output');
-  const fetchBtn = document.getElementById('cite-fetch-metadata');
-
-  // DEV default -> ensure this points to your Flask backend (no trailing slash)
-if (!window.fetchProxyBase) {
-    window.fetchProxyBase = 'http://localhost:8001/api/media';
-    console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
-}
-
-  const KEY = 'biasGame_citations_v1';
-
-  function safe(val, fallback='') { return (val || '').trim(); }
-
-function fmtAPA({author, date, title, source, url}) {
-  let parts = [];
-  if (author) parts.push(author);
-  if (date) parts.push(`(${date})`);
-  if (title) parts.push(title ? `<i>${title}</i>` : null);
-  if (source) parts.push(`${source}.`);
-  if (url) parts.push(url);
-  return parts.filter(Boolean).join(' ').trim();
-}
-
-function fmtMLA9({author, date, title, source, url}) {
-  let parts = [];
-  if (author) parts.push(`${author}.`);
-  if (title) parts.push(title ? `"${title}."` : null);
-  if (source) parts.push(source + ',');
-  if (date) parts.push(date + ',');
-  if (url) parts.push(url);
-  return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
-}
-
-function fmtChicago({author, date, title, source, url}) {
-  let parts = [];
-  if (author) parts.push(author);
-  if (date) parts.push(date);
-  if (title) parts.push(title ? `"${title}."` : null);
-  if (source) parts.push(source ? source + '.' : null);
-  if (url) parts.push(url);
-  return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
-}
-
-  function generate() {
-    const payload = {
-      author: safe(authorEl.value),
-      date: safe(dateEl.value),
-      title: safe(titleEl.value),
-      source: safe(sourceEl.value),
-                     url: safe(urlEl.value)
-    };
-    const style = styleEl.value;
-    let citation = '';
-    if (style === 'mla') citation = fmtMLA9(payload);
-    else if (style === 'chicago') citation = fmtChicago(payload);
-    else citation = fmtAPA(payload);
-
-    outEl.innerHTML = citation;
-    return citation;
-  }
-
-  function copyToClipboard(text) {
-    if (!navigator.clipboard) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); } catch (e) {}
-      ta.remove();
-      alert('Citation copied (fallback).');
-      return;
-    }
-    navigator.clipboard.writeText(text).catch(() => { alert('Copy failed.'); });
-  }
-
-  function save() {
-    const citation = generate();
-    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
-    saved.push({ citation, at: Date.now() });
-    localStorage.setItem(KEY, JSON.stringify(saved.slice(-50)));
-    alert('Citation saved locally.');
-  }
-
-  function loadLast() {
-    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
-    if (!saved.length) { alert('No saved citations.'); return; }
-    const last = saved[saved.length - 1];
-    outEl.innerHTML = last.citation;
-  }
-
-  async function tryFetchHtml(url) {
-    // Try direct fetch first (may fail due to CORS)
-    try {
-      const r = await fetch(url, { method: 'GET', mode: 'cors' });
-      if (r.ok) return await r.text();
-    } catch (err) {
-      console.warn('Direct fetch failed (CORS?), will try proxy', err);
-    }
-    // Fallback to AllOrigins public proxy (rate-limited). Replace with your own proxy for production.
-    try {
-      const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-      const r2 = await fetch(proxy);
-      if (r2.ok) return await r2.text();
-    } catch (err) {
-      console.warn('Proxy fetch failed', err);
-    }
-    return null;
-  }
-
-  function parseMetadataFromHtml(html, url) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const getMeta = (name, prop) => {
-      const byName = doc.querySelector(`meta[name="${name}"]`);
-      if (byName && byName.content) return byName.content;
-      const byProp = doc.querySelector(`meta[property="${prop}"]`);
-      if (byProp && byProp.content) return byProp.content;
-      const byLink = doc.querySelector(`link[rel="canonical"]`);
-      if (name === 'url' && byLink && byLink.href) return byLink.href;
-      return null;
-    };
-
-    const title = getMeta('title','og:title') || doc.querySelector('title')?.textContent || getMeta('twitter:title','twitter:title');
-    const site = getMeta('site_name','og:site_name') || (new URL(url)).hostname.replace(/^www\./,'');
-    const author = getMeta('author','article:author') || getMeta('author','og:author') || getMeta('byline','byline');
-    const published = getMeta('date','article:published_time') || getMeta('publication_date','publication_date') || getMeta('date','og:updated_time') || getMeta('pubdate','pubdate');
-
-    return { title, site, author, published, url };
-  }
-
-  // Format published timestamps into user-friendly strings for each citation style.
-  function formatPublishedDate(raw) {
-    if (!raw) return null;
-    // try parse ISO / common date strings
-    const ms = Date.parse(raw);
-    if (isNaN(ms)) {
-      return { apa: raw, mla: raw, chicago: raw };
-    }
-    const d = new Date(ms);
-    // use UTC parts to avoid timezone shifts from ISO Z strings
-    const year = d.getUTCFullYear();
-    const monthIdx = d.getUTCMonth();
-    const day = d.getUTCDate();
-    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const monthName = months[monthIdx];
-    return {
-      apa: `${year}, ${monthName} ${day}`,      // e.g. "2025, December 4"
-      mla: `${day} ${monthName} ${year}`,       // e.g. "4 December 2025"
-      chicago: `${year}`                        // Chicago author-date often uses just year for in-text
-    };
-  }
-  
-  // try server-side metadata fetch (Flask) — returns { title, author, published, site, url } or throws
-  async function fetchMetadataFromServer(targetUrl) {
-    const base = (window.fetchProxyBase || '').replace(/\/$/, '');
-    if (!base) {
-      console.warn('No fetchProxyBase set; skipping server fetch');
-      return null;
-    }
-
-    try {
-      const endpoint = `${base}/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
-      console.info('Calling server metadata endpoint:', endpoint);
-      const res = await fetch(endpoint, { method: 'GET' });
-
-      // read response body safely (JSON preferred)
-      const ct = res.headers.get('content-type') || '';
-      const body = ct.includes('application/json') ? await res.json().catch(()=>null) : await res.text().catch(()=>null);
-
-      if (!res.ok) {
-        console.warn('Server fetch_meta returned non-OK', res.status, body);
-        // show a helpful alert in dev so you know why client fell back
-        const detail = body && body.detail ? body.detail : (typeof body === 'string' ? body : JSON.stringify(body));
-        alert('Server metadata fetch failed: ' + (detail || res.status));
-        return null;
-      }
-
-      console.info('Server metadata response', body);
-      return body;
-    } catch (err) {
-      console.warn('Server metadata fetch failed (network)', err);
-      alert('Server metadata fetch network error: ' + (err && err.message ? err.message : err));
-      return null;
-    }
-  }
-
-  // try server first, then fallback to client fetch + AllOrigins proxy
-  async function fetchAndFill() {
-    const url = (urlEl.value || '').trim();
-    if (!url) { alert('Enter a URL first.'); return; }
-    fetchBtn.textContent = 'Fetching…';
-    fetchBtn.disabled = true;
-    try {
-      // server attempt
-      let meta = await fetchMetadataFromServer(url);
-
-      // client fallback
-      if (!meta) {
-        const html = await tryFetchHtml(url);
-        if (!html) {
-          alert('Failed to fetch page. CORS or proxy error. Consider enabling your Flask proxy.');
-          return;
-        }
-        meta = parseMetadataFromHtml(html, url);
-      }
-
-      if (meta.author) authorEl.value = meta.author;
-      if (meta.published) {
-        const fmt = formatPublishedDate(meta.published);
-        const style = (styleEl && styleEl.value) ? styleEl.value : 'apa';
-        dateEl.value = (fmt && fmt[style]) ? fmt[style] : meta.published;
-      }
-      if (meta.title) titleEl.value = meta.title;
-      if (meta.site) sourceEl.value = meta.site;
-      urlEl.value = meta.url || url;
-      generate();
-    } catch (err) {
-      console.warn(err);
-      alert('Error fetching metadata.');
-    } finally {
-      fetchBtn.textContent = 'Fetch from URL';
-      fetchBtn.disabled = false;
-    }
-  }
-
-  fetchBtn.addEventListener('click', fetchAndFill);
-
-// authorEl.value = '';
-// dateEl.value = '';
-// titleEl.value = '';
-// sourceEl.value = '';
-// urlEl.value = '';
-// generate();
-})();
-</script></p>
-                <p style="margin-top: 20px; font-size: 0.9rem;">
-                    (Citation form, format selector, metadata fetching, save/load functionality)
-                </p>
-            </div>
-
-            <div class="navigation-buttons">
-                <button class="nav-btn nav-btn-prev" onclick="prevSection()">
-                    ← Previous
-                </button>
-                <button class="nav-btn nav-btn-next" onclick="nextSection()">
-                    Next Section →
-                </button>
-            </div>
-        </div>
-
-        <!-- Section 3: Thesis Generator -->
-        <div class="section-container" id="section-3">
             <div class="section-header">
                 <h2 class="section-title">Thesis Generator</h2>
                 <p class="section-description">
-                    Starting your essay can be challenging. Use this AI-powered tool to 
-                    generate strong thesis statements that outline your argument effectively.
+                Starting your essay can be challenging. Use this AI-powered tool to 
+                generate strong thesis statements that outline your argument effectively.
                 </p>
             </div>
 
             <div class="content-placeholder">
                 <p>
-<style>
+                <style>
         .thesis-gen-card {
             background: linear-gradient(160deg, #856ccadd, #5b6ebce1);
             border: 1px solid rgba(255,255,255,0.08);
@@ -2914,7 +2632,338 @@ function fmtChicago({author, date, title, source, url}) {
     document.getElementById('thesis-generate').addEventListener('click', generateThesis);
     document.getElementById('thesis-clear').addEventListener('click', clearThesisForm);
 </script>
-</body></p>
+</body>
+</p>
+                <p style="margin-top: 20px; font-size: 0.9rem;">
+                </p>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn nav-btn-prev" onclick="prevSection()">
+                    ← Previous
+                </button>
+                <button class="nav-btn nav-btn-next" onclick="nextSection()">
+                    Next Section →
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 3: Citation Generator -->
+        <div class="section-container" id="section-3">
+            <div class="section-header">
+                <h2 class="section-title">Citation Generator</h2>
+                <p class="section-description">
+                    It's important to include correct citations for your work. 
+                    There are many formats including MLA, APA, and Chicago. 
+                    This tool helps you create proper citations for your sources.
+                </p>
+            </div>
+            <div class="content-placeholder">
+                <p>
+<style>
+  .cite-card { background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); color:#e6f2ff; padding:18px; border-radius:12px; margin:20px 0; }
+  .cite-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+  .cite-label { min-width:110px; font-weight:700; color:#d6e9ff; }
+  .cite-input, .cite-select { flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:inherit; }
+  .cite-actions { display:flex; gap:10px; margin-top:12px; justify-content:flex-end; }
+  .cite-btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
+  .cite-btn.primary { background:#7ad2f9; color:#082033; }
+  .cite-btn.ghost { background:rgba(255,255,255,0.06); color:#d6e6ff; border:1px solid rgba(255,255,255,0.04); }
+  .cite-output { margin-top:12px; background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; font-family:system-ui, -apple-system, sans-serif; color:#eaf6ff; }
+  .cite-small { font-size:0.9rem; color:#9fb7da; margin-top:6px; }
+</style>
+
+<div class="cite-card" id="citation-tool">
+  <div class="cite-row">
+    <div class="cite-label">Style</div>
+    <select id="cite-style" class="cite-select">
+      <option value="apa">APA</option>
+      <option value="mla">MLA (9th ed.)</option>
+      <option value="chicago">Chicago (author-date)</option>
+    </select>
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Author(s)</div>
+    <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Date</div>
+    <input id="cite-date" class="cite-input" placeholder="e.g., 2025, May 10 or 2025" />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Title</div>
+    <input id="cite-title" class="cite-input" placeholder="Article title (no italics markup)" />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">Source</div>
+    <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">URL</div>
+    <input id="cite-url" class="cite-input" placeholder="https://..." />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Fetch metadata from URL" style="margin-left:8px;min-width:120px;">Fetch from URL</button>
+  </div>
+
+  <div class="cite-actions">
+    <button id="cite-generate" class="cite-btn primary">Generate</button>
+    <button id="cite-copy" class="cite-btn ghost">Copy</button>
+    <button id="cite-save" class="cite-btn ghost" title="Save locally">Save</button>
+    <button id="cite-load" class="cite-btn ghost" title="Load last">Load</button>
+  </div>
+
+  <div id="cite-output" class="cite-output" aria-live="polite"></div>
+  <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
+</div>
+
+<script>
+(function(){
+  const styleEl = document.getElementById('cite-style');
+  const authorEl = document.getElementById('cite-author');
+  const dateEl = document.getElementById('cite-date');
+  const titleEl = document.getElementById('cite-title');
+  const sourceEl = document.getElementById('cite-source');
+  const urlEl = document.getElementById('cite-url');
+  const outEl = document.getElementById('cite-output');
+  const fetchBtn = document.getElementById('cite-fetch-metadata');
+
+  // DEV default -> ensure this points to your Flask backend (no trailing slash)
+if (!window.fetchProxyBase) {
+    window.fetchProxyBase = 'http://localhost:8001/api/media';
+    console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
+}
+
+  const KEY = 'biasGame_citations_v1';
+
+  function safe(val, fallback='') { return (val || '').trim(); }
+
+function fmtAPA({author, date, title, source, url}) {
+  let parts = [];
+  if (author) parts.push(author);
+  if (date) parts.push(`(${date})`);
+  if (title) parts.push(title ? `<i>${title}</i>` : null);
+  if (source) parts.push(`${source}.`);
+  if (url) parts.push(url);
+  return parts.filter(Boolean).join(' ').trim();
+}
+
+function fmtMLA9({author, date, title, source, url}) {
+  let parts = [];
+  if (author) parts.push(`${author}.`);
+  if (title) parts.push(title ? `"${title}."` : null);
+  if (source) parts.push(source + ',');
+  if (date) parts.push(date + ',');
+  if (url) parts.push(url);
+  return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+}
+
+function fmtChicago({author, date, title, source, url}) {
+  let parts = [];
+  if (author) parts.push(author);
+  if (date) parts.push(date);
+  if (title) parts.push(title ? `"${title}."` : null);
+  if (source) parts.push(source ? source + '.' : null);
+  if (url) parts.push(url);
+  return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+}
+
+  function generate() {
+    const payload = {
+      author: safe(authorEl.value),
+      date: safe(dateEl.value),
+      title: safe(titleEl.value),
+      source: safe(sourceEl.value),
+                     url: safe(urlEl.value)
+    };
+    const style = styleEl.value;
+    let citation = '';
+    if (style === 'mla') citation = fmtMLA9(payload);
+    else if (style === 'chicago') citation = fmtChicago(payload);
+    else citation = fmtAPA(payload);
+
+    outEl.innerHTML = citation;
+    return citation;
+  }
+
+  function copyToClipboard(text) {
+    if (!navigator.clipboard) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      alert('Citation copied (fallback).');
+      return;
+    }
+    navigator.clipboard.writeText(text).catch(() => { alert('Copy failed.'); });
+  }
+
+  function save() {
+    const citation = generate();
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    saved.push({ citation, at: Date.now() });
+    localStorage.setItem(KEY, JSON.stringify(saved.slice(-50)));
+    alert('Citation saved locally.');
+  }
+
+  function loadLast() {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (!saved.length) { alert('No saved citations.'); return; }
+    const last = saved[saved.length - 1];
+    outEl.innerHTML = last.citation;
+  }
+
+  async function tryFetchHtml(url) {
+    // Try direct fetch first (may fail due to CORS)
+    try {
+      const r = await fetch(url, { method: 'GET', mode: 'cors' });
+      if (r.ok) return await r.text();
+    } catch (err) {
+      console.warn('Direct fetch failed (CORS?), will try proxy', err);
+    }
+    // Fallback to AllOrigins public proxy (rate-limited). Replace with your own proxy for production.
+    try {
+      const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      const r2 = await fetch(proxy);
+      if (r2.ok) return await r2.text();
+    } catch (err) {
+      console.warn('Proxy fetch failed', err);
+    }
+    return null;
+  }
+
+  function parseMetadataFromHtml(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const getMeta = (name, prop) => {
+      const byName = doc.querySelector(`meta[name="${name}"]`);
+      if (byName && byName.content) return byName.content;
+      const byProp = doc.querySelector(`meta[property="${prop}"]`);
+      if (byProp && byProp.content) return byProp.content;
+      const byLink = doc.querySelector(`link[rel="canonical"]`);
+      if (name === 'url' && byLink && byLink.href) return byLink.href;
+      return null;
+    };
+
+    const title = getMeta('title','og:title') || doc.querySelector('title')?.textContent || getMeta('twitter:title','twitter:title');
+    const site = getMeta('site_name','og:site_name') || (new URL(url)).hostname.replace(/^www\./,'');
+    const author = getMeta('author','article:author') || getMeta('author','og:author') || getMeta('byline','byline');
+    const published = getMeta('date','article:published_time') || getMeta('publication_date','publication_date') || getMeta('date','og:updated_time') || getMeta('pubdate','pubdate');
+
+    return { title, site, author, published, url };
+  }
+
+  // Format published timestamps into user-friendly strings for each citation style.
+  function formatPublishedDate(raw) {
+    if (!raw) return null;
+    // try parse ISO / common date strings
+    const ms = Date.parse(raw);
+    if (isNaN(ms)) {
+      return { apa: raw, mla: raw, chicago: raw };
+    }
+    const d = new Date(ms);
+    // use UTC parts to avoid timezone shifts from ISO Z strings
+    const year = d.getUTCFullYear();
+    const monthIdx = d.getUTCMonth();
+    const day = d.getUTCDate();
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const monthName = months[monthIdx];
+    return {
+      apa: `${year}, ${monthName} ${day}`,      // e.g. "2025, December 4"
+      mla: `${day} ${monthName} ${year}`,       // e.g. "4 December 2025"
+      chicago: `${year}`                        // Chicago author-date often uses just year for in-text
+    };
+  }
+  
+  // try server-side metadata fetch (Flask) — returns { title, author, published, site, url } or throws
+  async function fetchMetadataFromServer(targetUrl) {
+    const base = (window.fetchProxyBase || '').replace(/\/$/, '');
+    if (!base) {
+      console.warn('No fetchProxyBase set; skipping server fetch');
+      return null;
+    }
+
+    try {
+      const endpoint = `${base}/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
+      console.info('Calling server metadata endpoint:', endpoint);
+      const res = await fetch(endpoint, { method: 'GET' });
+
+      // read response body safely (JSON preferred)
+      const ct = res.headers.get('content-type') || '';
+      const body = ct.includes('application/json') ? await res.json().catch(()=>null) : await res.text().catch(()=>null);
+
+      if (!res.ok) {
+        console.warn('Server fetch_meta returned non-OK', res.status, body);
+        // show a helpful alert in dev so you know why client fell back
+        const detail = body && body.detail ? body.detail : (typeof body === 'string' ? body : JSON.stringify(body));
+        alert('Server metadata fetch failed: ' + (detail || res.status));
+        return null;
+      }
+
+      console.info('Server metadata response', body);
+      return body;
+    } catch (err) {
+      console.warn('Server metadata fetch failed (network)', err);
+      alert('Server metadata fetch network error: ' + (err && err.message ? err.message : err));
+      return null;
+    }
+  }
+
+  // try server first, then fallback to client fetch + AllOrigins proxy
+  async function fetchAndFill() {
+    const url = (urlEl.value || '').trim();
+    if (!url) { alert('Enter a URL first.'); return; }
+    fetchBtn.textContent = 'Fetching…';
+    fetchBtn.disabled = true;
+    try {
+      // server attempt
+      let meta = await fetchMetadataFromServer(url);
+
+      // client fallback
+      if (!meta) {
+        const html = await tryFetchHtml(url);
+        if (!html) {
+          alert('Failed to fetch page. CORS or proxy error. Consider enabling your Flask proxy.');
+          return;
+        }
+        meta = parseMetadataFromHtml(html, url);
+      }
+
+      if (meta.author) authorEl.value = meta.author;
+      if (meta.published) {
+        const fmt = formatPublishedDate(meta.published);
+        const style = (styleEl && styleEl.value) ? styleEl.value : 'apa';
+        dateEl.value = (fmt && fmt[style]) ? fmt[style] : meta.published;
+      }
+      if (meta.title) titleEl.value = meta.title;
+      if (meta.site) sourceEl.value = meta.site;
+      urlEl.value = meta.url || url;
+      generate();
+    } catch (err) {
+      console.warn(err);
+      alert('Error fetching metadata.');
+    } finally {
+      fetchBtn.textContent = 'Fetch from URL';
+      fetchBtn.disabled = false;
+    }
+  }
+
+  fetchBtn.addEventListener('click', fetchAndFill);
+
+// authorEl.value = '';
+// dateEl.value = '';
+// titleEl.value = '';
+// sourceEl.value = '';
+// urlEl.value = '';
+// generate();
+})();
+</script>
+</p>
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
             </div>

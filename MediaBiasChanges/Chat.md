@@ -1,5 +1,5 @@
 <style>
-   .chat-container {
+    .chat-container {
       background: linear-gradient(145deg, #8568e694 0%, #586ed09f 100%);
       border-radius: 24px;
       padding: 32px;
@@ -228,223 +228,268 @@
       display: block;
     }
   </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <div class="intro-text">
-   <h2>AI Chatbox with History</h2>
-    <p>Type your question about a news source you're stuck on, choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send. You can even ask about popular shows!
-      Your conversation history is saved below!
-    </p>
+   <h2>AI Chatbox with Smart Prompts</h2>
+    <p>Type a news source to see smart prompt suggestions, or ask your own question. Choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send. Your conversation history is saved below!</p>
 </div>
-<div class="chat-container">
-    <form id="chat-form">
-      <label for="message">Your message</label>
-      <textarea id="message" placeholder="Ask a question here..." required></textarea>
 
-      <label for="mode">What do you want?</label>
-      <select id="mode">
+<div class="ai-card">
+    <h3>🎯 Source Intel Chat</h3>
+    <p>Get help analyzing news sources with AI-powered suggestions</p>
+    
+    <label>News Source (Optional)</label>
+    <textarea id="news-source" placeholder="Type a news source like 'Fox News', 'CNN', 'NBC'..." style="min-height: 60px;"></textarea>
+    
+    <!-- Smart Prompts -->
+    <div id="smart-prompts-section" style="display: none;">
+        <p class="chat-hint" style="margin: 8px 0 4px;">💡 Quick Prompts (Most Popular First)</p>
+        <div class="ai-prompts" id="smart-prompts-grid"></div>
+    </div>
+    
+    <label>Your Question</label>
+    <textarea id="ai-message" placeholder="Ask a question about this news source..." required></textarea>
+    
+    <label>What do you want?</label>
+    <select id="ai-mode" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eaf6ff; margin-bottom: 12px;">
         <option value="hint">Hint</option>
         <option value="information">Information</option>
-      </select>
-
-      <div class="actions">
-        <button type="submit" id="send-btn">Send</button>
-        <button type="button" id="clear-history-btn">Clear History</button>
-      </div>
-    </form>
-
-    <div id="status" class="status"></div>
-    <div id="response" class="response-box" style="display:none;"></div>
-
-    <div class="history-section">
-      <h3>Conversation History</h3>
-      <div class="stats" id="stats"></div>
-      <div id="history-list"></div>
+    </select>
+    
+    <div class="ai-controls">
+        <button type="button" class="ai-btn primary" id="ai-send-btn">Send</button>
+        <button type="button" class="ai-btn ghost" id="ai-clear-btn">Clear</button>
     </div>
-  </div>
+    
+    <div class="ai-status" id="ai-status"></div>
+    <div class="ai-chat-log" id="ai-chat-log" style="display: none;"></div>
+</div>
 
-  <script>
-    // ===== REQUIREMENT: LIST/COLLECTION TYPE =====
-    // This array stores all conversation history
-    let conversationHistory = [];
+<script>
+// Smart Prompts Feature
+const PROMPT_TEMPLATES = [
+    { id: 1, text: "What is the political bias of {source}?" },
+    { id: 2, text: "Show me recent top stories from {source}" },
+    { id: 3, text: "How does {source} compare to other news outlets?" },
+    { id: 4, text: "What are the most controversial topics covered by {source}?" },
+    { id: 5, text: "Is {source} a reliable news source?" }
+];
 
-    // DOM Elements
-    const form = document.getElementById('chat-form');
-    const messageInput = document.getElementById('message');
-    const modeSelect = document.getElementById('mode');
-    const statusEl = document.getElementById('status');
-    const responseEl = document.getElementById('response');
-    const sendBtn = document.getElementById('send-btn');
-    const clearHistoryBtn = document.getElementById('clear-history-btn');
-    const historyList = document.getElementById('history-list');
-    const statsEl = document.getElementById('stats');
+const PROMPTS_API_BASE = 'http://localhost:8001';
+const PROMPTS_REFRESH_INTERVAL = 5000;
+let promptsWithClicks = [];
+let currentSource = '';
+let promptRefreshTimer;
 
-    // ===== REQUIREMENT: STUDENT-DEVELOPED PROCEDURE =====
-    // Procedure name: processConversationHistory
-    // Parameters: historyArray (list), filterType (string), maxItems (number)
-    // Return type: array
-    // Purpose: Filter and process conversation history based on criteria
-    function processConversationHistory(historyArray, filterType, maxItems) {
-      // ===== ALGORITHM WITH SEQUENCING, SELECTION, AND ITERATION =====
-      
-      // SEQUENCING: Steps execute in order
-      let filteredHistory = [];
-      let hintCount = 0;
-      let infoCount = 0;
-      
-      // ITERATION: Loop through each item in history
-      for (let i = 0; i < historyArray.length; i++) {
-        let item = historyArray[i];
-        
-        // SELECTION: Conditional logic to filter and count
-        if (filterType === 'all' || item.type === filterType) {
-          filteredHistory.push(item);
+const newsSourceInput = document.getElementById('news-source');
+const smartPromptsSection = document.getElementById('smart-prompts-section');
+const smartPromptsGrid = document.getElementById('smart-prompts-grid');
+const aiMessageInput = document.getElementById('ai-message');
+const aiModeSelect = document.getElementById('ai-mode');
+const aiSendBtn = document.getElementById('ai-send-btn');
+const aiClearBtn = document.getElementById('ai-clear-btn');
+const aiStatusEl = document.getElementById('ai-status');
+const aiChatLog = document.getElementById('ai-chat-log');
+
+function havePromptClicksChanged(nextPrompts) {
+    if (promptsWithClicks.length !== nextPrompts.length) return true;
+    return nextPrompts.some(next => {
+        const existing = promptsWithClicks.find(p => p.id === next.id);
+        return !existing || existing.clicks !== next.clicks;
+    });
+}
+
+// Load prompt click data
+async function loadPromptClicks() {
+    let nextPrompts;
+    try {
+        const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/clicks`);
+        if (response.ok) {
+            const data = await response.json();
+            nextPrompts = PROMPT_TEMPLATES.map(prompt => ({
+                ...prompt,
+                clicks: data[prompt.id] || 0
+            }));
+        } else {
+            nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
         }
-        
-        // Count different types
-        if (item.type === 'hint') {
-          hintCount++;
-        } else if (item.type === 'information') {
-          infoCount++;
-        }
-        
-        // SELECTION: Stop if we've reached maxItems
-        if (filteredHistory.length >= maxItems) {
-          break;
-        }
-      }
-      
-      // Return processed data
-      return {
-        filtered: filteredHistory,
-        stats: {
-          total: historyArray.length,
-          hints: hintCount,
-          information: infoCount
-        }
-      };
+    } catch (error) {
+        console.warn('Could not load prompt clicks:', error);
+        nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
     }
 
-    // Helper procedure to add item to history
-    function addToHistory(question, answer, type) {
-      const timestamp = new Date().toLocaleString();
-      conversationHistory.push({
-        question: question,
-        answer: answer,
-        type: type,
-        timestamp: timestamp
-      });
-      
-      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
-      updateHistoryDisplay();
-    }
+    const changed = havePromptClicksChanged(nextPrompts);
+    promptsWithClicks = nextPrompts;
+    return changed;
+}
 
-    // Display history using our procedure
-    function updateHistoryDisplay() {
-      // ===== REQUIREMENT: CALLS TO PROCEDURE =====
-      // Call our student-developed procedure
-      const result = processConversationHistory(conversationHistory, 'all', 50);
-      
-      // Update statistics
-      statsEl.textContent = `Total conversations: ${result.stats.total} | Hints: ${result.stats.hints} | Information: ${result.stats.information}`;
-      
-      // Display filtered history
-      if (result.filtered.length === 0) {
-        historyList.innerHTML = '<p style="color: #999;">No conversation history yet. Start chatting!</p>';
+// Render prompts sorted by popularity
+function renderSmartPrompts(source) {
+    const trimmedSource = (source || '').trim();
+    if (!trimmedSource || trimmedSource.length < 2) {
+        currentSource = '';
+        smartPromptsSection.style.display = 'none';
         return;
-      }
-      
-      historyList.innerHTML = '';
-      
-      // Show most recent first
-      for (let i = result.filtered.length - 1; i >= 0; i--) {
-        const item = result.filtered[i];
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item';
-        historyItem.innerHTML = `
-          <div class="history-question">Q: ${item.question}</div>
-          <div class="history-type">${item.type === 'hint' ? '💡 Hint' : '📚 Information'} - ${item.timestamp}</div>
-          <div class="history-answer">${item.answer}</div>
-        `;
-        historyList.appendChild(historyItem);
-      }
     }
 
-    // Show status message
-    function showStatus(message, type) {
-      statusEl.textContent = message;
-      statusEl.className = `status ${type} show`;
+    currentSource = trimmedSource;
+    const sorted = [...promptsWithClicks].sort((a, b) => b.clicks - a.clicks);
+    smartPromptsGrid.innerHTML = '';
+    
+    sorted.forEach(prompt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ai-prompt-btn';
+        
+        const promptText = prompt.text.replace('{source}', trimmedSource);
+        btn.innerHTML = `<span style="flex: 1;">${promptText}</span> <span style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;">${prompt.clicks}</span>`;
+        
+        btn.addEventListener('click', () => handlePromptClick(prompt, trimmedSource));
+        smartPromptsGrid.appendChild(btn);
+    });
+
+    smartPromptsSection.style.display = 'block';
+}
+
+// Handle prompt click
+async function handlePromptClick(prompt, source) {
+    const filledPrompt = prompt.text.replace('{source}', source);
+    aiMessageInput.value = filledPrompt;
+
+    try {
+        const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/${prompt.id}/click`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const localPrompt = promptsWithClicks.find(p => p.id === prompt.id);
+            if (localPrompt) localPrompt.clicks = data.clicks;
+            renderSmartPrompts(source);
+        }
+    } catch (error) {
+        console.error('Failed to increment click count:', error);
     }
 
-    // Form submission handler
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+    aiMessageInput.focus();
+}
 
-      const message = messageInput.value.trim();
-      const mode = modeSelect.value;
+// Listen for news source input
+let debounceTimeout;
+if (newsSourceInput) {
+    newsSourceInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimeout);
+        const source = e.target.value.trim();
+        debounceTimeout = setTimeout(() => renderSmartPrompts(source), 300);
+    });
+}
 
-      if (!message) {
-        showStatus('Please enter a message.', 'error');
+async function refreshPromptsFromServer() {
+    const changed = await loadPromptClicks();
+    if (changed && currentSource) {
+        renderSmartPrompts(currentSource);
+    }
+}
+
+function startPromptLiveUpdates() {
+    clearInterval(promptRefreshTimer);
+    promptRefreshTimer = setInterval(refreshPromptsFromServer, PROMPTS_REFRESH_INTERVAL);
+}
+
+// Show status
+function showAIStatus(message, isError = false) {
+    aiStatusEl.textContent = message;
+    aiStatusEl.style.display = 'block';
+    aiStatusEl.style.background = isError ? 'rgba(248, 113, 113, 0.15)' : 'rgba(122, 210, 249, 0.15)';
+    aiStatusEl.style.border = isError ? '1px solid rgba(248, 113, 113, 0.3)' : '1px solid rgba(122, 210, 249, 0.3)';
+    aiStatusEl.style.color = isError ? '#fca5a5' : '#7ad2f9';
+}
+
+// Send message
+aiSendBtn.addEventListener('click', async () => {
+    const message = aiMessageInput.value.trim();
+    const mode = aiModeSelect.value;
+
+    if (!message) {
+        showAIStatus('Please enter a message', true);
         return;
-      }
+    }
 
-      sendBtn.disabled = true;
-      showStatus('Thinking...', 'info');
-      responseEl.style.display = 'none';
-
-      try {
-        const backendUrl = 'http://localhost:8001/api/chat';
-
-        const res = await fetch(backendUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            type: mode,
-            message: message
-          })
+    aiSendBtn.disabled = true;
+    aiSendBtn.textContent = 'Thinking...';
+    showAIStatus('Processing your request...');
+    
+    try {
+        const response = await fetch('http://localhost:8001/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: mode, message: message })
         });
 
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || `Server error: ${res.status}`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Server error: ${response.status}`);
         }
 
-        const data = await res.json();
+        const data = await response.json();
+        
+        // Add to chat log
+        const userBubble = document.createElement('div');
+        userBubble.className = 'chat-bubble user';
+        userBubble.textContent = `You: ${message}`;
+        
+        const aiBubble = document.createElement('div');
+        aiBubble.className = 'chat-bubble ai';
+        aiBubble.innerHTML = `<strong>${data.type === 'hint' ? '💡 Hint' : '📚 Info'}:</strong> ${data.answer}`;
+        
+        aiChatLog.appendChild(userBubble);
+        aiChatLog.appendChild(aiBubble);
+        aiChatLog.style.display = 'block';
+        aiChatLog.scrollTop = aiChatLog.scrollHeight;
+        
+        showAIStatus('Response received!');
+        aiMessageInput.value = '';
+        
+        setTimeout(() => {
+            aiStatusEl.style.display = 'none';
+        }, 2000);
+        
+    } catch (error) {
+        console.error(error);
+        showAIStatus('Error: ' + error.message, true);
+    } finally {
+        aiSendBtn.disabled = false;
+        aiSendBtn.textContent = 'Send';
+    }
+});
 
-        showStatus('Response received!', 'success');
+// Clear chat
+aiClearBtn.addEventListener('click', () => {
+    if (confirm('Clear conversation history?')) {
+        aiChatLog.innerHTML = '';
+        aiChatLog.style.display = 'none';
+        aiMessageInput.value = '';
+        newsSourceInput.value = '';
+        smartPromptsSection.style.display = 'none';
+        currentSource = '';
+        showAIStatus('Chat cleared');
+        setTimeout(() => {
+            aiStatusEl.style.display = 'none';
+        }, 2000);
+    }
+});
 
-        if (data.answer) {
-          responseEl.style.display = 'block';
-          responseEl.innerHTML = `
-            <div class="label">${data.type === 'hint' ? '💡 Hint:' : '📚 Information:'}</div>
-            <div class="answer">${data.answer}</div>
-          `;
-          
-          // Add to history
-          addToHistory(message, data.answer, data.type);
-          
-          // Clear input
-          messageInput.value = '';
+// Initialize
+loadPromptClicks()
+    .then(() => {
+        const prefilledSource = newsSourceInput?.value?.trim();
+        if (prefilledSource) {
+            renderSmartPrompts(prefilledSource);
         }
-
-      } catch (err) {
-        console.error(err);
-        showStatus('Error: ' + err.message, 'error');
-        responseEl.style.display = 'none';
-      } finally {
-        sendBtn.disabled = false;
-      }
+    })
+    .finally(() => {
+        startPromptLiveUpdates();
     });
-
-    // Clear history button
-    clearHistoryBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to clear all conversation history?')) {
-        conversationHistory = [];
-        updateHistoryDisplay();
-        showStatus('History cleared!', 'success');
-      }
-    });
-
-    // Initialize display
-    updateHistoryDisplay();
-  </script>
+</script>

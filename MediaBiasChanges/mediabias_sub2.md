@@ -2030,6 +2030,21 @@ async function submitFinalTime(username, elapsed) {
     background: rgba(248, 113, 113, 1);
     transform: translateY(-50%) scale(1.1);
   }
+
+  .cite-input.missing {
+  border: 2px solid #f87171 !important;
+  background: rgba(248, 113, 113, 0.2) !important;
+}
+
+.cite-warning {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(248, 113, 113, 0.15);
+  color: #fff;
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+}
 </style>
 
 <div class="intro-text">
@@ -2089,6 +2104,7 @@ async function submitFinalTime(username, elapsed) {
   </div>
 
   <div id="cite-output" class="cite-output" aria-live="polite"></div>
+  <div id="cite-warning" class="cite-warning" style="display:none;"></div>
   <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
 
   <div class="works-cited-section" id="works-cited-section" style="display: none;">
@@ -2213,22 +2229,54 @@ async function submitFinalTime(username, elapsed) {
 
   // OUTPUT: Generate and display citation
   function generate() {
-    const payload = {
-      author: safe(authorEl.value),
-      date: safe(dateEl.value),
-      title: safe(titleEl.value),
-      source: safe(sourceEl.value),
-      url: safe(urlEl.value)
-    };
-    const style = styleEl.value;
-    let citation = '';
-    if (style === 'mla') citation = fmtMLA9(payload);
-    else if (style === 'chicago') citation = fmtChicago(payload);
-    else citation = fmtAPA(payload);
+  const payload = {
+    author: safe(authorEl.value),
+    date: safe(dateEl.value),
+    title: safe(titleEl.value),
+    source: safe(sourceEl.value),
+    url: safe(urlEl.value)
+  };
 
-    outEl.innerHTML = citation;
-    return citation;
+  const missing = [];
+  const fields = [
+    { el: authorEl, key: 'author', label: 'Author' },
+    { el: titleEl, key: 'title', label: 'Title' },
+    { el: sourceEl, key: 'source', label: 'Source / Website' },
+    { el: dateEl, key: 'date', label: 'Publication Date' }
+  ];
+
+  // Reset previous highlights
+  fields.forEach(f => f.el.classList.remove('missing'));
+
+  // Detect missing fields
+  fields.forEach(f => {
+    if (!payload[f.key]) {
+      missing.push(f.label);
+      f.el.classList.add('missing');
+    }
+  });
+
+  const style = styleEl.value;
+  let citation = '';
+  if (style === 'mla') citation = fmtMLA9(payload);
+  else if (style === 'chicago') citation = fmtChicago(payload);
+  else citation = fmtAPA(payload);
+
+  outEl.innerHTML = citation;
+
+  // Warning message
+  const warningEl = document.getElementById('cite-warning');
+  if (missing.length > 0) {
+    warningEl.innerHTML =
+      `⚠️ Missing citation info: <b>${missing.join(', ')}</b><br>
+       Please manually enter these fields for a complete citation.`;
+    warningEl.style.display = 'block';
+  } else {
+    warningEl.style.display = 'none';
   }
+
+  return citation;
+}
 
   // OUTPUT: Copy to clipboard (tactile/visual feedback)
   function copyToClipboard(text) {

@@ -2193,6 +2193,45 @@ async function submitFinalTime(username, elapsed) {
       console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
   }
 
+  // ===== CROSS-CHECK FORMATTING =====
+function validateCitationFields() {
+  const style = styleEl.value;
+  const warnings = [];
+
+  // Basic checks for missing required fields
+  if (!authorEl.value.trim()) warnings.push('Author is missing');
+  if (!titleEl.value.trim()) warnings.push('Title is missing');
+  if (!sourceEl.value.trim()) warnings.push('Source is missing');
+  if (!dateEl.value.trim()) warnings.push('Date is missing');
+
+  // Style-specific checks
+  if (style === 'apa' && dateEl.value && !/\d{4}/.test(dateEl.value)) {
+    warnings.push('APA date should include a year (YYYY)');
+  }
+  if (style === 'mla' && dateEl.value && !/\d{4}/.test(dateEl.value)) {
+    warnings.push('MLA date should include a year (YYYY)');
+  }
+  if (style === 'chicago' && dateEl.value && !/\d{4}/.test(dateEl.value)) {
+    warnings.push('Chicago date should include a year (YYYY)');
+  }
+
+  // Display warnings
+  const warningEl = document.getElementById('cite-warning');
+  if (warnings.length) {
+    warningEl.innerHTML = `⚠️ Formatting issues:<br><b>${warnings.join('<br>')}</b>`;
+    warningEl.style.display = 'block';
+  } else {
+    warningEl.style.display = 'none';
+  }
+}
+
+// Run validation whenever an input or style changes
+[authorEl, titleEl, sourceEl, dateEl, urlEl, styleEl].forEach(el => {
+  el.addEventListener('input', validateCitationFields);
+});
+styleEl.addEventListener('change', validateCitationFields);
+
+
   // ===== AUTO-SAVE LAST SESSION =====
 const SESSION_KEY = 'biasGame_lastSession';
 

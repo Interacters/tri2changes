@@ -293,12 +293,12 @@ date: 2025-12-12
                 
                 <div class="step" data-step="2">
                     <div class="step-circle">2</div>
-                    <div class="step-label">Citation Generator</div>
+                    <div class="step-label">Thesis Generator</div>
                 </div>
                 
                 <div class="step" data-step="3">
                     <div class="step-circle">3</div>
-                    <div class="step-label">Thesis Generator</div>
+                    <div class="step-label">Citation Generator</div>
                 </div>
                 
                 <div class="step" data-step="4">

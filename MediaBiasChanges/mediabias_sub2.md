@@ -2104,6 +2104,7 @@ async function submitFinalTime(username, elapsed) {
   </div>
 
   <div id="cite-output" class="cite-output" aria-live="polite"></div>
+  <div id="cite-parenthetical" class="cite-output" style="margin-top:8px;"></div>
   <div id="cite-warning" class="cite-warning" style="display:none;"></div>
   <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
 
@@ -2226,7 +2227,28 @@ async function submitFinalTime(username, elapsed) {
     if (url) parts.push(url);
     return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
   }
+function buildParenthetical({ author, title, date }) {
+  let year = '';
 
+  if (date) {
+    const match = date.match(/\d{4}/);
+    if (match) year = match[0];
+  }
+
+  // Extract last name if possible
+  if (author) {
+    const last = author.split(',')[0].trim();
+    return year ? `(${last}, ${year})` : `(${last})`;
+  }
+
+  // Fallback to shortened title
+  if (title) {
+    const shortTitle = title.split(' ').slice(0, 3).join(' ');
+    return year ? `("${shortTitle}…", ${year})` : `("${shortTitle}…")`;
+  }
+
+  return '';
+}
   // OUTPUT: Generate and display citation
   function generate() {
   const payload = {
@@ -2261,8 +2283,17 @@ async function submitFinalTime(username, elapsed) {
   if (style === 'mla') citation = fmtMLA9(payload);
   else if (style === 'chicago') citation = fmtChicago(payload);
   else citation = fmtAPA(payload);
+  
+outEl.innerHTML = citation;
 
-  outEl.innerHTML = citation;
+const parentheticalEl = document.getElementById('cite-parenthetical');
+const parenthetical = buildParenthetical(payload);
+
+if (parentheticalEl) {
+  parentheticalEl.innerHTML = parenthetical
+    ? `<b>Parenthetical citation:</b> ${parenthetical}`
+    : '';
+}
 
   // Warning message
   const warningEl = document.getElementById('cite-warning');

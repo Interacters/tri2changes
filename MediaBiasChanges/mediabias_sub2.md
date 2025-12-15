@@ -2193,6 +2193,35 @@ async function submitFinalTime(username, elapsed) {
       console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
   }
 
+  // ===== AUTO-SAVE LAST SESSION =====
+const SESSION_KEY = 'biasGame_lastSession';
+
+// Load last session on page load
+const lastSession = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+if (lastSession) {
+  if (lastSession.author) authorEl.value = lastSession.author;
+  if (lastSession.title) titleEl.value = lastSession.title;
+  if (lastSession.source) sourceEl.value = lastSession.source;
+  if (lastSession.date) dateEl.value = lastSession.date;
+  if (lastSession.url) urlEl.value = lastSession.url;
+  if (lastSession.style) styleEl.value = lastSession.style;
+  generate();
+}
+
+// Save session whenever inputs change
+[authorEl, titleEl, sourceEl, dateEl, urlEl, styleEl].forEach(el => {
+  el.addEventListener('input', () => {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      author: authorEl.value,
+      title: titleEl.value,
+      source: sourceEl.value,
+      date: dateEl.value,
+      url: urlEl.value,
+      style: styleEl.value
+    }));
+  });
+});
+
   // LIST: Storage key for citation collection
   const KEY = 'biasGame_citations_v1';
 

@@ -2957,6 +2957,7 @@ function fmtChicago({author, date, title, source, url}) {
             box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
+            margin: 0 auto 40px;
         }
 
         .survey-container::before {
@@ -2983,7 +2984,7 @@ function fmtChicago({author, date, title, source, url}) {
 
         .survey-header h2 {
             font-size: 2.5rem;
-            background: #fff
+            background: #fff;
             background-clip: text;
             margin-bottom: 15px;
             font-weight: 800;
@@ -3192,7 +3193,7 @@ function fmtChicago({author, date, title, source, url}) {
         }
 
         .modal-content {
-            background: #9281b3ff
+            background: #9281b3ff;
             margin: 3% auto;
             padding: 50px;
             border-radius: 30px;
@@ -3370,6 +3371,100 @@ function fmtChicago({author, date, title, source, url}) {
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
+        /* Admin View Styles */
+        .admin-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 30px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 40px auto;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
+        }
+
+        .admin-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .admin-header h2 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .ratings-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .ratings-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .ratings-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+        }
+
+        .ratings-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .rating-1 { background: #fee; color: #c53030; }
+        .rating-2 { background: #fef5e7; color: #d97706; }
+        .rating-3 { background: #fef3c7; color: #b45309; }
+        .rating-4 { background: #e0f2fe; color: #0369a1; }
+        .rating-5 { background: #d1fae5; color: #047857; }
+
+        .timestamp {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .username-link {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .username-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
         @media (max-width: 768px) {
             .survey-container {
                 padding: 40px 30px;
@@ -3396,10 +3491,27 @@ function fmtChicago({author, date, title, source, url}) {
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .admin-container {
+                padding: 20px;
+            }
+
+            .ratings-table {
+                font-size: 0.85rem;
+            }
+
+            .ratings-table th,
+            .ratings-table td {
+                padding: 10px;
+            }
         }
     </style>
 <body>
     <div class="survey-container">
+        <div class="survey-header">
+            <h2>Performance Reflection</h2>
+            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+        </div>
 
         <form id="survey-form">
             <div class="rating-grid">
@@ -3475,7 +3587,30 @@ function fmtChicago({author, date, title, source, url}) {
         </div>
     </div>
 
+    <!-- Admin View (visible to admins only) -->
+    <div class="admin-container" id="admin-section" style="display: none;">
+        <div class="admin-header">
+            <h2>📊 All Performance Ratings</h2>
+        </div>
+
+        <div class="admin-stats-grid" id="admin-stats-grid"></div>
+
+        <table class="ratings-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Rating</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="ratings-tbody"></tbody>
+        </table>
+    </div>
+
     <script>
+        const API_BASE = 'http://localhost:8001/api';
+
         const resourcesByTier = {
             1: {
                 title: 'Building Foundations',
@@ -3535,6 +3670,112 @@ function fmtChicago({author, date, title, source, url}) {
             }
         };
 
+        // Check if user is authenticated and get their role
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/id`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    return userData;
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+            return null;
+        }
+
+        // Load all performances (admin only)
+        async function loadAllPerformances() {
+            try {
+                const response = await fetch(`${API_BASE}/performance`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const performances = await response.json();
+                    displayAllPerformances(performances);
+                    displayAdminStats(performances);
+                }
+            } catch (error) {
+                console.error('Failed to load performances:', error);
+            }
+        }
+
+        // Display all performances in table
+        function displayAllPerformances(performances) {
+            const tbody = document.getElementById('ratings-tbody');
+            tbody.innerHTML = '';
+
+            performances.reverse().forEach(perf => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${perf.id}</td>
+                    <td><span class="username-link" onclick="showUserInfo(${perf.user_id}, '${perf.username}')">${perf.username || 'Guest'}</span></td>
+                    <td><span class="rating-badge rating-${perf.rating}">${perf.rating}/5</span></td>
+                    <td class="timestamp">${new Date(perf.timestamp).toLocaleString()}</td>
+                `;
+            });
+        }
+
+        // Display admin statistics
+        function displayAdminStats(performances) {
+            const statsGrid = document.getElementById('admin-stats-grid');
+            
+            const total = performances.length;
+            const average = total > 0 
+                ? (performances.reduce((sum, p) => sum + p.rating, 0) / total).toFixed(1)
+                : 0;
+            
+            const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            performances.forEach(p => distribution[p.rating]++);
+            const mostCommon = Object.entries(distribution)
+                .sort((a, b) => b[1] - a[1])[0][0];
+
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${total}</div>
+                    <div class="stat-label">Total Ratings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${average}</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${mostCommon}</div>
+                    <div class="stat-label">Most Common</div>
+                </div>
+            `;
+        }
+
+        // Show user info when clicking username
+        window.showUserInfo = async function(userId, username) {
+            try {
+                const response = await fetch(`${API_BASE}/performance/user/${userId}`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const userPerfs = await response.json();
+                    const totalRatings = userPerfs.length;
+                    const avgRating = totalRatings > 0 
+                        ? (userPerfs.reduce((sum, p) => sum + p.rating, 0) / totalRatings).toFixed(1)
+                        : 0;
+                    
+                    const ratings = userPerfs.map(p => p.rating).join(', ');
+                    
+                    alert(`User: ${username}\nUser ID: ${userId}\n\nTotal Ratings: ${totalRatings}\nAverage Rating: ${avgRating}\nAll Ratings: ${ratings || 'None'}`);
+                } else {
+                    alert(`User: ${username}\nUser ID: ${userId}\n\nCould not load rating history.`);
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                alert(`User: ${username}\nUser ID: ${userId}\n\nError loading rating history.`);
+            }
+        }
+
         document.getElementById('survey-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -3549,9 +3790,10 @@ function fmtChicago({author, date, title, source, url}) {
             submitBtn.innerHTML = '<div class="loading"></div>';
 
             try {
-                const response = await fetch('http://localhost:8001/api/performance/submit', {
+                const response = await fetch(`${API_BASE}/performance/submit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ rating: parseInt(rating.value) })
                 });
                 
@@ -3559,11 +3801,16 @@ function fmtChicago({author, date, title, source, url}) {
                 
                 if (response.ok) {
                     showResults(data);
+                    
+                    // Reload admin view if visible
+                    if (document.getElementById('admin-section').style.display !== 'none') {
+                        loadAllPerformances();
+                    }
                 } else {
                     alert('Error: ' + (data.error || 'Unknown error occurred'));
                 }
             } catch (error) {
-                alert('Failed to submit. Please ensure your Flask server is running on port 8001.');
+                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8001.');
                 console.error(error);
             } finally {
                 submitBtn.disabled = false;
@@ -3615,6 +3862,23 @@ function fmtChicago({author, date, title, source, url}) {
                 closeModal();
             }
         }
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', async () => {
+            const user = await checkAuth();
+            
+            if (user) {
+                console.log('User logged in:', user.uid, 'Role:', user.role);
+                
+                // Show admin section if user is admin
+                if (user.role === 'Admin') {
+                    document.getElementById('admin-section').style.display = 'block';
+                    loadAllPerformances();
+                }
+            } else {
+                console.log('No user logged in');
+            }
+        });
     </script>
 </body>
 </p>

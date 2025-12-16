@@ -2101,6 +2101,10 @@ async function submitFinalTime(username, elapsed) {
     <button id="cite-load" class="cite-btn ghost" title="Load last">
       Load <span class="btn-hint">(view Works Cited)</span>
     </button>
+    <button id="cite-reset" class="cite-btn ghost">
+    Reset Fields
+</button>
+
   </div>
 
   <div id="cite-output" class="cite-output" aria-live="polite"></div>
@@ -2609,6 +2613,20 @@ if (parentheticalEl) {
   // INPUT: Event listeners for user actions
   fetchBtn.addEventListener('click', fetchAndFill);
   generateBtn.addEventListener('click', generate);
+  const resetBtn = document.getElementById('cite-reset');
+
+resetBtn.addEventListener('click', () => {
+  // Clear all input fields
+  [authorEl, dateEl, titleEl, sourceEl, urlEl].forEach(el => el.value = '');
+  
+  // Clear outputs
+  outEl.innerHTML = '';
+  document.getElementById('cite-parenthetical').innerHTML = '';
+  document.getElementById('cite-warning').style.display = 'none';
+  
+  // Remove missing highlights
+  [authorEl, dateEl, titleEl, sourceEl].forEach(el => el.classList.remove('missing'));
+});
   copyBtn.addEventListener('click', () => {
     const citation = outEl.innerHTML;
     if (!citation || citation === 'Your citation will appear here...') {

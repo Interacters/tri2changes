@@ -3721,7 +3721,7 @@ if (parentheticalEl) {
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(113, 117, 193, 0.82);
             backdrop-filter: blur(8px);
             animation: fadeIn 0.3s ease-out;
             overflow-y: auto;
@@ -3865,7 +3865,7 @@ if (parentheticalEl) {
         .resource-item {
             padding: 15px 20px;
             margin-bottom: 10px;
-            background: white;
+            background: #6768a3ff;
             border-radius: 10px;
             border-left: 4px solid #667eea;
             transition: all 0.3s;

@@ -3721,7 +3721,7 @@ if (parentheticalEl) {
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(113, 117, 193, 0.82);
+            background: #31285cbc;
             backdrop-filter: blur(8px);
             animation: fadeIn 0.3s ease-out;
             overflow-y: auto;

@@ -467,7 +467,7 @@ body {
 }
 
 .btn-ghost {
-    background: rgba(5, 0, 0, 0.5);
+    background: rgb(255 255 255 / 29%);
     color: #2c5282;
 }
 

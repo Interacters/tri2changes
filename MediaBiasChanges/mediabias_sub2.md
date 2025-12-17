@@ -2371,28 +2371,69 @@ function fmtChicago({ author, date, title, source, url }) {
   return parts.join(' ').replace(/\s+/g, ' ').trim();
 }
 
-function buildParenthetical({ author, title, date }) {
+function buildParenthetical({ author, title, date, style = 'apa' }) {
+  // Extract year if possible
   let year = '';
-
   if (date) {
     const match = date.match(/\d{4}/);
     if (match) year = match[0];
   }
 
-  // Extract last name if possible
-  if (author) {
-    const last = author.split(',')[0].trim();
-    return year ? `(${last}, ${year})` : `(${last})`;
+  // Short title for no-author cases
+  const shortTitle = title
+    ? title.split(' ').slice(0, 3).join(' ')
+    : '';
+
+  // ---- MLA parenthetical
+  if (style === 'mla') {
+    if (author) {
+      // MLA: only author last name
+      const last = author.split(',')[0].trim();
+      return `(${last})`;
+    }
+    if (shortTitle) {
+      // MLA: shortened title in quotes (no year)
+      return `("${shortTitle}…")`;
+    }
+    return '';
   }
 
-  // Fallback to shortened title
-  if (title) {
-    const shortTitle = title.split(' ').slice(0, 3).join(' ');
-    return year ? `("${shortTitle}…", ${year})` : `("${shortTitle}…")`;
+  // ---- APA parenthetical
+  if (style === 'apa') {
+    if (author) {
+      const last = author.split(',')[0].trim();
+      // APA: (Author, Year)
+      return year ? `(${last}, ${year})` : `(${last})`;
+    }
+    if (shortTitle) {
+      // APA: (Short Title, Year) if no author
+      return year
+        ? `(${shortTitle}, ${year})`
+        : `(${shortTitle})`;
+    }
+    return '';
   }
 
+  // ---- Chicago (author-date) parenthetical
+  if (style === 'chicago') {
+    if (author) {
+      const last = author.split(',')[0].trim();
+      // Chicago: (Author Year) — **no comma**
+      return year ? `(${last} ${year})` : `(${last})`;
+    }
+    if (shortTitle) {
+      // Chicago: (Short Title Year) — no comma
+      return year
+        ? `(${shortTitle} ${year})`
+        : `(${shortTitle})`;
+    }
+    return '';
+  }
+
+  // Default fallback
   return '';
 }
+
   // OUTPUT: Generate and display citation
   function generate() {
   const payload = {
@@ -2422,16 +2463,18 @@ function buildParenthetical({ author, title, date }) {
     }
   });
 
-  const style = styleEl.value;
-  let citation = '';
-  if (style === 'mla') citation = fmtMLA9(payload);
-  else if (style === 'chicago') citation = fmtChicago(payload);
-  else citation = fmtAPA(payload);
-  
+const style = styleEl.value; // 'apa', 'mla', or 'chicago'
+
+let citation = '';
+if (style === 'mla') citation = fmtMLA9(payload);
+else if (style === 'chicago') citation = fmtChicago(payload);
+else citation = fmtAPA(payload);
+
 outEl.innerHTML = citation;
 
+// Pass style to buildParenthetical!
 const parentheticalEl = document.getElementById('cite-parenthetical');
-const parenthetical = buildParenthetical(payload);
+const parenthetical = buildParenthetical({ ...payload, style });
 
 if (parentheticalEl) {
   parentheticalEl.innerHTML = parenthetical

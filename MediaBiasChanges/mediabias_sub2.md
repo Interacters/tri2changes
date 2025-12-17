@@ -2073,7 +2073,7 @@ async function submitFinalTime(username, elapsed) {
 
   <div class="cite-row">
     <div class="cite-label">Title</div>
-    <input id="cite-title" class="cite-input" placeholder="Article title (no italics markup)" />
+    <input id="cite-title" class="cite-input" placeholder="Article title" />
   </div>
 
   <div class="cite-row">

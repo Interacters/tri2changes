@@ -1837,7 +1837,6 @@ async function submitFinalTime(username, elapsed) {
     };
 </script>
 
-<!-- Citation Generator -->
 <style>
   /* Import modern, readable font matching thesis generator */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -2101,10 +2100,6 @@ async function submitFinalTime(username, elapsed) {
     <button id="cite-load" class="cite-btn ghost" title="Load last">
       Load <span class="btn-hint">(view Works Cited)</span>
     </button>
-    <button id="cite-reset" class="cite-btn ghost">
-    Reset Fields
-</button>
-
   </div>
 
   <div id="cite-output" class="cite-output" aria-live="polite"></div>
@@ -2270,104 +2265,35 @@ if (lastSession) {
 
   function safe(val, fallback='') { return (val || '').trim(); }
 
-  // FIXED APA FORMAT
-  function fmtAPA({ author, date, title, source, url }) {
-    // APA Format: Author. (Date). Title. Source. URL
-    // If no author, start with Title. (Date). then rest
+  function fmtAPA({author, date, title, source, url}) {
     let parts = [];
-
-    if (author) {
-      parts.push(author + '.');
-      if (date) {
-        parts.push(`(${date}).`);
-      }
-      if (title) {
-        parts.push(title + '.');
-      }
-    } else {
-      // No author: Title. (Date). Source. URL
-      if (title) {
-        parts.push(title + '.');
-      }
-      if (date) {
-        parts.push(`(${date}).`);
-      }
-    }
-    
-    if (source) {
-      parts.push(`<i>${source}</i>.`);
-    }
-    
-    if (url) {
-      parts.push(url);
-    }
-
-    return parts.join(' ').trim();
+    if (author) parts.push(author);
+    if (date) parts.push(`(${date})`);
+    if (title) parts.push(title ? `<i>${title}</i>` : null);
+    if (source) parts.push(`${source}.`);
+    if (url) parts.push(url);
+    return parts.filter(Boolean).join(' ').trim();
   }
 
-  // FIXED MLA 9TH EDITION FORMAT
   function fmtMLA9({author, date, title, source, url}) {
-    // Author. "Title." Source, Date, URL.
     let parts = [];
-    
-    if (author) {
-      parts.push(author + '.');
-    }
-    
-    if (title) {
-      parts.push(`"${title}."`);
-    }
-    
-    if (source) {
-      parts.push(`<i>${source}</i>,`);
-    }
-    
-    if (date) {
-      parts.push(date + ',');
-    }
-    
-    if (url) {
-      parts.push(url + '.');
-    }
-    
-    return parts.join(' ').replace(/\s+/g,' ').trim();
+    if (author) parts.push(`${author}.`);
+    if (title) parts.push(title ? `"${title}."` : null);
+    if (source) parts.push(source + ',');
+    if (date) parts.push(date + ',');
+    if (url) parts.push(url);
+    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
   }
 
-  // FIXED CHICAGO FORMAT
   function fmtChicago({author, date, title, source, url}) {
-    // Chicago Format: Author. (Date). "Title." Source. URL.
-    // If no author, start with "Title." (Date). then rest
     let parts = [];
-    
-    if (author) {
-      parts.push(author + '.');
-      if (date) {
-        parts.push(`(${date}).`);
-      }
-      if (title) {
-        parts.push(`"${title}."`);
-      }
-    } else {
-      // No author: "Title." (Date). Source. URL.
-      if (title) {
-        parts.push(`"${title}."`);
-      }
-      if (date) {
-        parts.push(`(${date}).`);
-      }
-    }
-    
-    if (source) {
-      parts.push(`<i>${source}</i>.`);
-    }
-    
-    if (url) {
-      parts.push(url);
-    }
-    
-    return parts.join(' ').replace(/\s+/g,' ').trim();
+    if (author) parts.push(author);
+    if (date) parts.push(date);
+    if (title) parts.push(title ? `"${title}."` : null);
+    if (source) parts.push(source ? source + '.' : null);
+    if (url) parts.push(url);
+    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
   }
-
 function buildParenthetical({ author, title, date }) {
   let year = '';
 
@@ -2576,14 +2502,6 @@ if (parentheticalEl) {
   function parseMetadataFromHtml(html, url) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    
-    // Check if we got a Cloudflare "Just a moment" page or similar blocking page
-    const bodyText = doc.body?.textContent?.toLowerCase() || '';
-    if (bodyText.includes('just a moment') || bodyText.includes('checking your browser') || bodyText.includes('please wait')) {
-      console.warn('Detected blocking page (Cloudflare/security check)');
-      return { title: null, site: null, author: null, published: null, url };
-    }
-    
     const getMeta = (name, prop) => {
       const byName = doc.querySelector(`meta[name="${name}"]`);
       if (byName && byName.content) return byName.content;
@@ -2649,7 +2567,7 @@ if (parentheticalEl) {
     }
   }
 
-  // INPUT: Process URL and fetch metadata - FIXED TO CLEAR OLD DATA
+  // INPUT: Process URL and fetch metadata
   async function fetchAndFill() {
     const url = (urlEl.value || '').trim();
     if (!url) { alert('Enter a URL first.'); return; }
@@ -2665,18 +2583,6 @@ if (parentheticalEl) {
           return;
         }
         meta = parseMetadataFromHtml(html, url);
-      }
-
-      // Clear all fields first to prevent old data from persisting
-      authorEl.value = '';
-      dateEl.value = '';
-      titleEl.value = '';
-      sourceEl.value = '';
-
-      // Check if we got blocked by Cloudflare or similar
-      if (!meta.title && !meta.author && !meta.published) {
-        alert('⚠️ Unable to fetch metadata. The site may be blocking automated requests. Please enter citation details manually.');
-        return;
       }
 
       // Fill form inputs with fetched data
@@ -2702,20 +2608,6 @@ if (parentheticalEl) {
   // INPUT: Event listeners for user actions
   fetchBtn.addEventListener('click', fetchAndFill);
   generateBtn.addEventListener('click', generate);
-  const resetBtn = document.getElementById('cite-reset');
-
-resetBtn.addEventListener('click', () => {
-  // Clear all input fields
-  [authorEl, dateEl, titleEl, sourceEl, urlEl].forEach(el => el.value = '');
-  
-  // Clear outputs
-  outEl.innerHTML = '';
-  document.getElementById('cite-parenthetical').innerHTML = '';
-  document.getElementById('cite-warning').style.display = 'none';
-  
-  // Remove missing highlights
-  [authorEl, dateEl, titleEl, sourceEl].forEach(el => el.classList.remove('missing'));
-});
   copyBtn.addEventListener('click', () => {
     const citation = outEl.innerHTML;
     if (!citation || citation === 'Your citation will appear here...') {
@@ -2726,6 +2618,12 @@ resetBtn.addEventListener('click', () => {
   });
   saveBtn.addEventListener('click', saveToWorksCited);
   loadBtn.addEventListener('click', loadWorksCited);
+
+  styleEl.addEventListener('change', () => {
+    if (authorEl.value || titleEl.value || sourceEl.value) {
+      generate();
+    }
+  });
 })();
 </script>
 

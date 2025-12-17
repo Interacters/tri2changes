@@ -234,7 +234,7 @@
 
   <div class="cite-row">
     <div class="cite-label">Title</div>
-    <input id="cite-title" class="cite-input" placeholder="Article title (no italics markup)" />
+    <input id="cite-title" class="cite-input" placeholder="Article title" />
   </div>
 
   <div class="cite-row">
@@ -252,6 +252,7 @@
 
   <div class="cite-actions">
     <button id="cite-generate" class="cite-btn primary">Generate</button>
+    <button id="cite-reset" class="cite-btn ghost"> Reset <span class="btn-hint">(clear fields)</span> </button>
     <button id="cite-copy" class="cite-btn ghost">
       Copy <span class="btn-hint">(to clipboard)</span>
     </button>
@@ -391,22 +392,6 @@ function validateCitationFields() {
 });
 styleEl.addEventListener('change', validateCitationFields);
 
-
-  // ===== AUTO-SAVE LAST SESSION =====
-const SESSION_KEY = 'biasGame_lastSession';
-
-// Load last session on page load
-const lastSession = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
-if (lastSession) {
-  if (lastSession.author) authorEl.value = lastSession.author;
-  if (lastSession.title) titleEl.value = lastSession.title;
-  if (lastSession.source) sourceEl.value = lastSession.source;
-  if (lastSession.date) dateEl.value = lastSession.date;
-  if (lastSession.url) urlEl.value = lastSession.url;
-  if (lastSession.style) styleEl.value = lastSession.style;
-  generate();
-}
-
 // Save session whenever inputs change
 [authorEl, titleEl, sourceEl, dateEl, urlEl, styleEl].forEach(el => {
   el.addEventListener('input', () => {
@@ -426,57 +411,190 @@ if (lastSession) {
 
   function safe(val, fallback='') { return (val || '').trim(); }
 
-  function fmtAPA({author, date, title, source, url}) {
+  // FIXED APA FORMAT
+  function fmtAPA({ author, date, title, source, url }) {
+    // APA Format: Author. (Date). Title. Source. URL
+    // If no author, start with Title. (Date). then rest
     let parts = [];
-    if (author) parts.push(author);
-    if (date) parts.push(`(${date})`);
-    if (title) parts.push(title ? `<i>${title}</i>` : null);
-    if (source) parts.push(`${source}.`);
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').trim();
+
+    if (author) {
+      parts.push(author + '.');
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+      if (title) {
+        parts.push(title + '.');
+      }
+    } else {
+      // No author: Title. (Date). Source. URL
+      if (title) {
+        parts.push(title + '.');
+      }
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+    }
+    
+    if (source) {
+      parts.push(`<i>${source}</i>.`);
+    }
+    
+    if (url) {
+      parts.push(url);
+    }
+
+    return parts.join(' ').trim();
   }
 
-  function fmtMLA9({author, date, title, source, url}) {
-    let parts = [];
-    if (author) parts.push(`${author}.`);
-    if (title) parts.push(title ? `"${title}."` : null);
-    if (source) parts.push(source + ',');
-    if (date) parts.push(date + ',');
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+  // CORRECT MLA 9TH EDITION FORMAT
+function fmtMLA9({ author, date, title, source, url }) {
+  // MLA format:
+  // Author. "Title." Source, Day Mon. Year, URL.
+
+  let parts = [];
+
+  // Author
+  if (author) {
+    parts.push(author.trim() + '.');
   }
 
-  function fmtChicago({author, date, title, source, url}) {
-    let parts = [];
-    if (author) parts.push(author);
-    if (date) parts.push(date);
-    if (title) parts.push(title ? `"${title}."` : null);
-    if (source) parts.push(source ? source + '.' : null);
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+  // Title (required if no author)
+  if (title) {
+    parts.push(`"${title.trim()}."`);
   }
-function buildParenthetical({ author, title, date }) {
+
+  // Source (italicized)
+  if (source) {
+    parts.push(`<i>${source.trim()}</i>,`);
+  }
+
+  // Date → MLA format (Day Mon. Year)
+  if (date) {
+    let mlaDate = date;
+
+    const parsed = Date.parse(date);
+    if (!isNaN(parsed)) {
+      const d = new Date(parsed);
+      const day = d.getUTCDate();
+      const year = d.getUTCFullYear();
+      const months = [
+        'Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June',
+        'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'
+      ];
+      const month = months[d.getUTCMonth()];
+      mlaDate = `${day} ${month} ${year}`;
+    }
+
+    parts.push(mlaDate + ',');
+  }
+
+  // URL (no https:// removal in MLA 9 unless teacher says so)
+  if (url) {
+    parts.push(url.trim() + '.');
+  }
+
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+  // CORRECT CHICAGO (AUTHOR–DATE) FORMAT
+function fmtChicago({ author, date, title, source, url }) {
+  // Chicago author-date:
+  // Author. (Date). "Title." Source. URL.
+  // No author → "Title." (Date). Source. URL.
+
+  let parts = [];
+
+  // Author (if present)
+  if (author) {
+    parts.push(author.trim() + '.');
+  }
+
+  // Title (always quoted)
+  if (title) {
+    parts.push(`"${title.trim()}."`);
+  }
+
+  // Date in parentheses (after title if no author)
+  if (date) {
+    parts.push(`(${date.trim()}).`);
+  }
+
+  // Source (italicized)
+  if (source) {
+    parts.push(`<i>${source.trim()}</i>.`);
+  }
+
+  // URL (no trailing period in Chicago author-date)
+  if (url) {
+    parts.push(url.trim());
+  }
+
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function buildParenthetical({ author, title, date, style = 'apa' }) {
+  // Extract year if possible
   let year = '';
-
   if (date) {
     const match = date.match(/\d{4}/);
     if (match) year = match[0];
   }
 
-  // Extract last name if possible
-  if (author) {
-    const last = author.split(',')[0].trim();
-    return year ? `(${last}, ${year})` : `(${last})`;
+  // Short title for no-author cases
+  const shortTitle = title
+    ? title.split(' ').slice(0, 3).join(' ')
+    : '';
+
+  // ---- MLA parenthetical
+  if (style === 'mla') {
+    if (author) {
+      // MLA: only author last name
+      const last = author.split(',')[0].trim();
+      return `(${last})`;
+    }
+    if (shortTitle) {
+      // MLA: shortened title in quotes (no year)
+      return `("${shortTitle}…")`;
+    }
+    return '';
   }
 
-  // Fallback to shortened title
-  if (title) {
-    const shortTitle = title.split(' ').slice(0, 3).join(' ');
-    return year ? `("${shortTitle}…", ${year})` : `("${shortTitle}…")`;
+  // ---- APA parenthetical
+  if (style === 'apa') {
+    if (author) {
+      const last = author.split(',')[0].trim();
+      // APA: (Author, Year)
+      return year ? `(${last}, ${year})` : `(${last})`;
+    }
+    if (shortTitle) {
+      // APA: (Short Title, Year) if no author
+      return year
+        ? `(${shortTitle}, ${year})`
+        : `(${shortTitle})`;
+    }
+    return '';
   }
 
+  // ---- Chicago (author-date) parenthetical
+  if (style === 'chicago') {
+    if (author) {
+      const last = author.split(',')[0].trim();
+      // Chicago: (Author Year) — **no comma**
+      return year ? `(${last} ${year})` : `(${last})`;
+    }
+    if (shortTitle) {
+      // Chicago: (Short Title Year) — no comma
+      return year
+        ? `(${shortTitle} ${year})`
+        : `(${shortTitle})`;
+    }
+    return '';
+  }
+
+  // Default fallback
   return '';
 }
+
   // OUTPUT: Generate and display citation
   function generate() {
   const payload = {
@@ -506,16 +624,18 @@ function buildParenthetical({ author, title, date }) {
     }
   });
 
-  const style = styleEl.value;
-  let citation = '';
-  if (style === 'mla') citation = fmtMLA9(payload);
-  else if (style === 'chicago') citation = fmtChicago(payload);
-  else citation = fmtAPA(payload);
-  
+const style = styleEl.value; // 'apa', 'mla', or 'chicago'
+
+let citation = '';
+if (style === 'mla') citation = fmtMLA9(payload);
+else if (style === 'chicago') citation = fmtChicago(payload);
+else citation = fmtAPA(payload);
+
 outEl.innerHTML = citation;
 
+// Pass style to buildParenthetical!
 const parentheticalEl = document.getElementById('cite-parenthetical');
-const parenthetical = buildParenthetical(payload);
+const parenthetical = buildParenthetical({ ...payload, style });
 
 if (parentheticalEl) {
   parentheticalEl.innerHTML = parenthetical
@@ -769,6 +889,20 @@ if (parentheticalEl) {
   // INPUT: Event listeners for user actions
   fetchBtn.addEventListener('click', fetchAndFill);
   generateBtn.addEventListener('click', generate);
+  const resetBtn = document.getElementById('cite-reset');
+
+resetBtn.addEventListener('click', () => {
+  // Clear all input fields
+  [authorEl, dateEl, titleEl, sourceEl, urlEl].forEach(el => el.value = '');
+  
+  // Clear outputs
+  outEl.innerHTML = '';
+  document.getElementById('cite-parenthetical').innerHTML = '';
+  document.getElementById('cite-warning').style.display = 'none';
+  
+  // Remove missing highlights
+  [authorEl, dateEl, titleEl, sourceEl].forEach(el => el.classList.remove('missing'));
+});
   copyBtn.addEventListener('click', () => {
     const citation = outEl.innerHTML;
     if (!citation || citation === 'Your citation will appear here...') {
@@ -779,11 +913,5 @@ if (parentheticalEl) {
   });
   saveBtn.addEventListener('click', saveToWorksCited);
   loadBtn.addEventListener('click', loadWorksCited);
-
-  styleEl.addEventListener('change', () => {
-    if (authorEl.value || titleEl.value || sourceEl.value) {
-      generate();
-    }
-  });
 })();
 </script>

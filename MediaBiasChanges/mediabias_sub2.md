@@ -2637,12 +2637,6 @@ resetBtn.addEventListener('click', () => {
   });
   saveBtn.addEventListener('click', saveToWorksCited);
   loadBtn.addEventListener('click', loadWorksCited);
-
-  styleEl.addEventListener('change', () => {
-    if (authorEl.value || titleEl.value || sourceEl.value) {
-      generate();
-    }
-  });
 })();
 </script>
 

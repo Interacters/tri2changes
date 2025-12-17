@@ -2270,15 +2270,23 @@ if (lastSession) {
 
   function safe(val, fallback='') { return (val || '').trim(); }
 
-  function fmtAPA({author, date, title, source, url}) {
-    let parts = [];
-    if (author) parts.push(author);
-    if (date) parts.push(`(${date})`);
-    if (title) parts.push(title ? `<i>${title}</i>` : null);
-    if (source) parts.push(`${source}.`);
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').trim();
+function fmtAPA({ author, date, title, source, url }) {
+  let parts = [];
+
+  if (author) {
+    parts.push(author + '.');
+    if (date) parts.push(`(${date}).`);
+    if (title) parts.push(title + '.');
+  } else {
+    if (title) parts.push(title + '.');
+    if (date) parts.push(`(${date}).`);
   }
+
+  if (source) parts.push(`<i>${source}</i>.`);
+  if (url) parts.push(url);
+
+  return parts.join(' ').trim();
+}
 
   function fmtMLA9({author, date, title, source, url}) {
     let parts = [];

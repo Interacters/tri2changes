@@ -2285,68 +2285,92 @@ styleEl.addEventListener('change', validateCitationFields);
     return parts.join(' ').trim();
   }
 
-  // FIXED MLA 9TH EDITION FORMAT
-  function fmtMLA9({author, date, title, source, url}) {
-    // Author. "Title." Source, Date, URL.
-    let parts = [];
-    
-    if (author) {
-      parts.push(author + '.');
-    }
-    
-    if (title) {
-      parts.push(`"${title}."`);
-    }
-    
-    if (source) {
-      parts.push(`<i>${source}</i>,`);
-    }
-    
-    if (date) {
-      parts.push(date + ',');
-    }
-    
-    if (url) {
-      parts.push(url + '.');
-    }
-    
-    return parts.join(' ').replace(/\s+/g,' ').trim();
+  // CORRECT MLA 9TH EDITION FORMAT
+function fmtMLA9({ author, date, title, source, url }) {
+  // MLA format:
+  // Author. "Title." Source, Day Mon. Year, URL.
+
+  let parts = [];
+
+  // Author
+  if (author) {
+    parts.push(author.trim() + '.');
   }
 
-  // FIXED CHICAGO FORMAT
-  function fmtChicago({author, date, title, source, url}) {
-    // Chicago Format: Author. (Date). "Title." Source. URL.
-    // If no author, start with "Title." (Date). then rest
-    let parts = [];
-    
-    if (author) {
-      parts.push(author + '.');
-      if (date) {
-        parts.push(`(${date}).`);
-      }
-      if (title) {
-        parts.push(`"${title}."`);
-      }
-    } else {
-      // No author: "Title." (Date). Source. URL.
-      if (title) {
-        parts.push(`"${title}."`);
-      }
-      if (date) {
-        parts.push(`(${date}).`);
-      }
-    }
-    
-    if (source) {
-      parts.push(`<i>${source}</i>.`);
-    }
-    
-    if (url) {
-      parts.push(url);
-    }
-    
-    return parts.join(' ').replace(/\s+/g,' ').trim();
+  // Title (required if no author)
+  if (title) {
+    parts.push(`"${title.trim()}."`);
   }
+
+  // Source (italicized)
+  if (source) {
+    parts.push(`<i>${source.trim()}</i>,`);
+  }
+
+  // Date → MLA format (Day Mon. Year)
+  if (date) {
+    let mlaDate = date;
+
+    const parsed = Date.parse(date);
+    if (!isNaN(parsed)) {
+      const d = new Date(parsed);
+      const day = d.getUTCDate();
+      const year = d.getUTCFullYear();
+      const months = [
+        'Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June',
+        'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'
+      ];
+      const month = months[d.getUTCMonth()];
+      mlaDate = `${day} ${month} ${year}`;
+    }
+
+    parts.push(mlaDate + ',');
+  }
+
+  // URL (no https:// removal in MLA 9 unless teacher says so)
+  if (url) {
+    parts.push(url.trim() + '.');
+  }
+
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+  // CORRECT CHICAGO (AUTHOR–DATE) FORMAT
+function fmtChicago({ author, date, title, source, url }) {
+  // Chicago author-date:
+  // Author. (Date). "Title." Source. URL.
+  // No author → "Title." (Date). Source. URL.
+
+  let parts = [];
+
+  // Author (if present)
+  if (author) {
+    parts.push(author.trim() + '.');
+  }
+
+  // Title (always quoted)
+  if (title) {
+    parts.push(`"${title.trim()}."`);
+  }
+
+  // Date in parentheses (after title if no author)
+  if (date) {
+    parts.push(`(${date.trim()}).`);
+  }
+
+  // Source (italicized)
+  if (source) {
+    parts.push(`<i>${source.trim()}</i>.`);
+  }
+
+  // URL (no trailing period in Chicago author-date)
+  if (url) {
+    parts.push(url.trim());
+  }
+
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
 function buildParenthetical({ author, title, date }) {
   let year = '';
 

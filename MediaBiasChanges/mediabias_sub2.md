@@ -2231,22 +2231,6 @@ function validateCitationFields() {
 });
 styleEl.addEventListener('change', validateCitationFields);
 
-
-  // ===== AUTO-SAVE LAST SESSION =====
-const SESSION_KEY = 'biasGame_lastSession';
-
-// Load last session on page load
-const lastSession = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
-if (lastSession) {
-  if (lastSession.author) authorEl.value = lastSession.author;
-  if (lastSession.title) titleEl.value = lastSession.title;
-  if (lastSession.source) sourceEl.value = lastSession.source;
-  if (lastSession.date) dateEl.value = lastSession.date;
-  if (lastSession.url) urlEl.value = lastSession.url;
-  if (lastSession.style) styleEl.value = lastSession.style;
-  generate();
-}
-
 // Save session whenever inputs change
 [authorEl, titleEl, sourceEl, dateEl, urlEl, styleEl].forEach(el => {
   el.addEventListener('input', () => {

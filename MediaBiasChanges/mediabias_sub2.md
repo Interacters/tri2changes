@@ -2270,43 +2270,104 @@ if (lastSession) {
 
   function safe(val, fallback='') { return (val || '').trim(); }
 
-function fmtAPA({ author, date, title, source, url }) {
-  let parts = [];
+  // FIXED APA FORMAT
+  function fmtAPA({ author, date, title, source, url }) {
+    // APA Format: Author. (Date). Title. Source. URL
+    // If no author, start with Title. (Date). then rest
+    let parts = [];
 
-  if (author) {
-    parts.push(author + '.');
-    if (date) parts.push(`(${date}).`);
-    if (title) parts.push(title + '.');
-  } else {
-    if (title) parts.push(title + '.');
-    if (date) parts.push(`(${date}).`);
+    if (author) {
+      parts.push(author + '.');
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+      if (title) {
+        parts.push(title + '.');
+      }
+    } else {
+      // No author: Title. (Date). Source. URL
+      if (title) {
+        parts.push(title + '.');
+      }
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+    }
+    
+    if (source) {
+      parts.push(`<i>${source}</i>.`);
+    }
+    
+    if (url) {
+      parts.push(url);
+    }
+
+    return parts.join(' ').trim();
   }
 
-  if (source) parts.push(`<i>${source}</i>.`);
-  if (url) parts.push(url);
-
-  return parts.join(' ').trim();
-}
-
+  // FIXED MLA 9TH EDITION FORMAT
   function fmtMLA9({author, date, title, source, url}) {
+    // Author. "Title." Source, Date, URL.
     let parts = [];
-    if (author) parts.push(`${author}.`);
-    if (title) parts.push(title ? `"${title}."` : null);
-    if (source) parts.push(source + ',');
-    if (date) parts.push(date + ',');
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+    
+    if (author) {
+      parts.push(author + '.');
+    }
+    
+    if (title) {
+      parts.push(`"${title}."`);
+    }
+    
+    if (source) {
+      parts.push(`<i>${source}</i>,`);
+    }
+    
+    if (date) {
+      parts.push(date + ',');
+    }
+    
+    if (url) {
+      parts.push(url + '.');
+    }
+    
+    return parts.join(' ').replace(/\s+/g,' ').trim();
   }
 
+  // FIXED CHICAGO FORMAT
   function fmtChicago({author, date, title, source, url}) {
+    // Chicago Format: Author. (Date). "Title." Source. URL.
+    // If no author, start with "Title." (Date). then rest
     let parts = [];
-    if (author) parts.push(author);
-    if (date) parts.push(date);
-    if (title) parts.push(title ? `"${title}."` : null);
-    if (source) parts.push(source ? source + '.' : null);
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+    
+    if (author) {
+      parts.push(author + '.');
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+      if (title) {
+        parts.push(`"${title}."`);
+      }
+    } else {
+      // No author: "Title." (Date). Source. URL.
+      if (title) {
+        parts.push(`"${title}."`);
+      }
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+    }
+    
+    if (source) {
+      parts.push(`<i>${source}</i>.`);
+    }
+    
+    if (url) {
+      parts.push(url);
+    }
+    
+    return parts.join(' ').replace(/\s+/g,' ').trim();
   }
+
 function buildParenthetical({ author, title, date }) {
   let year = '';
 
@@ -2515,6 +2576,14 @@ if (parentheticalEl) {
   function parseMetadataFromHtml(html, url) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
+    
+    // Check if we got a Cloudflare "Just a moment" page or similar blocking page
+    const bodyText = doc.body?.textContent?.toLowerCase() || '';
+    if (bodyText.includes('just a moment') || bodyText.includes('checking your browser') || bodyText.includes('please wait')) {
+      console.warn('Detected blocking page (Cloudflare/security check)');
+      return { title: null, site: null, author: null, published: null, url };
+    }
+    
     const getMeta = (name, prop) => {
       const byName = doc.querySelector(`meta[name="${name}"]`);
       if (byName && byName.content) return byName.content;
@@ -2580,7 +2649,7 @@ if (parentheticalEl) {
     }
   }
 
-  // INPUT: Process URL and fetch metadata
+  // INPUT: Process URL and fetch metadata - FIXED TO CLEAR OLD DATA
   async function fetchAndFill() {
     const url = (urlEl.value || '').trim();
     if (!url) { alert('Enter a URL first.'); return; }
@@ -2596,6 +2665,18 @@ if (parentheticalEl) {
           return;
         }
         meta = parseMetadataFromHtml(html, url);
+      }
+
+      // Clear all fields first to prevent old data from persisting
+      authorEl.value = '';
+      dateEl.value = '';
+      titleEl.value = '';
+      sourceEl.value = '';
+
+      // Check if we got blocked by Cloudflare or similar
+      if (!meta.title && !meta.author && !meta.published) {
+        alert('⚠️ Unable to fetch metadata. The site may be blocking automated requests. Please enter citation details manually.');
+        return;
       }
 
       // Fill form inputs with fetched data

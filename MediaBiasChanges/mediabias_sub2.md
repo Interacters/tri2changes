@@ -2265,34 +2265,102 @@ if (lastSession) {
 
   function safe(val, fallback='') { return (val || '').trim(); }
 
-  function fmtAPA({author, date, title, source, url}) {
+  // FIXED APA FORMAT
+  function fmtAPA({ author, date, title, source, url }) {
+    // APA Format: Author. (Date). Title. Source. URL
+    // If no author, start with Title. (Date). then rest
     let parts = [];
-    if (author) parts.push(author);
-    if (date) parts.push(`(${date})`);
-    if (title) parts.push(title ? `<i>${title}</i>` : null);
-    if (source) parts.push(`${source}.`);
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').trim();
+
+    if (author) {
+      parts.push(author + '.');
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+      if (title) {
+        parts.push(title + '.');
+      }
+    } else {
+      // No author: Title. (Date). Source. URL
+      if (title) {
+        parts.push(title + '.');
+      }
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+    }
+    
+    if (source) {
+      parts.push(`<i>${source}</i>.`);
+    }
+    
+    if (url) {
+      parts.push(url);
+    }
+
+    return parts.join(' ').trim();
   }
 
+  // FIXED MLA 9TH EDITION FORMAT
   function fmtMLA9({author, date, title, source, url}) {
+    // Author. "Title." Source, Date, URL.
     let parts = [];
-    if (author) parts.push(`${author}.`);
-    if (title) parts.push(title ? `"${title}."` : null);
-    if (source) parts.push(source + ',');
-    if (date) parts.push(date + ',');
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+    
+    if (author) {
+      parts.push(author + '.');
+    }
+    
+    if (title) {
+      parts.push(`"${title}."`);
+    }
+    
+    if (source) {
+      parts.push(`<i>${source}</i>,`);
+    }
+    
+    if (date) {
+      parts.push(date + ',');
+    }
+    
+    if (url) {
+      parts.push(url + '.');
+    }
+    
+    return parts.join(' ').replace(/\s+/g,' ').trim();
   }
 
+  // FIXED CHICAGO FORMAT
   function fmtChicago({author, date, title, source, url}) {
+    // Chicago Format: Author. (Date). "Title." Source. URL.
+    // If no author, start with "Title." (Date). then rest
     let parts = [];
-    if (author) parts.push(author);
-    if (date) parts.push(date);
-    if (title) parts.push(title ? `"${title}."` : null);
-    if (source) parts.push(source ? source + '.' : null);
-    if (url) parts.push(url);
-    return parts.filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+    
+    if (author) {
+      parts.push(author + '.');
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+      if (title) {
+        parts.push(`"${title}."`);
+      }
+    } else {
+      // No author: "Title." (Date). Source. URL.
+      if (title) {
+        parts.push(`"${title}."`);
+      }
+      if (date) {
+        parts.push(`(${date}).`);
+      }
+    }
+    
+    if (source) {
+      parts.push(`<i>${source}</i>.`);
+    }
+    
+    if (url) {
+      parts.push(url);
+    }
+    
+    return parts.join(' ').replace(/\s+/g,' ').trim();
   }
 function buildParenthetical({ author, title, date }) {
   let year = '';

@@ -88,10 +88,10 @@ Function named createImageCard
 **Backend Issues:**
 
 ```python
-#Missing validation:
+# Found the missing validation:
 body = request.get_json()
-rating = body.get('rating')  # If body is None, this crashes
-#Added:
+rating = body.get('rating')  # If body is None then this crashes
+# I Added:
 if not body:
     return {'message': 'Request body is required'}, 400
 

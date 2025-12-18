@@ -396,6 +396,14 @@ CORS(media_api, resources={r"/*": {"origins": "http://localhost:4600"}})
   - Code assumed `request.get_json()` always returned a dictionary
   - When no JSON body was sent, `None.get()` caused server error
 
+<p align="center">
+  <img src="../images/Debugging-evidence.png" alt="Debugging Evidence: Postman" width="600">
+</p>
+
+<p align="center">
+  <img src="../images/Postman-success.png" alt="Postman Success: 200 OK" width="600">
+</p>
+
 **Fix:**
 ```python
 body = request.get_json()
@@ -420,6 +428,14 @@ fetch('/api/media/fetch_meta?url=' + encodeURIComponent(url))
         // Populate form fields
     });
 ```
+<p align="center">
+  <img src="../images/Console-debug-fetch-success.png" alt="Console Debug Fetch Success" width="600">
+</p>
+
+<p align="center">
+  <img src="../images/Network-debug-fetch-from-endpoint.png" alt="Network Debug Fetch from Endpoint" width="600">
+</p>
+
 
 ## College Board Component A Requirements: Performace Rater
 

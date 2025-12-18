@@ -764,16 +764,9 @@ Requests worked in Postman but failed in the browser, showing it was a CORS issu
 Fix:
 I enabled CORS in the backend to allow frontend requests.
 
+<img width="318" height="718" alt="Image" src="https://github.com/user-attachments/assets/1c4fb879-6fc1-42ed-8e28-3ba27653da8a" />
 
-
-
-
-
-Split it up by person, each person shows their contribution (ex: citation generator) and code that shows one/two of the collegeboard requirements (ex: lists code block, shows how your code uses lists)
-Follow explanation of requirement in your code with a demo of ur tool + how it uses that collegeboard requirement
-And then how you debugged, used postman, your process
-
-Show code blocks for ALL requirements (keep this concise) but you only TALK about one, show demo for like one or talk about how your requirements come together to make ur tool 
+<img width="262" height="306" alt="Image" src="https://github.com/user-attachments/assets/89603e03-57d0-42e7-97bd-45ef8d46f2e1" />
 
 
 

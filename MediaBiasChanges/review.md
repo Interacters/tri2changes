@@ -205,8 +205,6 @@ function displayTheses(data) {
 
 ## College Board Component A Requirements: Citation Generator
 
-# College Board Component A Requirements: Citation Generator
-
 | Requirement | Location | Specific Code Lines | Explanation |
 |---|---|---|---|
 | **Input from user** | `citation-generator.html` | `<input id="cite-author">` `<input id="cite-title">` `<select id="cite-style">` `document.getElementById('generate-btn').addEventListener('click', generate)` | Users enter author, title, date, source, and URL fields; select citation style from dropdown (APA/MLA/Chicago); click generate button |

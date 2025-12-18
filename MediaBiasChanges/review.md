@@ -612,7 +612,7 @@ fetch('/api/media/fetch_meta?url=' + encodeURIComponent(url))
 
 College Board Component A Requirements: Performance Rater
 Overview
-The Performance Rater collects student self-assessments (ratings 1-5), stores responses in a database, calculates class averages, and provides personalized feedback with educational resources.
+The Performance Rater collects student self-assessments (ratings 1-5), stores responses in a database, calculates class averages, and provides personalized feedback with educational resources. It allows users to submit ratings through a frontend interface. Those inputs are sent to a backend system that processes and stores the data. The program then analyzes the collected ratings and displays aggregated results back to the user. This demonstrates College Board requirements by using input, data storage, processing, and output working together in one system.
 
 | Requirement | Location | Specific Code Lines | Explanation |
 |-------------|----------|---------------------|-------------|

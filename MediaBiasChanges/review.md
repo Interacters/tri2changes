@@ -437,7 +437,164 @@ fetch('/api/media/fetch_meta?url=' + encodeURIComponent(url))
 </p>
 
 
-## College Board Component A Requirements: Performace Rater
+## College Board Component A Requirements: Performance Rater
+
+College Board Component A Requirements: Performance Rater
+Overview
+The Performance Rater collects student self-assessments (ratings 1-5), stores responses in a database, calculates class averages, and provides personalized feedback with educational resources.
+
+| Requirement | Location | Specific Code Lines | Explanation |
+|-------------|----------|---------------------|-------------|
+| **Input from user** | `mediabias_sub2.md` | `document.getElementById('survey-form').addEventListener('submit', async (e) => { ... })` `const rating = document.querySelector('input[name="rating"]:checked');` | User selects rating (1-5) via radio buttons, clicks "Submit Rating" button |
+| **Input from file** | `api/performance_api.py` | `body = request.get_json()` `rating = body.get('rating')` | Reads JSON data from HTTP request body containing student's performance rating |
+| **List/Collection Type** | `mediabias_sub2.md` | `const resourcesByTier = { 1: { title: "Building Foundations", items: [{ text: "Grammarly Handbook", url: "..." }] } }` | Nested dictionary containing 5 tiers, each with array of 5-6 resource objects (30+ total resources) |
+| **List manages complexity** | `mediabias_sub2.md` | `const resources = resourcesByTier[data.your_rating];` `resourcesList.innerHTML = resources.items.map(item => '<div>...</div>').join('');` | Direct dictionary lookup retrieves tier; single map() generates HTML for all resources dynamically |
+| **Procedure name** | `mediabias_sub2.md` | `function showResults(data)` `const badgeColors = { ... };` `document.getElementById('result-badge').innerHTML = ...;` | Function named `showResults` |
+| **Procedure parameters** | `mediabias_sub2.md` | `function showResults(data)` | One parameter: data (object containing status, your_rating, average_rating, message) |
+| **Procedure return type** | `mediabias_sub2.md` | No explicit return statement | Returns `undefined` (performs DOM manipulation side effects) |
+| **Algorithm: Sequencing** | `mediabias_sub2.md` | `const badgeColors = { ... };` → `document.getElementById('result-badge').innerHTML = ...;` → `document.getElementById('results-modal').style.display = 'block';` | Steps execute in order: map colors → set badge → set title → load resources → render HTML → show modal |
+| **Algorithm: Selection** | `mediabias_sub2.md` | `if (!rating) { alert('Please select a rating'); return; }` | Conditional logic validates form completion before allowing submission |
+| **Algorithm: Iteration** | `mediabias_sub2.md` | `resources.items.map(item => '<div class="resource-item"><a href="${item.url}">${item.text}</a></div>').join('')` | Loops through resources.items array (5-6 items) to generate HTML for each resource link |
+| **Procedure calls** | `mediabias_sub2.md` | `const data = await response.json();` `if (response.ok) { showResults(data); }` | Calls showResults procedure with API response data after successful submission |
+| **Output: Visual** | `mediabias_sub2.md` | `document.getElementById('results-modal').style.display = 'block';` `<span class="result-badge ${badgeColors[data.status]}">` | Displays modal overlay, color-coded badges (red/yellow/green), statistics cards, resource links |
+| **Output: Textual** | `mediabias_sub2.md` | `document.getElementById('result-title').textContent = titles[data.status];` `document.getElementById('result-message').textContent = data.message;` | Shows performance title ("Let's Build Your Skills!"), personalized feedback message |
+| **Output based on input** | Backend + Frontend | Backend: `if rating < avg_rating - 0.5: status = 'underprepared'` Frontend: `const resources = resourcesByTier[data.your_rating];` | Backend determines status based on rating comparison; frontend displays tier-specific resources |
+
+List/Collection Type
+The Performance Rater uses a nested dictionary structure to organize educational resources by performance tier:
+
+```javascript
+const resourcesByTier = {
+    1: {
+        title: 'Building Foundations',
+        intro: 'Start with these fundamentals to strengthen your English skills:',
+        items: [
+            { text: 'Grammarly Handbook - Grammar Basics', url: 'https://www.grammarly.com/blog/category/handbook/' },
+            { text: 'Khan Academy Grammar Course (Free)', url: 'https://www.khanacademy.org/humanities/grammar' },
+            { text: 'Basic Essay Structure (YouTube)', url: 'https://www.youtube.com/watch?v=sQEr5D1sSrU' }
+        ]
+    },
+    2: {
+        title: 'Developing Skills',
+        items: [
+            { text: 'MLA Citation Guide - Purdue OWL', url: 'https://owl.purdue.edu/...' },
+            { text: 'Hemingway Editor - Improve Clarity', url: 'https://www.hemingwayapp.com/' }
+        ]
+    }
+    // ... tiers 3-5
+};
+```
+
+**Why this is a collection:**
+
+- Main dictionary contains 5 performance tiers (keys: 1-5)
+- Each tier has an items array containing 5-6 resource objects
+- Each resource object has text and url properties
+- Total: 30+ resources organized hierarchically
+
+List Manages Complexity
+
+```javascript
+function showResults(data) {
+    const resources = resourcesByTier[data.your_rating];
+    
+    const resourcesList = document.getElementById('resources-list');
+    resourcesList.innerHTML = resources.items.map(item => 
+        `<div class="resource-item">
+            <a href="${item.url}" target="_blank">${item.text}</a>
+        </div>`
+    ).join('');
+}
+```
+**Benefits:**
+
+- No conditional chains - Direct dictionary access instead of 5 if-else blocks
+- Scalable - Adding tiers requires only data updates, no code changes
+- Dynamic rendering - Single .map() handles 5-30 links regardless of tier
+- Maintainable - Resource updates happen in data structure, not logic
+
+The list approach reduces 150+ lines of repeated code to 5 lines that handle all 30+ resources dynamically.
+
+**Debugging Process**
+Example 1: Missing JSON Key Error
+Problem: Frontend received 400 Bad Request error from backend
+Tool Used: Chrome DevTools Network Tab
+Brief Explanation:
+When submitting the rating form, the backend rejected the request with a 400 error. Using Chrome DevTools Network tab, I inspected the POST request payload and discovered the frontend was sending { value: 3 } while the backend expected { rating: 3 }. The backend's validation logic checked for a rating key, so when it received value instead, it returned an error message "rating is required". Changing the JSON key from value to rating in the frontend code resolved the issue.
+Fix:
+
+```javascript
+// Before (WRONG):
+body: JSON.stringify({ value: parseInt(rating.value) })
+
+// After (CORRECT):
+body: JSON.stringify({ rating: parseInt(rating.value) })
+```
+
+Example 2: Modal Not Displaying Resources
+Problem: Results modal showed up blank with no resource links
+Tool Used: Console.log() debugging
+Process:
+
+Added console logs to trace data flow:
+
+```javascript
+function showResults(data) {
+    console.log('Received data:', data);
+    console.log('Rating tier:', data.your_rating);
+    console.log('Type of rating:', typeof data.your_rating);
+    
+    const resources = resourcesByTier[data.your_rating];
+    console.log('Resources object:', resources);
+    
+    if (!resources) {
+        console.error('No resources found for tier:', data.your_rating);
+    }
+}
+
+2. Console output revealed:
+Received data: {your_rating: "3", status: "average", ...}
+Rating tier: "3"
+Type of rating: string
+Resources object: undefined
+``
+```
+Discovery: Backend returned your_rating as a string "3" instead of number 3. The resourcesByTier dictionary used numeric keys, so resourcesByTier["3"] returned undefined.
+Fix:
+```javascript
+const data = await response.json();
+data.your_rating = parseInt(data.your_rating); // Convert string to number
+showResults(data);
+```
+
+**Postman Debugging**
+
+1. Incorrect API Route (Endpoint Error)
+Error:
+The frontend was calling /api/data, but the backend route was actually /api/info.
+How Postman helped:
+I tested the GET request in Postman and got a 404 Not Found, which told me the route didn’t exist.
+Fix:
+I corrected the endpoint path in the frontend to match the backend route.
+
+2. Wrong HTTP Method (GET vs POST)
+Error:
+The frontend sent a GET request to an endpoint that expected POST.
+How Postman helped:
+When I tried GET in Postman, the server returned an error, but POST worked correctly.
+Fix:
+I updated the frontend to use the correct HTTP method.
+
+3. CORS or Credential Issues
+Error:
+The frontend couldn’t access the API due to CORS restrictions.
+How Postman helped:
+Requests worked in Postman but failed in the browser, showing it was a CORS issue.
+Fix:
+I enabled CORS in the backend to allow frontend requests.
+
+
+
 
 
 
@@ -446,5 +603,7 @@ Follow explanation of requirement in your code with a demo of ur tool + how it u
 And then how you debugged, used postman, your process
 
 Show code blocks for ALL requirements (keep this concise) but you only TALK about one, show demo for like one or talk about how your requirements come together to make ur tool 
+
+
 
 

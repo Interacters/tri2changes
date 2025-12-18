@@ -278,7 +278,7 @@ date: 2025-12-12
         <div class="progress-tracker">
             <div class="progress-header">
                 <h1>English Essay Skills Module</h1>
-                <p class="progress-subtitle">Master media bias, thesis writing, citations, and more!</p>
+                <p class="progress-subtitle">Ideation help for an English Essay. Start by finding accurate sources and end with citing them.</p>
             </div>
 
             <div class="progress-steps">

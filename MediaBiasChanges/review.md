@@ -205,6 +205,223 @@ function displayTheses(data) {
 
 ## College Board Component A Requirements: Citation Generator
 
+# College Board Component A Requirements: Citation Generator
+
+| Requirement | Location | Specific Code Lines | Explanation |
+|---|---|---|---|
+| **Input from user** | `citation-generator.html` | `<input id="cite-author">` `<input id="cite-title">` `<select id="cite-style">` `document.getElementById('generate-btn').addEventListener('click', generate)` | Users enter author, title, date, source, and URL fields; select citation style from dropdown (APA/MLA/Chicago); click generate button |
+| **Input from online source** | Flask backend + frontend fetch | `const response = await fetch('/api/media/fetch_meta?url=' + encodeURIComponent(url))` `const data = await response.json()` | Fetches article metadata (title, author, date) from real URLs via Flask proxy endpoint |
+| **List/Collection Type** | Frontend JavaScript | `JSON.parse(localStorage.getItem(KEY) || '[]')` `let saved = getSavedCitations();` | Citations stored as array of objects in localStorage; each citation object contains style, formatted text, and metadata |
+| **List manages complexity** | Frontend JavaScript | `processCitationList(saved, 'all', 100)` `const result = processCitationList(saved, filterValue, 100);` | Abstracts filtering by citation style, limits display items, and counts citations per style without exposing implementation details |
+| **Procedure name** | Frontend JavaScript | `function processCitationList(citationList, filterStyle, maxItems)` `let filtered = [];` `let styleCount = { apa: 0, mla: 0, chicago: 0 };` | Function named `processCitationList` |
+| **Procedure parameters** | Frontend JavaScript | `function processCitationList(citationList, filterStyle, maxItems)` | Three parameters: citationList (array of citation objects), filterStyle (string for filtering), maxItems (number for display limit) |
+| **Procedure return type** | Frontend JavaScript | `return { citations: filtered, totalCount: citationList.length, styleCounts: styleCount };` | Returns object containing filtered array, total count number, and style counts object |
+| **Algorithm: Sequencing** | `generate()` function | `const payload = { author: safe(authorEl.value), date: safe(dateEl.value), ... };` `if (!payload.title) { warnings.push('Missing title') }` `if (style === 'mla') citation = fmtMLA9(payload);` `outputEl.innerHTML = citation;` | Steps execute in order: read input → validate fields → format citation → display output → show parenthetical → display warnings |
+| **Algorithm: Selection** | Formatting logic | `if (style === 'mla') citation = fmtMLA9(payload);` `else if (style === 'chicago') citation = fmtChicago(payload);` `else citation = fmtAPA(payload);` | Conditional logic switches between citation styles; also handles missing authors with fallback to title |
+| **Algorithm: Iteration** | Rendering saved citations | `result.citations.forEach((item, index) => { const citationDiv = document.createElement('div'); citationDiv.innerHTML = item.citation; savedList.appendChild(citationDiv); });` | Loops through filtered citations array to create and display multiple citation cards |
+| **Procedure calls** | `loadSavedCitations()` function | `const result = processCitationList(saved, filterValue, 100);` `result.citations.forEach((item) => { ... })` | Calls processCitationList to filter/process citations, then iterates result to render UI |
+| **Output: Visual** | DOM manipulation | `outputEl.innerHTML = citation;` `parentheticalEl.textContent = parenthetical;` `savedList.appendChild(citationDiv);` | Displays formatted citation in styled div, shows parenthetical reference, renders Works Cited list |
+| **Output: Textual** | Status messages | `warningsEl.textContent = warnings.join('; ');` `statusEl.textContent = '✅ Citation copied to clipboard!';` `alert('Citation saved!')` | Shows validation warnings, clipboard confirmation, save notifications |
+| **Output based on input** | Formatting functions | `function fmtAPA(p) { ... }` `function fmtMLA9(p) { ... }` `function fmtChicago(p) { ... }` | Output format varies based on user's selected citation style and entered metadata fields |
+
+---
+
+## Input from User
+Input is collected through multiple form interaction methods:
+1. Text input fields capture author, title, publication date, source, and URL strings
+2. Dropdown selection for citation style (APA, MLA 9, Chicago)
+3. Button clicks trigger different actions: Generate (formats citation), Save (stores to localStorage), Reset (clears form), Load (displays saved citations)
+4. URL input triggers automatic metadata fetch from online sources
+
+---
+
+## Student-Developed Procedure (Abstraction)
+
+### Function: `processCitationList`
+
+**Purpose:**  
+Processes a list of saved citations by filtering them by citation style, limiting the number displayed, and counting how many citations exist for each style. This abstraction prevents repeated logic and simplifies rendering the Works Cited list.
+
+```javascript
+function processCitationList(citationList, filterStyle, maxItems) {
+    let filtered = [];
+    let styleCount = { apa: 0, mla: 0, chicago: 0 };
+
+    for (let i = 0; i < citationList.length; i++) {
+        let citation = citationList[i];
+
+        // Count all citations by style
+        if (citation.style && styleCount.hasOwnProperty(citation.style)) {
+            styleCount[citation.style]++;
+        }
+
+        // Filter by selected style
+        if (filterStyle === 'all' || citation.style === filterStyle) {
+            filtered.push(citation);
+        }
+
+        // Limit display items
+        if (filtered.length >= maxItems) {
+            break;
+        }
+    }
+
+    return {
+        citations: filtered,
+        totalCount: citationList.length,
+        styleCounts: styleCount
+    };
+}
+```
+
+**Parameters:**
+- `citationList` (array): Complete list of saved citation objects
+- `filterStyle` (string): Citation style to filter by ('all', 'apa', 'mla', 'chicago')
+- `maxItems` (number): Maximum number of citations to return
+
+**Returns:** Object containing:
+- `citations`: Filtered array of citation objects
+- `totalCount`: Total number of saved citations
+- `styleCounts`: Object with counts for each citation style
+
+---
+
+## Algorithms in the Program
+
+### Sequencing
+Seen clearly in `generate()` function:
+
+```javascript
+// 1. Read user input
+const payload = {
+    author: safe(authorEl.value),
+    date: safe(dateEl.value),
+    title: safe(titleEl.value),
+    source: safe(sourceEl.value),
+    url: safe(urlEl.value)
+};
+
+// 2. Validate missing fields
+let warnings = [];
+if (!payload.title) warnings.push('Missing title');
+if (!payload.author) warnings.push('Missing author');
+
+// 3. Format citation based on style
+let citation;
+if (style === 'mla') citation = fmtMLA9(payload);
+else if (style === 'chicago') citation = fmtChicago(payload);
+else citation = fmtAPA(payload);
+
+// 4. Display citation
+outputEl.innerHTML = citation;
+
+// 5. Display parenthetical citation
+parentheticalEl.textContent = parenthetical;
+
+// 6. Show warnings if needed
+if (warnings.length > 0) {
+    warningsEl.textContent = warnings.join('; ');
+}
+```
+
+### Selection
+Used to switch citation styles and handle missing authors:
+
+```javascript
+// Style selection
+if (style === 'mla') citation = fmtMLA9(payload);
+else if (style === 'chicago') citation = fmtChicago(payload);
+else citation = fmtAPA(payload);
+
+// Missing author handling
+if (!author) {
+    return `<i>${title}</i>. (${date}). ${source}.`;
+}
+```
+
+### Iteration
+Used to render saved citations and process lists:
+
+```javascript
+result.citations.forEach((item, index) => {
+    const citationDiv = document.createElement('div');
+    citationDiv.className = 'saved-citation';
+    citationDiv.innerHTML = item.citation;
+    savedList.appendChild(citationDiv);
+});
+```
+
+---
+
+## Backend Integration (Flask)
+
+The Flask backend provides a proxy metadata endpoint to avoid browser CORS restrictions:
+
+```python
+@media_api.route('/fetch_meta')
+def fetch_meta():
+    target = request.args.get('url')
+    if not target:
+        return jsonify({'error': 'missing url'}), 400
+    
+    try:
+        response = requests.get(target, timeout=5)
+        # Parse metadata from HTML
+        # Return title, author, date
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+```
+
+---
+
+## Debugging & Iterative Development
+
+### Problem 1: CORS Errors
+**Issue:** Direct fetch from news sites failed; browser blocked cross-origin requests (security policy)
+
+**Fix:**
+- Added Flask proxy endpoint (backend)
+- Added `flask_cors.CORS` to allow frontend requests
+- Added AllOrigins fallback in case server fetch fails
+
+```python
+from flask_cors import CORS
+CORS(media_api, resources={r"/*": {"origins": "http://localhost:4600"}})
+```
+
+### Postman Debugging
+**Process:**
+- Used Postman to confirm problem was NOT with the URL
+- Repeated testing of GET request to verify article metadata was received from article URL
+- Identified error handling issues:
+  - **400 Bad Request** (Missing or invalid JSON)
+  - Code assumed `request.get_json()` always returned a dictionary
+  - When no JSON body was sent, `None.get()` caused server error
+
+**Fix:**
+```python
+body = request.get_json()
+
+if not body:
+    return {'message': 'Request body is required'}, 400
+```
+
+### Console Debugging - Verifying Logic Flow
+Used `console.log()` statements throughout to:
+- Confirm button clicks were firing
+- Verify URLs were being passed correctly to the fetch call
+- Inspect data returned from server before formatting citations
+
+**Example:**
+```javascript
+console.log("Fetching metadata for:", url);
+fetch('/api/media/fetch_meta?url=' + encodeURIComponent(url))
+    .then(response => response.json())
+    .then(data => {
+        console.log("Received metadata:", data);
+        // Populate form fields
+    });
+```
 
 ## College Board Component A Requirements: Performace Rater
 

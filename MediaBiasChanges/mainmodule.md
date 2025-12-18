@@ -1447,10 +1447,10 @@ async function submitFinalTime(username, elapsed) {
 }
 
     window.addEventListener('DOMContentLoaded', () => {
-        console.log("🚀 DOM fully loaded — initializing game & buttons");
+        console.log("DOM fully loaded — initializing game & buttons");
 
         initGame();
-        console.log("✅ Game initialized automatically");
+        console.log("Game initialized automatically");
 
         const resetBtn = document.getElementById('reset-btn');
         if (resetBtn) {
@@ -1483,7 +1483,7 @@ async function submitFinalTime(username, elapsed) {
         const submitBtn = document.getElementById('submit-btn');
         if (submitBtn) {
             submitBtn.addEventListener('click', () => {
-                console.log("📨 Submit clicked");
+                console.log("Submit clicked");
 
                 const totalImages = document.querySelectorAll('.image').length;
                 const placedCount = placedImages.size;
@@ -1546,7 +1546,7 @@ async function submitFinalTime(username, elapsed) {
 
     // Initialize
     window.onload = () => {
-        console.log("🌎 Window fully loaded — starting game");
+        console.log("Window fully loaded — starting game");
         fetchUser();
         initGame();
         fetchLeaderboard();

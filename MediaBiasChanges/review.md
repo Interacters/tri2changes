@@ -99,6 +99,177 @@ if not body:
 
 ## College Board Component A Requirements: AI Chatbox
 
+# AI Source Intel Chatbox
+
+## AP CSP Component A Requirements
+
+A comprehensive demonstration of fundamental computer science principles working together to create a functional AI chatbot for news analysis.
+
+---
+
+## Core Requirements
+
+### 1. User Input
+
+**Description:** Flask API receives POST requests from users clicking prompts
+
+**Code Implementation:**
+
+```python
+# User clicks trigger events
+class _IncrementClick(Resource):
+    def post(self, id):
+        prompt = increment_prompt_click(id)
+        return jsonify(prompt)
+```
+
+**Impact:** Users interact with the AI chatbot by selecting pre-defined prompts, triggering real-time API calls
+
+---
+
+### 2. List Collection
+
+**Description:** List stores 5 AI prompts, manages complexity of tracking user interactions
+
+**Code Implementation:**
+
+```python
+prompt_list = [
+    "What is the political bias of {source}?",
+    "Show me recent top stories from {source}",
+    # ... 3 more prompts
+]
+```
+
+**Impact:** The list structure enables dynamic prompt management and scalability
+
+---
+
+### 3. Custom Procedure
+
+**Description:** increment_prompt_click() with parameters, return type, and algorithm
+
+**Code Implementation:**
+
+```python
+def increment_prompt_click(id):
+    """Atomically increment clicks"""
+    with open(PROMPTS_FILE, 'r+') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        prompts = json.load(f)
+        
+        for prompt in prompts:
+            if prompt['id'] == id:
+                prompt['clicks'] += 1
+                break
+        
+        f.seek(0)
+        json.dump(prompts, f)
+        f.truncate()
+    
+    return getPrompt(id)
+```
+
+**Impact:** Uses file locking for thread-safe operations, preventing data corruption
+
+---
+
+### 4. Algorithm (Sequencing, Selection, Iteration)
+
+**Description:** Complete algorithm with all three components
+
+**Code Implementation:**
+
+```python
+# SEQUENCING: Step-by-step execution
+fcntl.flock(f, fcntl.LOCK_EX)
+prompts = json.load(f)
+
+# ITERATION: Loop through prompts
+for prompt in prompts:
+    # SELECTION: Conditional check
+    if prompt['id'] == id:
+        prompt['clicks'] += 1
+        break
+```
+
+**Impact:** Ensures accurate click tracking across concurrent user requests
+
+---
+
+### 5. Procedure Calls
+
+**Description:** API routes call custom procedures throughout the system
+
+**Code Implementation:**
+
+```python
+# Multiple calls to procedures
+class _IncrementClick(Resource):
+    def post(self, id):
+        prompt = increment_prompt_click(id)
+        # Calls getPrompt(id) internally
+        return jsonify(prompt)
+
+class _ReadClicks(Resource):
+    def get(self):
+        return jsonify(getPromptClicks())
+```
+
+**Impact:** Modular design enables code reusability and maintainability
+
+---
+
+### 6. Output
+
+**Description:** JSON responses display click data and prompt information
+
+**Code Implementation:**
+
+```python
+# Returns visual/textual output
+return jsonify({
+    "id": 1,
+    "text": "What is the political bias?",
+    "clicks": 8
+})
+```
+
+**Impact:** Real-time feedback shows users which prompts are most popular
+
+---
+
+## Development & Debugging Journey using Postman
+
+### Common Errors Encountered and Fixed
+
+#### 1. Function Name Mismatch
+
+**Error:** Called `_increment_prompt_click()` in `prompt.py` but function was named `increment_prompt_click()` in `prompts.py`
+
+- **Symptom:** Function not found error
+- **Fix:** Removed underscore prefix to make it public
+
+#### 2. Missing Blueprint Registration
+
+**Error:** Forgot to register `prompt_api` in `main.py`
+
+- **Symptom:** 404 Not Found when testing `/api/prompts`
+- **Fix:** Added `app.register_blueprint(prompt_api)`
+
+#### 3. Missing Initialization
+
+**Error:** Didn't call `initPrompts()` on server startup
+
+- **Symptom:** `prompts.json` file never created
+- **Fix:** Added `initPrompts()` to the `with app.app_context():` block
+
+#### 4. Wrong Import Order
+
+**Error:** Imported `initPrompts` before `prompt_api` in `main.py`
+
+- **Symptom:** Potential circular import or function not defined
+- **Fix:** Organized imports properly (data functions before API blueprints)
 
 ## College Board Component A Requirements: Thesis Generator
 

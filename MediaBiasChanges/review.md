@@ -103,6 +103,106 @@ if not body:
 ## College Board Component A Requirements: Thesis Generator
 
 
+| Requirement | Location | Specific Code Lines | Explanation |
+|---|---|---|---|
+| **Input from user** | Thesis Generator HTML/JS | `document.getElementById('thesis-topic').value.trim()` `document.getElementById('thesis-position').value.trim()` `document.getElementById('thesis-generate').addEventListener('click', generateThesis)` | User enters topic and position text, selects thesis type from dropdown, clicks generate button |
+| **Input from file** | `generateThesis()` function | `const response = await fetch('${API_BASE}/api/thesis/generate', {...})` `const result = await response.json();` `if (!result.success \|\| !result.data) { throw new Error(...) }` | Reads JSON data from API response containing generated thesis statements, strength ratings, and recommendations |
+| **List/Collection Type** | `generateThesis()` function | `const pointInputs = document.querySelectorAll('.thesis-supporting-point');` `const supportingPoints = Array.from(pointInputs).map(input => input.value.trim()).filter(point => point.length > 0);` | NodeList of input elements converted to Array, storing user's supporting points with filtering |
+| **List manages complexity** | `displayTheses()` function | `data.theses.forEach((thesis) => { ... })` `thesis.supportingArguments.map(arg => '<li>${arg}</li>').join('')` | Iterates through multiple thesis objects, dynamically generates HTML cards for each with nested arrays for arguments |
+| **Procedure name** | Thesis Generator JS | `function displayTheses(data)` `const card = document.createElement('div');` `card.className = 'thesis-card';` `card.innerHTML = '...'` `thesisOutput.appendChild(card);` | Function named `displayTheses` |
+| **Procedure parameters** | `displayTheses()` | `function displayTheses(data)` | One parameter: data (object containing array of thesis objects with statements, strength ratings, and supporting/counter arguments) |
+| **Procedure return type** | `displayTheses()` | No explicit return statement (returns `undefined`) | Procedure performs side effects (DOM manipulation) rather than returning a value |
+| **Algorithm: Sequencing** | `displayTheses()` function | `thesisOutput.innerHTML = '';` `data.theses.forEach(...)` `const card = document.createElement('div');` `card.className = 'thesis-card';` `card.innerHTML = '...';` `thesisOutput.appendChild(card);` | Steps execute in specific order: clear output area, iterate theses, create card element, set class, populate content, append to DOM |
+| **Algorithm: Selection** | `displayTheses()` function | `const strengthClass = thesis.strength >= 8 ? 'thesis-strength-high' : thesis.strength >= 6 ? 'thesis-strength-medium' : 'thesis-strength-low';` | Conditional logic using ternary operators to assign CSS class based on strength score ranges |
+| **Algorithm: Iteration** | `displayTheses()` function | `data.theses.forEach((thesis) => { const card = document.createElement('div'); ... thesisOutput.appendChild(card); });` | Loops through theses array to create and display multiple thesis cards |
+| **Procedure calls** | `generateThesis()` function | `displayTheses(result.data);` `showThesisStatus('✅ Thesis statements generated successfully!', 'success');` | Calls displayTheses to render results and showThesisStatus to provide user feedback after API response |
+| **Output: Visual** | `displayTheses()` function | `thesisOutput.appendChild(card);` `<span class="thesis-strength-badge ${strengthClass}">Strength: ${thesis.strength}/10</span>` `outputSection.style.display = 'block';` | Displays thesis cards with color-coded strength badges, supporting arguments lists, and counterarguments |
+| **Output: Textual** | `showThesisStatus()` function | `statusDiv.textContent = message;` `showThesisStatus('✅ Thesis statements generated successfully!', 'success');` `showThesisStatus('❌ Error: ' + error.message, 'error');` | Shows success/error messages, displays thesis statements, strength explanations, and recommendations |
+| **Output based on input** | `generateThesis()` function | `if (!topic \|\| !position) { showThesisStatus('Please fill in both Topic and Position fields', 'error'); return; }` `body: JSON.stringify({ topic: topic, position: position, ... })` `displayTheses(result.data);` | Validates user inputs, sends to API, displays customized thesis statements based on user's topic, position, and selected type |
+
+#### **Input from User**
+Input is collected through multiple form interaction methods:
+1. Text input fields capture topic and position strings that form the basis of thesis generation
+2. Dynamic supporting points array allows users to add/remove bullet points via buttons
+3. Dropdown selection for thesis type (Argumentative, Analytical, Expository, etc.)
+4. Optional audience targeting field for tone customization
+5. Generate and Clear buttons trigger API calls and form reset actions
+
+#### **Procedure**
+Function named `displayTheses`
+- Takes a data object containing an array of thesis objects with strength ratings, statements, arguments, and counterarguments
+- Dynamically creates HTML card elements for each thesis with color-coded strength badges
+- Handles conditional rendering of supporting arguments and counterarguments lists when present
+- This allows the application to display 3+ thesis variations by calling `displayTheses(data)` instead of manually writing repetitive DOM manipulation code
+
+```javascript
+function displayTheses(data) {
+    const thesisOutput = document.getElementById('thesis-output');
+    const recommendationsOutput = document.getElementById('thesis-recommendations');
+    
+    thesisOutput.innerHTML = '';
+
+    if (!data.theses || data.theses.length === 0) {
+        thesisOutput.innerHTML = '<p>No theses generated. Please try again.</p>';
+        return;
+    }
+
+    data.theses.forEach((thesis) => {
+        const strengthClass = thesis.strength >= 8 ? 'thesis-strength-high' : 
+                             thesis.strength >= 6 ? 'thesis-strength-medium' : 'thesis-strength-low';
+        
+        const card = document.createElement('div');
+        card.className = 'thesis-card';
+        card.innerHTML = `
+            <div class="thesis-statement">${thesis.statement}</div>
+            <span class="thesis-strength-badge ${strengthClass}">Strength: ${thesis.strength}/10</span>
+            <p style="color: #c8d7eb; margin-top: 10px; font-size: 0.9rem;">${thesis.strengthExplanation}</p>
+            
+            ${thesis.supportingArguments && thesis.supportingArguments.length > 0 ? `
+                <div class="thesis-details">
+                    <h5>Supporting Arguments</h5>
+                    <ul>
+                        ${thesis.supportingArguments.map(arg => `<li>${arg}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : ''}
+            
+            ${thesis.counterarguments && thesis.counterarguments.length > 0 ? `
+                <div class="thesis-details">
+                    <h5>Counterarguments to Address</h5>
+                    <ul>
+                        ${thesis.counterarguments.map(counter => `<li>${counter}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : ''}
+            
+            <button class="thesis-btn-use" data-statement="${thesis.statement.replace(/"/g, '&quot;')}">
+                Use This Thesis
+            </button>
+        `;
+        
+        thesisOutput.appendChild(card);
+    });
+
+    // Add event listeners to "Use This Thesis" buttons
+    document.querySelectorAll('.thesis-btn-use').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const statement = this.getAttribute('data-statement');
+            useThesis(statement);
+        });
+    });
+
+    if (data.recommendations) {
+        recommendationsOutput.innerHTML = `
+            <div class="thesis-recommendations">
+                <h5>Recommendations</h5>
+                <p>${data.recommendations}</p>
+            </div>
+        `;
+    }
+}
+```
+
 ## College Board Component A Requirements: Citation Generator
 
 

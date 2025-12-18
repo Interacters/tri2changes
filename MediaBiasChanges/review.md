@@ -764,10 +764,13 @@ Requests worked in Postman but failed in the browser, showing it was a CORS issu
 Fix:
 I enabled CORS in the backend to allow frontend requests.
 
+<<<<<<< HEAD
 <img width="318" height="718" alt="Image" src="https://github.com/user-attachments/assets/1c4fb879-6fc1-42ed-8e28-3ba27653da8a" />
 
 <img width="262" height="306" alt="Image" src="https://github.com/user-attachments/assets/89603e03-57d0-42e7-97bd-45ef8d46f2e1" />
 
+=======
+>>>>>>> 1f456ab (remove instructions)
 
 
 

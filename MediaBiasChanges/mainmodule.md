@@ -3673,7 +3673,7 @@ resetBtn.addEventListener('click', () => {
 
         .rating-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
             gap: 20px;
             margin: 40px 0;
         }

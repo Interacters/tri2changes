@@ -1834,7 +1834,7 @@ const PROMPT_TEMPLATES = [
     { id: 5, text: "Is {source} a reliable news source?" }
 ];
 
-const PROMPTS_API_BASE = 'http://localhost:8001';
+const PROMPTS_API_BASE = 'http://localhost:8404';
 const PROMPTS_REFRESH_INTERVAL = 5000;
 let promptsWithClicks = [];
 let currentSource = '';
@@ -1980,7 +1980,7 @@ aiSendBtn.addEventListener('click', async () => {
     showAIStatus('Processing your request...');
     
     try {
-        const response = await fetch('http://localhost:8001/api/chat', {
+        const response = await fetch('http://localhost:8404/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: mode, message: message })
@@ -2450,7 +2450,7 @@ loadPromptClicks()
 <script type="module">
     import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
 
-    const API_BASE = pythonURI || 'http://localhost:8001';
+    const API_BASE = pythonURI || 'http://localhost:8404';
 
     function addThesisPoint() {
         const container = document.getElementById('thesis-points-container');
@@ -3007,7 +3007,7 @@ loadPromptClicks()
 
   // Backend configuration
   if (!window.fetchProxyBase) {
-      window.fetchProxyBase = 'http://localhost:8001/api/media';
+      window.fetchProxyBase = 'http://localhost:8404/api/media';
       console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
   }
 
@@ -4267,7 +4267,7 @@ resetBtn.addEventListener('click', () => {
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8001/api';
+        const API_BASE = 'http://localhost:8404/api';
 
         const resourcesByTier = {
             1: {
@@ -4468,7 +4468,7 @@ resetBtn.addEventListener('click', () => {
                     alert('Error: ' + (data.error || 'Unknown error occurred'));
                 }
             } catch (error) {
-                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8001.');
+                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8404.');
                 console.error(error);
             } finally {
                 submitBtn.disabled = false;

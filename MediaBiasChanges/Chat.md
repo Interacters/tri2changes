@@ -19,7 +19,7 @@ const PROMPT_TEMPLATES = [
 ];
 >>>>>>> Stashed changes
 
-const PROMPTS_API_BASE = 'http://localhost:8001';
+const PROMPTS_API_BASE = 'http://localhost:8404';
 const PROMPTS_REFRESH_INTERVAL = 5000;
 let promptsWithClicks = [];
 let currentSource = '';
@@ -284,7 +284,7 @@ const PROMPT_TEMPLATES = [
     { id: 5, text: "Is {source} a reliable news source?" }
 ];
 
-const PROMPTS_API_BASE = 'http://localhost:8001';
+const PROMPTS_API_BASE = 'http://localhost:8404';
 const PROMPTS_REFRESH_INTERVAL = 5000;
 let promptsWithClicks = [];
 let currentSource = '';
@@ -432,7 +432,7 @@ aiSendBtn.addEventListener('click', async () => {
     showAIStatus('Processing your request...');
     
     try {
-        const response = await fetch('http://localhost:8001/api/chat', {
+        const response = await fetch('http://localhost:8404/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: mode, message: message })

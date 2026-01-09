@@ -350,7 +350,7 @@
 
   // Backend configuration
   if (!window.fetchProxyBase) {
-      window.fetchProxyBase = 'http://localhost:8001/api/media';
+      window.fetchProxyBase = 'http://localhost:8404/api/media';
       console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
   }
 

@@ -1834,7 +1834,9 @@ const PROMPT_TEMPLATES = [
     { id: 5, text: "Is {source} a reliable news source?" }
 ];
 
-const PROMPTS_API_BASE = 'http://localhost:8404';
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+const PROMPTS_API_BASE = pythonURI || 'http://localhost:8404';
+;
 const PROMPTS_REFRESH_INTERVAL = 5000;
 let promptsWithClicks = [];
 let currentSource = '';
@@ -1966,6 +1968,8 @@ function showAIStatus(message, isError = false) {
 }
 
 // Send message
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+
 aiSendBtn.addEventListener('click', async () => {
     const message = aiMessageInput.value.trim();
     const mode = aiModeSelect.value;
@@ -1980,10 +1984,11 @@ aiSendBtn.addEventListener('click', async () => {
     showAIStatus('Processing your request...');
     
     try {
-        const response = await fetch('http://localhost:8404/api/chat', {
+        const response = await fetch(`${pythonURI}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: mode, message: message })
+        });
         });
 
         if (!response.ok) {
@@ -4268,6 +4273,9 @@ resetBtn.addEventListener('click', () => {
 
     <script>
         const API_BASE = 'http://localhost:8404/api';
+        import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+const API_BASE = `${pythonURI}/api`;
+
 
         const resourcesByTier = {
             1: {

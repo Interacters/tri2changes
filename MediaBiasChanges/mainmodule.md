@@ -1824,7 +1824,10 @@ async function submitFinalTime(username, elapsed) {
     <div class="ai-chat-log" id="ai-chat-log" style="display: none;"></div>
 </div>
 
-<script>
+<script type="module">
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+const PROMPTS_API_BASE = pythonURI || 'http://localhost:8404';
+;
 // Smart Prompts Feature
 const PROMPT_TEMPLATES = [
     { id: 1, text: "What is the political bias of {source}?" },
@@ -1834,9 +1837,6 @@ const PROMPT_TEMPLATES = [
     { id: 5, text: "Is {source} a reliable news source?" }
 ];
 
-import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
-const PROMPTS_API_BASE = pythonURI || 'http://localhost:8404';
-;
 const PROMPTS_REFRESH_INTERVAL = 5000;
 let promptsWithClicks = [];
 let currentSource = '';
@@ -1966,9 +1966,6 @@ function showAIStatus(message, isError = false) {
     aiStatusEl.style.border = isError ? '1px solid rgba(248, 113, 113, 0.3)' : '1px solid rgba(122, 210, 249, 0.3)';
     aiStatusEl.style.color = isError ? '#fca5a5' : '#7ad2f9';
 }
-
-// Send message
-import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
 aiSendBtn.addEventListener('click', async () => {
     const message = aiMessageInput.value.trim();

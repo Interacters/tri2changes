@@ -1946,7 +1946,7 @@ async function submitFinalTime(username, elapsed) {
   
   .cite-small { 
     font-size:0.9rem; 
-    color:rgba(255, 255, 255, 0.75); 
+    color:rgba(255, 255, 255,  0.75); 
     margin-top:6px;
   }
   
@@ -2603,19 +2603,25 @@ if (parentheticalEl) {
 
   // INPUT: Fetch data from online source (URL)
   async function tryFetchHtml(url) {
+    // Try direct fetch first (may fail due to CORS)
     try {
-      const r = await fetch(url, { method: 'GET', mode: 'cors' });
+      const directOptions = { ...fetchOptions, method: 'GET', mode: 'cors' };
+      const r = await fetch(url, directOptions);
       if (r.ok) return await r.text();
     } catch (err) {
       console.warn('Direct fetch failed (CORS?), will try proxy', err);
     }
+
+    // Fallback to AllOrigins public proxy (dev only). Use fetchOptions as base so headers/credentials are consistent.
     try {
       const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-      const r2 = await fetch(proxy);
+      const proxyOptions = { ...fetchOptions, method: 'GET' };
+      const r2 = await fetch(proxy, proxyOptions);
       if (r2.ok) return await r2.text();
     } catch (err) {
       console.warn('Proxy fetch failed', err);
     }
+
     return null;
   }
 
@@ -3060,7 +3066,7 @@ resetBtn.addEventListener('click', () => {
             background: rgba(251, 191, 36, 0.15);
             border-left: 3px solid #fbbf24;
             padding: 14px;
-            margin-top: 16px;
+            margin-top: 30px;
             border-radius: 8px;
         }
 

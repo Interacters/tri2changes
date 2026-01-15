@@ -2934,7 +2934,7 @@ loadPromptClicks()
   </div>
 </div>
 
-<script>
+<script type="module">
 (function(){
   // ===== COLLEGE BOARD REQUIREMENTS DOCUMENTATION =====
   
@@ -4268,7 +4268,7 @@ resetBtn.addEventListener('click', () => {
         </table>
     </div>
 
-    <script>
+    <script type="module">
         const API_BASE = 'http://localhost:8404/api';
         import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 const API_BASE = `${pythonURI}/api`;
@@ -4560,7 +4560,7 @@ const API_BASE = `${pythonURI}/api`;
         </div>
     </div>
 
-    <script>
+    <script type="module">
         let currentSection = 1;
         const totalSections = 4;
 

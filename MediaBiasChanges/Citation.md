@@ -276,6 +276,8 @@
 </div>
 
 <script>
+import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
+
 (function(){
   // ===== COLLEGE BOARD REQUIREMENTS DOCUMENTATION =====
   

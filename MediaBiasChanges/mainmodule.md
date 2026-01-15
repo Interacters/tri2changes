@@ -2871,6 +2871,11 @@ loadPromptClicks()
 }
 </style>
 
+<div class="intro-text">
+   <h2>Citation Generator</h2>
+    <p>It's important to include correct citations for your work. There are many types of formats for citations including: MLA, APA, Chicago. This tool can help you create citations for your sources.</p>
+</div>
+
 <div class="cite-card" id="citation-tool">
   <div class="cite-row">
     <div class="cite-label">Style</div>
@@ -2935,6 +2940,11 @@ loadPromptClicks()
 </div>
 
 <script type="module">
+<<<<<<< HEAD
+=======
+import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
+
+>>>>>>> 29012e59f2863890a63506df2364ae521f3f7a83
 (function(){
   // ===== COLLEGE BOARD REQUIREMENTS DOCUMENTATION =====
   
@@ -3052,6 +3062,7 @@ function validateCitationFields() {
 styleEl.addEventListener('change', validateCitationFields);
 
 // Save session whenever inputs change
+const SESSION_KEY = 'citation_session_v1';
 [authorEl, titleEl, sourceEl, dateEl, urlEl, styleEl].forEach(el => {
   el.addEventListener('input', () => {
     localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -3480,16 +3491,23 @@ if (parentheticalEl) {
   }
 
   async function fetchMetadataFromServer(targetUrl) {
-    const base = (window.fetchProxyBase || '').replace(/\/$/, '');
+    const base = (pythonURI || '').replace(/\/$/, '');
     if (!base) {
-      console.warn('No fetchProxyBase set; skipping server fetch');
+      console.warn('No pythonURI set; skipping server fetch');
       return null;
     }
 
     try {
-      const endpoint = `${base}/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
+      const endpoint = `${base}/api/media/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
       console.info('Calling server metadata endpoint:', endpoint);
-      const res = await fetch(endpoint, { method: 'GET' });
+      
+      // Use fetchOptions from config.js
+      const requestOptions = {
+        ...fetchOptions,
+        method: 'GET'  // Override to GET for this specific endpoint
+      };
+      
+      const res = await fetch(endpoint, requestOptions);
 
       const ct = res.headers.get('content-type') || '';
       const body = ct.includes('application/json') ? await res.json().catch(()=>null) : await res.text().catch(()=>null);

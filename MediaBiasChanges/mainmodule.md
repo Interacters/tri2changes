@@ -314,7 +314,7 @@ date: 2025-12-12
         </div>
 
         <!-- Section 0: Interactive Introduction -->
-        <div class="section-container active" id="section-0">
+<div class="section-container active" id="section-0">
     <div class="section-header">
         <h2 class="section-title">Welcome to Media Literacy</h2>
         <p class="section-description">
@@ -403,24 +403,6 @@ date: 2025-12-12
             margin: 20px 0;
         }
         
-        .source-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .source-pill {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        
-        .pill-left { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-        .pill-center { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
-        .pill-right { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-        
         .headline-card {
             background: rgba(15, 23, 42, 0.6);
             border-radius: 12px;
@@ -439,15 +421,6 @@ date: 2025-12-12
         .headline-card.left { border-left-color: #ef4444; }
         .headline-card.right { border-left-color: #3b82f6; }
         .headline-card.center { border-left-color: #94a3b8; }
-        
-        .headline-source {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
         
         .headline-analysis {
             display: none;
@@ -523,214 +496,280 @@ date: 2025-12-12
     <div class="intro-slides-container">
         <!-- Slide 1: Welcome -->
         <div class="intro-slide active" data-slide="0">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h3 style="color: #60a5fa; font-size: 2rem; margin-bottom: 15px;">🎮 Choose Your Media Superpower!</h3>
+                <p style="color: #cbd5e1; font-size: 1.1rem;">Click on each skill to unlock what you'll master</p>
+            </div>
+
             <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-card-icon">🧠</div>
-                    <h3>Critical Thinking</h3>
-                    <p style="color: #cbd5e1; font-size: 0.95rem;">
-                        Learn to analyze information sources and identify bias patterns in news coverage
-                    </p>
+                <div class="info-card interactive-card" onclick="flipCard(this)" style="cursor: pointer;">
+                    <div class="card-front">
+                        <div class="info-card-icon">🧠</div>
+                        <h3>Critical Thinking</h3>
+                        <p style="color: #cbd5e1; font-size: 0.85rem; margin-top: 10px;">
+                            Click to reveal →
+                        </p>
+                    </div>
+                    <div class="card-back" style="display: none;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🔍</div>
+                        <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;">You'll Learn To:</p>
+                        <p style="color: #cbd5e1; font-size: 0.85rem;">
+                            ✓ Spot loaded language<br>
+                            ✓ Question assumptions<br>
+                            ✓ Compare perspectives
+                        </p>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <div class="info-card-icon">🎯</div>
-                    <h3>Academic Excellence</h3>
-                    <p style="color: #cbd5e1; font-size: 0.95rem;">
-                        Master the skills needed to write compelling, well-researched essays with credible sources
-                    </p>
+                <div class="info-card interactive-card" onclick="flipCard(this)" style="cursor: pointer;">
+                    <div class="card-front">
+                        <div class="info-card-icon">🎯</div>
+                        <h3>Academic Excellence</h3>
+                        <p style="color: #cbd5e1; font-size: 0.85rem; margin-top: 10px;">
+                            Click to reveal →
+                        </p>
+                    </div>
+                    <div class="card-back" style="display: none;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">📝</div>
+                        <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;">You'll Master:</p>
+                        <p style="color: #cbd5e1; font-size: 0.85rem;">
+                            ✓ Source evaluation<br>
+                            ✓ Strong arguments<br>
+                            ✓ Proper citations
+                        </p>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <div class="info-card-icon">👥</div>
-                    <h3>Real-World Skills</h3>
-                    <p style="color: #cbd5e1; font-size: 0.95rem;">
-                        Navigate today's complex media landscape with confidence and discernment
-                    </p>
+                <div class="info-card interactive-card" onclick="flipCard(this)" style="cursor: pointer;">
+                    <div class="card-front">
+                        <div class="info-card-icon">👥</div>
+                        <h3>Real-World Skills</h3>
+                        <p style="color: #cbd5e1; font-size: 0.85rem; margin-top: 10px;">
+                            Click to reveal →
+                        </p>
+                    </div>
+                    <div class="card-back" style="display: none;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🌍</div>
+                        <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;">You'll Navigate:</p>
+                        <p style="color: #cbd5e1; font-size: 0.85rem;">
+                            ✓ Social media safely<br>
+                            ✓ Fake news detection<br>
+                            ✓ Digital citizenship
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div class="alert-box">
-                <h4 style="color: #fbbf24; margin-bottom: 10px; font-size: 1.2rem;">⚠️ Did You Know?</h4>
-                <p style="color: #e2e8f0; line-height: 1.6;">
-                    A 2021 Stanford study found that <strong class="highlight-text">96% of students</strong> couldn't distinguish between real news and sponsored content. This module will help you develop the skills to be in the informed 4%!
-                </p>
+            <div class="alert-box" style="margin-top: 25px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="font-size: 3rem;">🎯</div>
+                    <div style="flex: 1;">
+                        <h4 style="color: #fbbf24; margin-bottom: 8px; font-size: 1.2rem;">The Challenge</h4>
+                        <p style="color: #e2e8f0; line-height: 1.6; margin-bottom: 10px;">
+                            A Stanford study found that <strong class="highlight-text">96% of students</strong> couldn't tell real news from ads.
+                        </p>
+                        <div style="background: rgba(96, 165, 250, 0.2); padding: 12px; border-radius: 8px; border-left: 3px solid #60a5fa;">
+                            <p style="color: #60a5fa; font-weight: 700; font-size: 0.95rem;">
+                                🚀 Can you join the informed 4%? Let's find out!
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Slide 2: Understanding Bias -->
         <div class="intro-slide" data-slide="1">
-            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px;">The Political Spectrum</h3>
-            <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6;">
-                Media bias is how journalists and news organizations frame stories based on their political, ideological, or cultural perspectives. Every outlet has some degree of bias—the key is learning to identify it.
+            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">🎨 The Media Spectrum Explorer</h3>
+            <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
+                Media bias is how stories get framed. Drag the slider to explore different perspectives!
             </p>
 
-            <div class="spectrum-bar"></div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
-                <span style="color: #ef4444; font-weight: 700;">LEFT</span>
-                <span style="color: #94a3b8; font-weight: 700;">CENTER</span>
-                <span style="color: #3b82f6; font-weight: 700;">RIGHT</span>
-            </div>
-
-            <div class="info-grid">
-                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 20px; border-radius: 12px;">
-                    <h4 style="color: #ef4444; margin-bottom: 10px;">Left-Leaning</h4>
-                    <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
-                        Generally supports progressive policies, social programs, environmental regulation, and diversity initiatives.
-                    </p>
-                    <div class="source-pills">
-                        <span class="source-pill pill-left">MSNBC</span>
-                        <span class="source-pill pill-left">CNN</span>
-                        <span class="source-pill pill-left">NPR</span>
-                        <span class="source-pill pill-left">The Atlantic</span>
-                    </div>
+            <div style="position: relative; padding: 40px 20px;">
+                <div class="spectrum-bar"></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                    <span style="color: #ef4444; font-weight: 700; font-size: 0.9rem;">LEFT</span>
+                    <span style="color: #94a3b8; font-weight: 700; font-size: 0.9rem;">CENTER</span>
+                    <span style="color: #3b82f6; font-weight: 700; font-size: 0.9rem;">RIGHT</span>
+                </div>
+                
+                <div style="position: relative; margin: 30px 0;">
+                    <input type="range" min="0" max="100" value="50" 
+                           id="bias-slider" 
+                           style="width: 100%; height: 8px; border-radius: 5px; background: rgba(148, 163, 184, 0.3); outline: none; cursor: pointer;">
                 </div>
 
-                <div style="background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.3); padding: 20px; border-radius: 12px;">
-                    <h4 style="color: #94a3b8; margin-bottom: 10px;">Center/Neutral</h4>
-                    <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
-                        Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
-                    </p>
-                    <div class="source-pills">
-                        <span class="source-pill pill-center">Reuters</span>
-                        <span class="source-pill pill-center">AP</span>
-                        <span class="source-pill pill-center">BBC</span>
-                        <span class="source-pill pill-center">PBS</span>
-                    </div>
-                </div>
-
-                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); padding: 20px; border-radius: 12px;">
-                    <h4 style="color: #3b82f6; margin-bottom: 10px;">Right-Leaning</h4>
-                    <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
-                        Generally supports conservative values, free markets, limited government, and traditional institutions.
-                    </p>
-                    <div class="source-pills">
-                        <span class="source-pill pill-right">Fox News</span>
-                        <span class="source-pill pill-right">WSJ</span>
-                        <span class="source-pill pill-right">Daily Wire</span>
-                        <span class="source-pill pill-right">NY Post</span>
+                <div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; min-height: 200px; transition: all 0.3s;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">⚖️</div>
+                        <h4 style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 15px;" id="bias-title">Center/Neutral</h4>
+                        <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8;" id="bias-description">
+                            Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
+                        </p>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(148, 163, 184, 0.1); border-radius: 10px;">
+                            <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;" id="bias-key">Key Characteristics:</p>
+                            <p style="color: #e2e8f0; font-size: 0.9rem;" id="bias-traits">
+                                ✓ Fact-based headlines<br>
+                                ✓ Multiple perspectives<br>
+                                ✓ Minimal opinion language
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
-                <h4 style="color: #a78bfa; margin-bottom: 10px;">💡 Key Insight</h4>
+                <h4 style="color: #a78bfa; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">💡</span> Pro Tip
+                </h4>
                 <p style="color: #e2e8f0; line-height: 1.6;">
-                    <strong>No source is 100% unbiased.</strong> Even "neutral" outlets make editorial choices. The goal isn't to find a perfectly unbiased source—it's to <strong class="highlight-text">recognize bias patterns</strong> and consume information from multiple perspectives.
+                    <strong>No source is 100% unbiased.</strong> The goal isn't perfection—it's <strong class="highlight-text">understanding the perspective</strong> each source brings. Smart readers consume multiple viewpoints!
                 </p>
             </div>
         </div>
 
         <!-- Slide 3: Spot the Bias -->
         <div class="intro-slide" data-slide="2">
-            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 15px;">📰 Spot the Bias: Interactive Exercise</h3>
-            <p style="color: #cbd5e1; margin-bottom: 25px;">
-                Click on each headline to reveal the neutral version and bias analysis. See how the same story can be framed differently!
+            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 15px; text-align: center;">🔍 Headline Detective Game</h3>
+            <p style="color: #cbd5e1; margin-bottom: 25px; text-align: center;">
+                Same story, different spin! Click each headline to reveal how bias works.
             </p>
 
             <div class="headline-card left" onclick="toggleHeadlineAnalysis('headline1')">
-                <span class="headline-source" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">Fox News</span>
-                <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px;">
-                    "Biden's Spending Spree Threatens Economic Stability"
-                </h4>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px; flex: 1;">
+                        "Spending Spree Threatens Economic Stability"
+                    </h4>
+                    <span style="font-size: 1.5rem;">👆</span>
+                </div>
                 <div class="headline-analysis" id="headline1">
                     <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                         <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 5px;">NEUTRAL VERSION:</p>
-                        <p style="color: #e2e8f0;">"Biden Administration Proposes $6 Trillion Budget"</p>
+                        <p style="color: #e2e8f0;">"Government Proposes $6 Trillion Budget"</p>
                     </div>
-                    <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 5px;">⚠️ BIAS ANALYSIS:</p>
-                    <p style="color: #cbd5e1; font-size: 0.9rem;">
-                        Uses loaded language like "spending spree" and "threatens" to frame the budget negatively. These emotional words suggest waste and danger rather than presenting facts.
-                    </p>
+                    <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px;">
+                        <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 8px; font-weight: 700;">🚨 Loaded Language Detected:</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
+                            <strong>"Spending spree"</strong> = suggests reckless behavior<br>
+                            <strong>"Threatens"</strong> = creates fear and urgency<br>
+                            <strong>Impact:</strong> Frames budget as dangerous before presenting facts
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <div class="headline-card left" onclick="toggleHeadlineAnalysis('headline2')">
-                <span class="headline-source" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">MSNBC</span>
-                <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px;">
-                    "Republicans Block Critical Voting Rights Protections"
-                </h4>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px; flex: 1;">
+                        "Republicans Block Critical Voting Rights Protections"
+                    </h4>
+                    <span style="font-size: 1.5rem;">👆</span>
+                </div>
                 <div class="headline-analysis" id="headline2">
                     <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                         <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 5px;">NEUTRAL VERSION:</p>
                         <p style="color: #e2e8f0;">"Senate Republicans Vote Against Voting Rights Bill"</p>
                     </div>
-                    <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 5px;">⚠️ BIAS ANALYSIS:</p>
-                    <p style="color: #cbd5e1; font-size: 0.9rem;">
-                        Uses emotional language like "block" and "critical protections" to suggest obstruction and harm. The word "critical" implies the bill is essential, which is an opinion.
-                    </p>
+                    <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px;">
+                        <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 8px; font-weight: 700;">🚨 Loaded Language Detected:</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
+                            <strong>"Block"</strong> = implies obstruction vs. legitimate opposition<br>
+                            <strong>"Critical protections"</strong> = assumes necessity (opinion)<br>
+                            <strong>Impact:</strong> Paints one side as harmful before facts
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <div class="headline-card center" onclick="toggleHeadlineAnalysis('headline3')">
-                <span class="headline-source" style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1;">Reuters</span>
-                <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px;">
-                    "Senate Votes 52-48 on Voting Rights Legislation"
-                </h4>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px; flex: 1;">
+                        "Senate Votes 52-48 on Voting Rights Legislation"
+                    </h4>
+                    <span style="font-size: 1.5rem;">👆</span>
+                </div>
                 <div class="headline-analysis" id="headline3">
                     <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                        <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 5px;">NEUTRAL VERSION:</p>
+                        <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 5px;">THIS IS THE NEUTRAL VERSION!</p>
                         <p style="color: #e2e8f0;">"Senate Votes 52-48 on Voting Rights Legislation"</p>
                     </div>
-                    <p style="color: #22c55e; font-size: 0.85rem; margin-bottom: 5px;">✓ NEUTRAL REPORTING:</p>
-                    <p style="color: #cbd5e1; font-size: 0.9rem;">
-                        States only verifiable facts (vote count) without emotional language or interpretation. This is what neutral journalism looks like—just the facts.
-                    </p>
+                    <div style="background: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px;">
+                        <p style="color: #22c55e; font-size: 0.85rem; margin-bottom: 8px; font-weight: 700;">✅ Neutral Reporting:</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
+                            <strong>Just facts:</strong> Vote count, topic, outcome<br>
+                            <strong>No emotion:</strong> No loaded adjectives or judgments<br>
+                            <strong>Impact:</strong> Reader forms their own opinion
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div class="alert-box" style="margin-top: 25px;">
-                <h4 style="color: #fbbf24; margin-bottom: 10px;">What Did You Notice?</h4>
-                <ul style="color: #cbd5e1; line-height: 1.8;">
-                    <li><strong>Word Choice:</strong> "Spending spree" vs "proposes budget" — loaded language reveals bias</li>
-                    <li><strong>Framing:</strong> "Block" vs "vote against" — action verbs can imply judgment</li>
-                    <li><strong>Facts vs Opinion:</strong> Neutral sources stick to verifiable facts and numbers</li>
-                </ul>
+            <div style="background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(168, 85, 247, 0.1)); border: 2px solid rgba(96, 165, 250, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
+                <h4 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.1rem;">🎯 Bias Detection Checklist:</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="display: flex; align-items: start; gap: 10px;">
+                        <span style="color: #22c55e; font-size: 1.2rem;">✓</span>
+                        <span style="color: #cbd5e1; font-size: 0.9rem;">Emotional adjectives?</span>
+                    </div>
+                    <div style="display: flex; align-items: start; gap: 10px;">
+                        <span style="color: #22c55e; font-size: 1.2rem;">✓</span>
+                        <span style="color: #cbd5e1; font-size: 0.9rem;">Charged action verbs?</span>
+                    </div>
+                    <div style="display: flex; align-items: start; gap: 10px;">
+                        <span style="color: #22c55e; font-size: 1.2rem;">✓</span>
+                        <span style="color: #cbd5e1; font-size: 0.9rem;">Opinion as fact?</span>
+                    </div>
+                    <div style="display: flex; align-items: start; gap: 10px;">
+                        <span style="color: #22c55e; font-size: 1.2rem;">✓</span>
+                        <span style="color: #cbd5e1; font-size: 0.9rem;">Missing context?</span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Slide 4: Quiz -->
         <div class="intro-slide" data-slide="3">
-            <h3 style="color: #a78bfa; font-size: 1.8rem; margin-bottom: 15px;">🎯 Quick Knowledge Check</h3>
-            <p style="color: #cbd5e1; margin-bottom: 25px;">
-                Test your understanding before moving to the interactive modules!
+            <h3 style="color: #a78bfa; font-size: 1.8rem; margin-bottom: 15px; text-align: center;">🎮 Bias Buster Challenge</h3>
+            <p style="color: #cbd5e1; margin-bottom: 25px; text-align: center;">
+                Can you spot the bias signals? Choose the best answer!
             </p>
 
             <div id="quiz-container">
                 <div class="quiz-question">
-                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">1. Which news outlet is generally considered center/neutral?</h4>
-                    <div class="quiz-option" data-question="1" data-answer="wrong">CNN</div>
-                    <div class="quiz-option" data-question="1" data-answer="correct">Associated Press</div>
-                    <div class="quiz-option" data-question="1" data-answer="wrong">Fox News</div>
-                    <div class="quiz-option" data-question="1" data-answer="wrong">MSNBC</div>
+                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">1. Which headline shows the MOST bias?</h4>
+                    <div class="quiz-option" data-question="1" data-answer="wrong">"Stock market closes at record high"</div>
+                    <div class="quiz-option" data-question="1" data-answer="correct">"Greedy corporations rake in obscene profits"</div>
+                    <div class="quiz-option" data-question="1" data-answer="wrong">"Companies report quarterly earnings"</div>
+                    <div class="quiz-option" data-question="1" data-answer="wrong">"Q3 profits exceed analyst predictions"</div>
                     <p class="quiz-explanation" style="display: none; color: #93c5fd; margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
-                        The Associated Press (AP) is a non-profit news agency known for factual, unbiased reporting. It's used as a source by many other news organizations.
+                        "Greedy" and "obscene" are loaded emotional words that reveal strong bias. Neutral reporting would stick to facts and numbers without judgmental language.
                     </p>
                 </div>
 
                 <div class="quiz-question">
-                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">2. What is the most reliable way to check media bias?</h4>
-                    <div class="quiz-option" data-question="2" data-answer="wrong">Only read sources you agree with</div>
-                    <div class="quiz-option" data-question="2" data-answer="correct">Compare coverage from multiple sources</div>
-                    <div class="quiz-option" data-question="2" data-answer="wrong">Trust social media recommendations</div>
-                    <div class="quiz-option" data-question="2" data-answer="wrong">Stick to one trusted outlet</div>
+                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">2. A headline reads: "Hero firefighters rescue family from blaze." What makes this biased?</h4>
+                    <div class="quiz-option" data-question="2" data-answer="wrong">It mentions firefighters</div>
+                    <div class="quiz-option" data-question="2" data-answer="correct">The word "hero" is an opinion/judgment</div>
+                    <div class="quiz-option" data-question="2" data-answer="wrong">It describes the rescue</div>
+                    <div class="quiz-option" data-question="2" data-answer="wrong">It's not biased at all</div>
                     <p class="quiz-explanation" style="display: none; color: #93c5fd; margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
-                        Reading multiple perspectives helps you see how different outlets frame the same story and identify bias patterns. This is critical thinking in action!
+                        While firefighters doing their job well is admirable, calling them "heroes" in a headline is an opinion. A neutral version would be: "Firefighters rescue family from house fire."
                     </p>
                 </div>
 
                 <div class="quiz-question">
-                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">3. Why should you use sources from different political leanings in your essay?</h4>
-                    <div class="quiz-option" data-question="3" data-answer="wrong">To confuse your teacher</div>
-                    <div class="quiz-option" data-question="3" data-answer="correct">To show balanced critical thinking</div>
-                    <div class="quiz-option" data-question="3" data-answer="wrong">To make your essay longer</div>
-                    <div class="quiz-option" data-question="3" data-answer="wrong">It's not necessary</div>
+                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">3. Why is reading multiple sources important for your essay?</h4>
+                    <div class="quiz-option" data-question="3" data-answer="wrong">Makes it longer</div>
+                    <div class="quiz-option" data-question="3" data-answer="correct">Shows you considered different perspectives</div>
+                    <div class="quiz-option" data-question="3" data-answer="wrong">Teachers require it</div>
+                    <div class="quiz-option" data-question="3" data-answer="wrong">It's easier than deep reading</div>
                     <p class="quiz-explanation" style="display: none; color: #93c5fd; margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
-                        Using diverse sources demonstrates that you've considered multiple perspectives, which is a hallmark of strong academic writing and critical thinking.
+                        Using diverse sources proves you've done thorough research and can think critically about complex topics—exactly what makes strong academic writing!
                     </p>
                 </div>
             </div>
 
             <div id="quiz-score" style="display: none; margin-top: 30px; padding: 25px; background: rgba(34, 197, 94, 0.1); border: 2px solid #22c55e; border-radius: 12px; text-align: center;">
                 <h3 style="color: #22c55e; font-size: 1.8rem; margin-bottom: 10px;">🏆 <span id="score-text"></span></h3>
-                <p style="color: #cbd5e1; font-size: 1.1rem;">Great job! You're ready to start the interactive modules.</p>
+                <p style="color: #cbd5e1; font-size: 1.1rem;">You're ready to become a media literacy master!</p>
             </div>
         </div>
 
@@ -862,6 +901,84 @@ date: 2025-12-12
         const analysis = document.getElementById(id);
         analysis.classList.toggle('show');
     };
+
+    window.flipCard = function(card) {
+        const front = card.querySelector('.card-front');
+        const back = card.querySelector('.card-back');
+        
+        if (front.style.display !== 'none') {
+            front.style.display = 'none';
+            back.style.display = 'block';
+        } else {
+            front.style.display = 'block';
+            back.style.display = 'none';
+        }
+    };
+
+    const biasSlider = document.getElementById('bias-slider');
+    const biasData = {
+        0: {
+            emoji: '📢',
+            title: 'Far Left',
+            color: '#dc2626',
+            description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
+            traits: '✓ Advocacy journalism<br>✓ Social justice focus<br>✓ Bold reform proposals'
+        },
+        25: {
+            emoji: '🗣️',
+            title: 'Left-Leaning',
+            color: '#ef4444',
+            description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
+            traits: '✓ Progressive values<br>✓ Government solutions<br>✓ Social equity emphasis'
+        },
+        50: {
+            emoji: '⚖️',
+            title: 'Center/Neutral',
+            color: '#94a3b8',
+            description: 'Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints. Prioritizes verifiable information over interpretation.',
+            traits: '✓ Fact-based headlines<br>✓ Multiple perspectives<br>✓ Minimal opinion language'
+        },
+        75: {
+            emoji: '🎙️',
+            title: 'Right-Leaning',
+            color: '#3b82f6',
+            description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
+            traits: '✓ Conservative values<br>✓ Market solutions<br>✓ Traditional institutions'
+        },
+        100: {
+            emoji: '📣',
+            title: 'Far Right',
+            color: '#1e40af',
+            description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
+            traits: '✓ Advocacy journalism<br>✓ Nationalist focus<br>✓ Traditional values defense'
+        }
+    };
+
+    if (biasSlider) {
+        biasSlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            let closestKey = 50;
+            let minDiff = Math.abs(value - 50);
+            
+            Object.keys(biasData).forEach(key => {
+                const diff = Math.abs(value - parseInt(key));
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestKey = key;
+                }
+            });
+            
+            const data = biasData[closestKey];
+            const infoBox = document.getElementById('bias-info-box');
+            
+            document.getElementById('bias-emoji').textContent = data.emoji;
+            document.getElementById('bias-title').textContent = data.title;
+            document.getElementById('bias-title').style.color = data.color;
+            document.getElementById('bias-description').textContent = data.description;
+            document.getElementById('bias-traits').innerHTML = data.traits;
+            infoBox.style.borderColor = data.color;
+        });
+    }
 
     document.querySelectorAll('.quiz-option').forEach(option => {
         option.addEventListener('click', function() {

@@ -286,7 +286,12 @@ date: 2025-12-12
                     <div class="progress-line-fill" id="progress-fill"></div>
                 </div>
                 
-                <div class="step active" data-step="1">
+                <div class="step active" data-step="0">
+                    <div class="step-circle">0</div>
+                    <div class="step-label">Introduction</div>
+                </div>
+                
+                <div class="step" data-step="1">
                     <div class="step-circle">1</div>
                     <div class="step-label">Media Bias Game</div>
                 </div>
@@ -308,8 +313,597 @@ date: 2025-12-12
             </div>
         </div>
 
+        <!-- Section 0: Interactive Introduction -->
+        <div class="section-container active" id="section-0">
+    <div class="section-header">
+        <h2 class="section-title">Welcome to Media Literacy</h2>
+        <p class="section-description">
+            Understanding media bias is essential for academic success and informed citizenship in today's information age.
+        </p>
+    </div>
+
+    <style>
+        .intro-slides-container {
+            position: relative;
+            min-height: 500px;
+        }
+        
+        .intro-slide {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .intro-slide.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .slide-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(148, 163, 184, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .slide-dot.active {
+            width: 30px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .info-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+        }
+        
+        .info-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .info-card h3 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .spectrum-bar {
+            height: 12px;
+            background: linear-gradient(to right, #ef4444, #94a3b8, #3b82f6);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .source-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .source-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .pill-left { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .pill-center { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+        .pill-right { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        
+        .headline-card {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #60a5fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .headline-card:hover {
+            background: rgba(15, 23, 42, 0.8);
+            transform: translateX(5px);
+        }
+        
+        .headline-card.left { border-left-color: #ef4444; }
+        .headline-card.right { border-left-color: #3b82f6; }
+        .headline-card.center { border-left-color: #94a3b8; }
+        
+        .headline-source {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .headline-analysis {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .headline-analysis.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        .quiz-question {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .quiz-option {
+            background: rgba(148, 163, 184, 0.1);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(96, 165, 250, 0.1);
+            border-color: #60a5fa;
+        }
+        
+        .quiz-option.selected {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: #60a5fa;
+        }
+        
+        .quiz-option.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+        
+        .alert-box {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .highlight-text {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+    </style>
+
+    <div class="slide-dots" id="intro-slide-dots">
+        <div class="slide-dot active" data-slide="0"></div>
+        <div class="slide-dot" data-slide="1"></div>
+        <div class="slide-dot" data-slide="2"></div>
+        <div class="slide-dot" data-slide="3"></div>
+        <div class="slide-dot" data-slide="4"></div>
+    </div>
+
+    <div class="intro-slides-container">
+        <!-- Slide 1: Welcome -->
+        <div class="intro-slide active" data-slide="0">
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-icon">🧠</div>
+                    <h3>Critical Thinking</h3>
+                    <p style="color: #cbd5e1; font-size: 0.95rem;">
+                        Learn to analyze information sources and identify bias patterns in news coverage
+                    </p>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon">🎯</div>
+                    <h3>Academic Excellence</h3>
+                    <p style="color: #cbd5e1; font-size: 0.95rem;">
+                        Master the skills needed to write compelling, well-researched essays with credible sources
+                    </p>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon">👥</div>
+                    <h3>Real-World Skills</h3>
+                    <p style="color: #cbd5e1; font-size: 0.95rem;">
+                        Navigate today's complex media landscape with confidence and discernment
+                    </p>
+                </div>
+            </div>
+
+            <div class="alert-box">
+                <h4 style="color: #fbbf24; margin-bottom: 10px; font-size: 1.2rem;">⚠️ Did You Know?</h4>
+                <p style="color: #e2e8f0; line-height: 1.6;">
+                    A 2021 Stanford study found that <strong class="highlight-text">96% of students</strong> couldn't distinguish between real news and sponsored content. This module will help you develop the skills to be in the informed 4%!
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Understanding Bias -->
+        <div class="intro-slide" data-slide="1">
+            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px;">The Political Spectrum</h3>
+            <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6;">
+                Media bias is how journalists and news organizations frame stories based on their political, ideological, or cultural perspectives. Every outlet has some degree of bias—the key is learning to identify it.
+            </p>
+
+            <div class="spectrum-bar"></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                <span style="color: #ef4444; font-weight: 700;">LEFT</span>
+                <span style="color: #94a3b8; font-weight: 700;">CENTER</span>
+                <span style="color: #3b82f6; font-weight: 700;">RIGHT</span>
+            </div>
+
+            <div class="info-grid">
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 20px; border-radius: 12px;">
+                    <h4 style="color: #ef4444; margin-bottom: 10px;">Left-Leaning</h4>
+                    <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
+                        Generally supports progressive policies, social programs, environmental regulation, and diversity initiatives.
+                    </p>
+                    <div class="source-pills">
+                        <span class="source-pill pill-left">MSNBC</span>
+                        <span class="source-pill pill-left">CNN</span>
+                        <span class="source-pill pill-left">NPR</span>
+                        <span class="source-pill pill-left">The Atlantic</span>
+                    </div>
+                </div>
+
+                <div style="background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.3); padding: 20px; border-radius: 12px;">
+                    <h4 style="color: #94a3b8; margin-bottom: 10px;">Center/Neutral</h4>
+                    <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
+                        Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
+                    </p>
+                    <div class="source-pills">
+                        <span class="source-pill pill-center">Reuters</span>
+                        <span class="source-pill pill-center">AP</span>
+                        <span class="source-pill pill-center">BBC</span>
+                        <span class="source-pill pill-center">PBS</span>
+                    </div>
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); padding: 20px; border-radius: 12px;">
+                    <h4 style="color: #3b82f6; margin-bottom: 10px;">Right-Leaning</h4>
+                    <p style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px;">
+                        Generally supports conservative values, free markets, limited government, and traditional institutions.
+                    </p>
+                    <div class="source-pills">
+                        <span class="source-pill pill-right">Fox News</span>
+                        <span class="source-pill pill-right">WSJ</span>
+                        <span class="source-pill pill-right">Daily Wire</span>
+                        <span class="source-pill pill-right">NY Post</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
+                <h4 style="color: #a78bfa; margin-bottom: 10px;">💡 Key Insight</h4>
+                <p style="color: #e2e8f0; line-height: 1.6;">
+                    <strong>No source is 100% unbiased.</strong> Even "neutral" outlets make editorial choices. The goal isn't to find a perfectly unbiased source—it's to <strong class="highlight-text">recognize bias patterns</strong> and consume information from multiple perspectives.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Spot the Bias -->
+        <div class="intro-slide" data-slide="2">
+            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 15px;">📰 Spot the Bias: Interactive Exercise</h3>
+            <p style="color: #cbd5e1; margin-bottom: 25px;">
+                Click on each headline to reveal the neutral version and bias analysis. See how the same story can be framed differently!
+            </p>
+
+            <div class="headline-card left" onclick="toggleHeadlineAnalysis('headline1')">
+                <span class="headline-source" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">Fox News</span>
+                <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px;">
+                    "Biden's Spending Spree Threatens Economic Stability"
+                </h4>
+                <div class="headline-analysis" id="headline1">
+                    <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 5px;">NEUTRAL VERSION:</p>
+                        <p style="color: #e2e8f0;">"Biden Administration Proposes $6 Trillion Budget"</p>
+                    </div>
+                    <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 5px;">⚠️ BIAS ANALYSIS:</p>
+                    <p style="color: #cbd5e1; font-size: 0.9rem;">
+                        Uses loaded language like "spending spree" and "threatens" to frame the budget negatively. These emotional words suggest waste and danger rather than presenting facts.
+                    </p>
+                </div>
+            </div>
+
+            <div class="headline-card left" onclick="toggleHeadlineAnalysis('headline2')">
+                <span class="headline-source" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5;">MSNBC</span>
+                <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px;">
+                    "Republicans Block Critical Voting Rights Protections"
+                </h4>
+                <div class="headline-analysis" id="headline2">
+                    <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 5px;">NEUTRAL VERSION:</p>
+                        <p style="color: #e2e8f0;">"Senate Republicans Vote Against Voting Rights Bill"</p>
+                    </div>
+                    <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 5px;">⚠️ BIAS ANALYSIS:</p>
+                    <p style="color: #cbd5e1; font-size: 0.9rem;">
+                        Uses emotional language like "block" and "critical protections" to suggest obstruction and harm. The word "critical" implies the bill is essential, which is an opinion.
+                    </p>
+                </div>
+            </div>
+
+            <div class="headline-card center" onclick="toggleHeadlineAnalysis('headline3')">
+                <span class="headline-source" style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1;">Reuters</span>
+                <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px;">
+                    "Senate Votes 52-48 on Voting Rights Legislation"
+                </h4>
+                <div class="headline-analysis" id="headline3">
+                    <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <p style="color: #94a3b8; font-size: 0.75rem; margin-bottom: 5px;">NEUTRAL VERSION:</p>
+                        <p style="color: #e2e8f0;">"Senate Votes 52-48 on Voting Rights Legislation"</p>
+                    </div>
+                    <p style="color: #22c55e; font-size: 0.85rem; margin-bottom: 5px;">✓ NEUTRAL REPORTING:</p>
+                    <p style="color: #cbd5e1; font-size: 0.9rem;">
+                        States only verifiable facts (vote count) without emotional language or interpretation. This is what neutral journalism looks like—just the facts.
+                    </p>
+                </div>
+            </div>
+
+            <div class="alert-box" style="margin-top: 25px;">
+                <h4 style="color: #fbbf24; margin-bottom: 10px;">What Did You Notice?</h4>
+                <ul style="color: #cbd5e1; line-height: 1.8;">
+                    <li><strong>Word Choice:</strong> "Spending spree" vs "proposes budget" — loaded language reveals bias</li>
+                    <li><strong>Framing:</strong> "Block" vs "vote against" — action verbs can imply judgment</li>
+                    <li><strong>Facts vs Opinion:</strong> Neutral sources stick to verifiable facts and numbers</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 4: Quiz -->
+        <div class="intro-slide" data-slide="3">
+            <h3 style="color: #a78bfa; font-size: 1.8rem; margin-bottom: 15px;">🎯 Quick Knowledge Check</h3>
+            <p style="color: #cbd5e1; margin-bottom: 25px;">
+                Test your understanding before moving to the interactive modules!
+            </p>
+
+            <div id="quiz-container">
+                <div class="quiz-question">
+                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">1. Which news outlet is generally considered center/neutral?</h4>
+                    <div class="quiz-option" data-question="1" data-answer="wrong">CNN</div>
+                    <div class="quiz-option" data-question="1" data-answer="correct">Associated Press</div>
+                    <div class="quiz-option" data-question="1" data-answer="wrong">Fox News</div>
+                    <div class="quiz-option" data-question="1" data-answer="wrong">MSNBC</div>
+                    <p class="quiz-explanation" style="display: none; color: #93c5fd; margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                        The Associated Press (AP) is a non-profit news agency known for factual, unbiased reporting. It's used as a source by many other news organizations.
+                    </p>
+                </div>
+
+                <div class="quiz-question">
+                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">2. What is the most reliable way to check media bias?</h4>
+                    <div class="quiz-option" data-question="2" data-answer="wrong">Only read sources you agree with</div>
+                    <div class="quiz-option" data-question="2" data-answer="correct">Compare coverage from multiple sources</div>
+                    <div class="quiz-option" data-question="2" data-answer="wrong">Trust social media recommendations</div>
+                    <div class="quiz-option" data-question="2" data-answer="wrong">Stick to one trusted outlet</div>
+                    <p class="quiz-explanation" style="display: none; color: #93c5fd; margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                        Reading multiple perspectives helps you see how different outlets frame the same story and identify bias patterns. This is critical thinking in action!
+                    </p>
+                </div>
+
+                <div class="quiz-question">
+                    <h4 style="color: #e2e8f0; margin-bottom: 15px;">3. Why should you use sources from different political leanings in your essay?</h4>
+                    <div class="quiz-option" data-question="3" data-answer="wrong">To confuse your teacher</div>
+                    <div class="quiz-option" data-question="3" data-answer="correct">To show balanced critical thinking</div>
+                    <div class="quiz-option" data-question="3" data-answer="wrong">To make your essay longer</div>
+                    <div class="quiz-option" data-question="3" data-answer="wrong">It's not necessary</div>
+                    <p class="quiz-explanation" style="display: none; color: #93c5fd; margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                        Using diverse sources demonstrates that you've considered multiple perspectives, which is a hallmark of strong academic writing and critical thinking.
+                    </p>
+                </div>
+            </div>
+
+            <div id="quiz-score" style="display: none; margin-top: 30px; padding: 25px; background: rgba(34, 197, 94, 0.1); border: 2px solid #22c55e; border-radius: 12px; text-align: center;">
+                <h3 style="color: #22c55e; font-size: 1.8rem; margin-bottom: 10px;">🏆 <span id="score-text"></span></h3>
+                <p style="color: #cbd5e1; font-size: 1.1rem;">Great job! You're ready to start the interactive modules.</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Why It Matters -->
+        <div class="intro-slide" data-slide="4">
+            <h3 style="color: #22c55e; font-size: 1.8rem; margin-bottom: 15px;">📈 Why Media Literacy Matters for YOU</h3>
+            <p style="color: #cbd5e1; margin-bottom: 25px;">
+                These aren't just abstract concepts—they directly impact your academic success and future career.
+            </p>
+
+            <div class="info-grid">
+                <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid rgba(59, 130, 246, 0.3); padding: 25px; border-radius: 12px;">
+                    <h4 style="color: #60a5fa; font-size: 1.3rem; margin-bottom: 15px;">For Your Essays</h4>
+                    <ul style="color: #cbd5e1; line-height: 2;">
+                        <li>✓ <strong>Source Credibility:</strong> Teachers check if you're using reliable sources</li>
+                        <li>✓ <strong>Balanced Arguments:</strong> Strong essays consider multiple perspectives</li>
+                        <li>✓ <strong>Critical Analysis:</strong> Demonstrate higher-order thinking skills</li>
+                        <li>✓ <strong>Better Grades:</strong> Well-sourced papers earn higher marks</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(168, 85, 247, 0.1); border: 2px solid rgba(168, 85, 247, 0.3); padding: 25px; border-radius: 12px;">
+                    <h4 style="color: #a78bfa; font-size: 1.3rem; margin-bottom: 15px;">For Your Future</h4>
+                    <ul style="color: #cbd5e1; line-height: 2;">
+                        <li>✓ <strong>College Readiness:</strong> Essential for research papers and analysis</li>
+                        <li>✓ <strong>Career Skills:</strong> Every field requires information evaluation</li>
+                        <li>✓ <strong>Informed Citizenship:</strong> Make educated decisions</li>
+                        <li>✓ <strong>Digital Literacy:</strong> Navigate social media safely</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: rgba(251, 191, 36, 0.1); border-left: 4px solid #fbbf24; padding: 25px; border-radius: 8px; margin-top: 25px;">
+                <p style="color: #cbd5e1; font-size: 1.1rem; font-style: italic; line-height: 1.8; margin-bottom: 10px;">
+                    "In the age of information, the ability to think critically about sources is more important than memorizing facts."
+                </p>
+                <p style="color: #94a3b8; font-size: 0.9rem;">— Educational Research Association</p>
+            </div>
+
+            <div style="margin-top: 30px; padding: 25px; background: rgba(96, 165, 250, 0.1); border-radius: 12px;">
+                <h4 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.2rem;">What's Coming Next:</h4>
+                <div class="info-grid">
+                    <div>
+                        <p style="color: #22c55e; font-weight: 700; margin-bottom: 5px;">1️⃣ Media Bias Sorting Game</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem;">Practice identifying bias by categorizing real news sources</p>
+                    </div>
+                    <div>
+                        <p style="color: #22c55e; font-weight: 700; margin-bottom: 5px;">2️⃣ AI Thesis Generator</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem;">Get help crafting strong, arguable thesis statements</p>
+                    </div>
+                    <div>
+                        <p style="color: #22c55e; font-weight: 700; margin-bottom: 5px;">3️⃣ Citation Tool</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem;">Master MLA, APA, and Chicago citation formats</p>
+                    </div>
+                    <div>
+                        <p style="color: #22c55e; font-weight: 700; margin-bottom: 5px;">4️⃣ Performance Review</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem;">Assess your skills and get personalized resources</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation-buttons">
+        <button class="nav-btn nav-btn-prev" id="intro-prev-btn">
+            ← Previous
+        </button>
+        <button class="nav-btn nav-btn-next" id="intro-next-btn">
+            Next Slide →
+        </button>
+    </div>
+</div>
+
+<script>
+(function() {
+    let currentIntroSlide = 0;
+    let quizAnswered = {1: false, 2: false, 3: false};
+    let quizScore = 0;
+
+    function changeIntroSlide(direction) {
+        const slides = document.querySelectorAll('.intro-slide');
+        const dots = document.querySelectorAll('.slide-dot');
+        
+        slides[currentIntroSlide].classList.remove('active');
+        dots[currentIntroSlide].classList.remove('active');
+        
+        currentIntroSlide += direction;
+        
+        if (currentIntroSlide >= slides.length) {
+            window.nextSection();
+            return;
+        }
+        if (currentIntroSlide < 0) {
+            currentIntroSlide = 0;
+        }
+        
+        slides[currentIntroSlide].classList.add('active');
+        dots[currentIntroSlide].classList.add('active');
+        
+        const nextBtn = document.getElementById('intro-next-btn');
+        const prevBtn = document.getElementById('intro-prev-btn');
+        
+        if (currentIntroSlide === slides.length - 1) {
+            nextBtn.innerHTML = 'Start Modules →';
+        } else {
+            nextBtn.innerHTML = 'Next Slide →';
+        }
+        
+        prevBtn.disabled = (currentIntroSlide === 0);
+    }
+
+    document.getElementById('intro-next-btn').addEventListener('click', function() {
+        changeIntroSlide(1);
+    });
+
+    document.getElementById('intro-prev-btn').addEventListener('click', function() {
+        changeIntroSlide(-1);
+    });
+
+    document.querySelectorAll('.slide-dot').forEach(dot => {
+        dot.addEventListener('click', function() {
+            const targetSlide = parseInt(this.dataset.slide);
+            const diff = targetSlide - currentIntroSlide;
+            changeIntroSlide(diff);
+        });
+    });
+
+    window.toggleHeadlineAnalysis = function(id) {
+        const analysis = document.getElementById(id);
+        analysis.classList.toggle('show');
+    };
+
+    document.querySelectorAll('.quiz-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const question = this.dataset.question;
+            const answer = this.dataset.answer;
+            
+            if (quizAnswered[question]) return;
+            
+            const questionOptions = document.querySelectorAll(`[data-question="${question}"]`);
+            questionOptions.forEach(opt => {
+                if (opt.dataset.answer === 'correct') {
+                    opt.classList.add('correct');
+                } else if (opt === this) {
+                    opt.classList.add('selected');
+                    if (answer === 'wrong') {
+                        opt.classList.add('incorrect');
+                    }
+                }
+                opt.style.cursor = 'default';
+            });
+            
+            const explanation = this.closest('.quiz-question').querySelector('.quiz-explanation');
+            explanation.style.display = 'block';
+            
+            quizAnswered[question] = true;
+            if (answer === 'correct') {
+                quizScore++;
+            }
+            
+            if (quizAnswered[1] && quizAnswered[2] && quizAnswered[3]) {
+                const scoreDiv = document.getElementById('quiz-score');
+                const scoreText = document.getElementById('score-text');
+                scoreText.textContent = `You got ${quizScore} out of 3 correct!`;
+                scoreDiv.style.display = 'block';
+            }
+        });
+    });
+})();
+</script>
+
         <!-- Section 1: Media Bias Game (with AI Chatbox) -->
-        <div class="section-container active" id="section-1">
+        <div class="section-container" id="section-1">
             <div class="section-header">
                 <h2 class="section-title">Media Bias Sorting Game</h2>
                 <p class="section-description">
@@ -4579,13 +5173,13 @@ const API_BASE = `${pythonURI}/api`;
     </div>
 
     <script type="module">
-        let currentSection = 1;
-        const totalSections = 4;
+        let currentSection = 0;
+        const totalSections = document.querySelectorAll('.section-container').length;
 
         function updateProgress() {
             // Update step indicators
             document.querySelectorAll('.step').forEach((step, index) => {
-                const stepNum = index + 1;
+                const stepNum = Number.parseInt(step.dataset.step, 10);
                 step.classList.remove('active', 'completed');
                 
                 if (stepNum < currentSection) {
@@ -4596,13 +5190,15 @@ const API_BASE = `${pythonURI}/api`;
             });
 
             // Update progress line
-            const progressPercent = ((currentSection - 1) / (totalSections - 1)) * 100;
+            const progressPercent = totalSections > 1
+                ? (currentSection / (totalSections - 1)) * 100
+                : 0;
             document.getElementById('progress-fill').style.width = progressPercent + '%';
 
             // Show/hide sections
             document.querySelectorAll('.section-container').forEach((section, index) => {
                 section.classList.remove('active');
-                if (index + 1 === currentSection) {
+                if (index === currentSection) {
                     section.classList.add('active');
                 }
             });
@@ -4611,19 +5207,20 @@ const API_BASE = `${pythonURI}/api`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function nextSection() {
-            if (currentSection < totalSections) {
+        window.nextSection = function() {
+            if (currentSection < totalSections - 1) {
                 currentSection++;
                 updateProgress();
             }
-        }
+        };
 
-        function prevSection() {
-            if (currentSection > 1) {
+        window.prevSection = function() {
+            if (currentSection > 0) {
                 currentSection--;
                 updateProgress();
             }
-        }
+        };
+
 
         // Allow direct navigation by clicking steps
         document.querySelectorAll('.step').forEach((step) => {

@@ -72,7 +72,7 @@
 
         .rating-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
             gap: 20px;
             margin: 40px 0;
         }
@@ -243,7 +243,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: #31285cbc;
             backdrop-filter: blur(8px);
             animation: fadeIn 0.3s ease-out;
             overflow-y: auto;
@@ -387,7 +387,7 @@
         .resource-item {
             padding: 15px 20px;
             margin-bottom: 10px;
-            background: white;
+            background: #6768a3ff;
             border-radius: 10px;
             border-left: 4px solid #667eea;
             transition: all 0.3s;
@@ -563,7 +563,6 @@
             }
         }
     </style>
-</head>
 <body>
     <div class="survey-container">
         <div class="survey-header">
@@ -666,8 +665,11 @@
         </table>
     </div>
 
-    <script>
-        const API_BASE = 'http://localhost:8001/api';
+    <script type="module">
+        const API_BASE = 'http://localhost:8404/api';
+        import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+const API_BASE = `${pythonURI}/api`;
+
 
         const resourcesByTier = {
             1: {
@@ -868,7 +870,7 @@
                     alert('Error: ' + (data.error || 'Unknown error occurred'));
                 }
             } catch (error) {
-                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8001.');
+                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8404.');
                 console.error(error);
             } finally {
                 submitBtn.disabled = false;
@@ -939,4 +941,3 @@
         });
     </script>
 </body>
-</html>

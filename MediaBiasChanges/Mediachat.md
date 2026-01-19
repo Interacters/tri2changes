@@ -1,4 +1,3 @@
-<div class="page-content">
 <style>
 * {
   margin: 0;
@@ -16,7 +15,7 @@ body {
 
 /* Center everything */
 .page-content {
-  max-width: 1400px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
@@ -146,7 +145,7 @@ body {
 }
 
 .btn-ghost {
-    background: rgba(255,255,255,0.5);
+    background: rgb(255 255 255 / 29%);
     color: #2c5282;
 }
 
@@ -189,10 +188,6 @@ body {
 }
 
 </style>
-<div class="intro-text">
-   <h2>Media Bias</h2>
-    <p>When writing a paper, checking the bias of sources is very important. Drag the news sources to the correct bins. Ask the chatbox below for help. Sign in to save your best time to the leaderboard!</p>
-</div>
 <div class="game-container">
     <div class="game-header">
         <div class="player-info">
@@ -1130,10 +1125,10 @@ async function submitFinalTime(username, elapsed) {
 }
 
     window.addEventListener('DOMContentLoaded', () => {
-        console.log("🚀 DOM fully loaded — initializing game & buttons");
+        console.log("DOM fully loaded — initializing game & buttons");
 
         initGame();
-        console.log("✅ Game initialized automatically");
+        console.log("Game initialized automatically");
 
         const resetBtn = document.getElementById('reset-btn');
         if (resetBtn) {
@@ -1166,7 +1161,7 @@ async function submitFinalTime(username, elapsed) {
         const submitBtn = document.getElementById('submit-btn');
         if (submitBtn) {
             submitBtn.addEventListener('click', () => {
-                console.log("📨 Submit clicked");
+                console.log("Submit clicked");
 
                 const totalImages = document.querySelectorAll('.image').length;
                 const placedCount = placedImages.size;
@@ -1229,7 +1224,7 @@ async function submitFinalTime(username, elapsed) {
 
     // Initialize
     window.onload = () => {
-        console.log("🌎 Window fully loaded — starting game");
+        console.log("Window fully loaded — starting game");
         fetchUser();
         initGame();
         fetchLeaderboard();

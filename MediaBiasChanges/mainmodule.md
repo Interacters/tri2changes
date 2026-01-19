@@ -3660,11 +3660,8 @@ loadPromptClicks()
 </div>
 
 <script type="module">
-<<<<<<< HEAD
-=======
 import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
->>>>>>> 29012e59f2863890a63506df2364ae521f3f7a83
 (function(){
   // ===== COLLEGE BOARD REQUIREMENTS DOCUMENTATION =====
   

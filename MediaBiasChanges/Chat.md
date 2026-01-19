@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 <style>
     .chat-container {
       background: linear-gradient(145deg, #8568e694 0%, #586ed09f 100%);
@@ -7,43 +6,36 @@
       backdrop-filter: blur(10px);
       margin-bottom: 20px
     }
-=======
-<script>
-// Smart Prompts Feature
-const PROMPT_TEMPLATES = [
-    { id: 1, text: "What is the political bias of {source}?" },
-    { id: 2, text: "Show me recent top stories from {source}" },
-    { id: 3, text: "How does {source} compare to other news outlets?" },
-    { id: 4, text: "What are the most controversial topics covered by {source}?" },
-    { id: 5, text: "Is {source} a reliable news source?" }
-];
->>>>>>> Stashed changes
 
-const PROMPTS_API_BASE = 'http://localhost:8404';
-const PROMPTS_REFRESH_INTERVAL = 5000;
-let promptsWithClicks = [];
-let currentSource = '';
-let promptRefreshTimer;
+    .chat-container h1 {
+      font-size: 1.75rem;
+      margin: 0 0 8px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa, #ec4899, #f59e0b, #60a5fa);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      animation: gradientShift 3s linear infinite;
+    }
 
-const newsSourceInput = document.getElementById('news-source');
-const smartPromptsSection = document.getElementById('smart-prompts-section');
-const smartPromptsGrid = document.getElementById('smart-prompts-grid');
-const aiMessageInput = document.getElementById('ai-message');
-const aiModeSelect = document.getElementById('ai-mode');
-const aiSendBtn = document.getElementById('ai-send-btn');
-const aiClearBtn = document.getElementById('ai-clear-btn');
-const aiStatusEl = document.getElementById('ai-status');
-const aiChatLog = document.getElementById('ai-chat-log');
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: 200% center;
+      }
+    }
 
-function havePromptClicksChanged(nextPrompts) {
-    if (promptsWithClicks.length !== nextPrompts.length) return true;
-    return nextPrompts.some(next => {
-        const existing = promptsWithClicks.find(p => p.id === next.id);
-        return !existing || existing.clicks !== next.clicks;
-    });
-}
+    .chat-container p.description {
+      margin: 0 0 28px;
+      font-size: 0.95rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
 
-<<<<<<< Updated upstream
     .chat-container p.description strong {
       color: #cbd5e1;
       font-weight: 600;
@@ -238,13 +230,9 @@ function havePromptClicksChanged(nextPrompts) {
   </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<div class="intro-text">
-   <h2>AI Chatbox with Smart Prompts</h2>
-    <p>Type a news source to see smart prompt suggestions, or ask your own question. Choose whether you want a <strong>Hint</strong> or <strong>Information</strong>, then send. Your conversation history is saved below!</p>
-</div>
 
 <div class="ai-card">
-    <h3>🎯 Source Intel Chat</h3>
+    <h3>Source Intel Chat</h3>
     <p>Get help analyzing news sources with AI-powered suggestions</p>
     
     <label>News Source (Optional)</label>
@@ -274,7 +262,10 @@ function havePromptClicksChanged(nextPrompts) {
     <div class="ai-chat-log" id="ai-chat-log" style="display: none;"></div>
 </div>
 
-<script>
+<script type="module">
+import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+const PROMPTS_API_BASE = pythonURI || 'http://localhost:8404';
+;
 // Smart Prompts Feature
 const PROMPT_TEMPLATES = [
     { id: 1, text: "What is the political bias of {source}?" },
@@ -284,7 +275,6 @@ const PROMPT_TEMPLATES = [
     { id: 5, text: "Is {source} a reliable news source?" }
 ];
 
-const PROMPTS_API_BASE = 'http://localhost:8404';
 const PROMPTS_REFRESH_INTERVAL = 5000;
 let promptsWithClicks = [];
 let currentSource = '';
@@ -308,8 +298,6 @@ function havePromptClicksChanged(nextPrompts) {
     });
 }
 
-=======
->>>>>>> Stashed changes
 // Load prompt click data
 async function loadPromptClicks() {
     let nextPrompts;
@@ -417,7 +405,6 @@ function showAIStatus(message, isError = false) {
     aiStatusEl.style.color = isError ? '#fca5a5' : '#7ad2f9';
 }
 
-// Send message
 aiSendBtn.addEventListener('click', async () => {
     const message = aiMessageInput.value.trim();
     const mode = aiModeSelect.value;
@@ -432,10 +419,11 @@ aiSendBtn.addEventListener('click', async () => {
     showAIStatus('Processing your request...');
     
     try {
-        const response = await fetch('http://localhost:8404/api/chat', {
+        const response = await fetch(`${pythonURI}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: mode, message: message })
+        });
         });
 
         if (!response.ok) {

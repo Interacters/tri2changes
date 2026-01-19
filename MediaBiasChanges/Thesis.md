@@ -314,13 +314,7 @@
             font-size: 0.9rem;
         }
     </style>
-</head>
 <body>
-<div class="intro-text">
-   <h2>Thesis Generator</h2>
-    <p>Starting your essay can be challenging. Using this Thesis Generator tool, you can recieve an AI-powered starting block to outline your essay. 
-    </p>
-</div>
     <div class="thesis-gen-card">
 
         <div class="thesis-form-group">
@@ -376,7 +370,7 @@
 <script type="module">
     import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
 
-    const API_BASE = pythonURI || 'http://localhost:8001';
+    const API_BASE = pythonURI || 'http://localhost:8404';
 
     function addThesisPoint() {
         const container = document.getElementById('thesis-points-container');

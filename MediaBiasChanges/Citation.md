@@ -275,7 +275,7 @@
   </div>
 </div>
 
-<script>
+<script type="module">
 import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
 (function(){
@@ -395,6 +395,7 @@ function validateCitationFields() {
 styleEl.addEventListener('change', validateCitationFields);
 
 // Save session whenever inputs change
+const SESSION_KEY = 'citation_session_v1';
 [authorEl, titleEl, sourceEl, dateEl, urlEl, styleEl].forEach(el => {
   el.addEventListener('input', () => {
     localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -823,16 +824,23 @@ if (parentheticalEl) {
   }
 
   async function fetchMetadataFromServer(targetUrl) {
-    const base = (window.fetchProxyBase || '').replace(/\/$/, '');
+    const base = (pythonURI || '').replace(/\/$/, '');
     if (!base) {
-      console.warn('No fetchProxyBase set; skipping server fetch');
+      console.warn('No pythonURI set; skipping server fetch');
       return null;
     }
 
     try {
-      const endpoint = `${base}/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
+      const endpoint = `${base}/api/media/fetch_meta?url=${encodeURIComponent(targetUrl)}`;
       console.info('Calling server metadata endpoint:', endpoint);
-      const res = await fetch(endpoint, { method: 'GET' });
+      
+      // Use fetchOptions from config.js
+      const requestOptions = {
+        ...fetchOptions,
+        method: 'GET'  // Override to GET for this specific endpoint
+      };
+      
+      const res = await fetch(endpoint, requestOptions);
 
       const ct = res.headers.get('content-type') || '';
       const body = ct.includes('application/json') ? await res.json().catch(()=>null) : await res.text().catch(()=>null);

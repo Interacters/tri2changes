@@ -5002,9 +5002,8 @@ resetBtn.addEventListener('click', () => {
         </table>
     </div>
 
-    <script type="module">
+<script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
-    const API_BASE = `${pythonURI}/api`;
 
 
         const resourcesByTier = {
@@ -5069,7 +5068,7 @@ resetBtn.addEventListener('click', () => {
         // Check if user is authenticated and get their role
         async function checkAuth() {
             try {
-                const response = await fetch(`${API_BASE}/id`, {
+                const response = await fetch(`${pythonURI}/api/id`, {
                     ...fetchOptions
                 });
                 
@@ -5086,7 +5085,8 @@ resetBtn.addEventListener('click', () => {
         // Load all performances (admin only)
         async function loadAllPerformances() {
             try {
-                const response = await fetch(`${API_BASE}/performance`, {
+                const response = await fetch(`${pythonURI}/performance`, {
+                    ...fetchOptions,
                     credentials: 'include'
                 });
                 
@@ -5149,7 +5149,8 @@ resetBtn.addEventListener('click', () => {
         // Show user info when clicking username
         window.showUserInfo = async function(userId, username) {
             try {
-                const response = await fetch(`${API_BASE}/performance/user/${userId}`, {
+                const response = await fetch(`${pythonURI}/api/performance/user/${userId}`, {
+                ...fetchOptions,
                     credentials: 'include'
                 });
                 
@@ -5172,47 +5173,46 @@ resetBtn.addEventListener('click', () => {
             }
         }
 
-        document.getElementById('survey-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+    document.getElementById('survey-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const rating = document.querySelector('input[name="rating"]:checked');
+        if (!rating) {
+            alert('Please select a rating before submitting.');
+            return;
+        }
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="loading"></div>';
+
+        try {
+            const response = await fetch(`${pythonURI}/api/performance/submit`, {
+                ...fetchOptions,
+                method: 'POST',
+                body: JSON.stringify({ rating: parseInt(rating.value) })
+            });
             
-            const rating = document.querySelector('input[name="rating"]:checked');
-            if (!rating) {
-                alert('Please select a rating before submitting.');
-                return;
-            }
-
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loading"></div>';
-
-            try {
-                const response = await fetch(`${API_BASE}/performance/submit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ rating: parseInt(rating.value) })
-                });
+            const data = await response.json();
+            
+            if (response.ok) {
+                showResults(data);
                 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showResults(data);
-                    
-                    // Reload admin view if visible
-                    if (document.getElementById('admin-section').style.display !== 'none') {
-                        loadAllPerformances();
-                    }
-                } else {
-                    alert('Error: ' + (data.error || 'Unknown error occurred'));
+                // Reload admin view if visible
+                if (document.getElementById('admin-section').style.display !== 'none') {
+                    loadAllPerformances();
                 }
-            } catch (error) {
-                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8404.');
-                console.error(error);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Submit Rating</span>';
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error occurred'));
             }
-        });
+        } catch (error) {
+            alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8404.');
+            console.error(error);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Submit Rating</span>';
+        }
+    });
 
         function showResults(data) {
             const badgeColors = {

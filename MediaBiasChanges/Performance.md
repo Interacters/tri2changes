@@ -647,7 +647,7 @@
     <!-- Admin View (visible to admins only) -->
     <div class="admin-container" id="admin-section" style="display: none;">
         <div class="admin-header">
-            <h2>📊 All Performance Ratings</h2>
+            <h2> All Performance Ratings</h2>
         </div>
 
         <div class="admin-stats-grid" id="admin-stats-grid"></div>
@@ -666,9 +666,8 @@
     </div>
 
     <script type="module">
-        const API_BASE = 'http://localhost:8404/api';
-        import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
-const API_BASE = `${pythonURI}/api`;
+    import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
+    const API_BASE = `${pythonURI}/api`;
 
 
         const resourcesByTier = {
@@ -734,7 +733,7 @@ const API_BASE = `${pythonURI}/api`;
         async function checkAuth() {
             try {
                 const response = await fetch(`${API_BASE}/id`, {
-                    credentials: 'include'
+                    ...fetchOptions
                 });
                 
                 if (response.ok) {

@@ -424,7 +424,6 @@ aiSendBtn.addEventListener('click', async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type: mode, message: message })
         });
-        });
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));

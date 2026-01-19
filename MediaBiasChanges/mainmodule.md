@@ -9,7 +9,28 @@ date: 2025-12-12
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Essay Help - Media Literacy Module</title>
-    <style>
+
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap');
+        
+        /* Global font override */
+        * {
+            font-family: 'DM Sans', system-ui, -apple-system, sans-serif !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6,
+        .section-title,
+        .progress-header h1 {
+           font-family: 'DM Serif Display', serif !important;
+            font-weight: 500 !important;
+        }
+        p, li, span, div {
+            font-family: 'DM Sans', system-ui, -apple-system, sans-serif !important;
+            line-height: 1.6 !important;
+        }
+    </style>
+
+ <style>
   * {
     max-width: none !important;
   }
@@ -19,7 +40,7 @@ date: 2025-12-12
     padding: 40px;
   }
 </style>
-    <style>
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -29,7 +50,7 @@ date: 2025-12-12
         body {
             min-height: 100vh;
             background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e293b 100%);
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'DM Sans', system-ui, -apple-system, sans-serif !important;
             color: #e2e8f0;
             padding: 20px;
         }
@@ -423,8 +444,8 @@ date: 2025-12-12
             transform: translateX(5px);
         }
         
-        .headline-card.left { border-left-color: #ef4444; }
-        .headline-card.right { border-left-color: #3b82f6; }
+        .headline-card.left { border-left-color: #3b82f6; }
+        .headline-card.right { border-left-color: #ef4444; }
         .headline-card.center { border-left-color: #94a3b8; }
         
         .headline-analysis {
@@ -591,9 +612,9 @@ date: 2025-12-12
             <div style="position: relative; padding: 40px 20px;">
                 <div class="spectrum-bar"></div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                    <span style="color: #ef4444; font-weight: 700; font-size: 0.9rem;">LEFT</span>
+                    <span style="color: #3b82f6; font-weight: 700; font-size: 0.9rem;">LEFT</span>
                     <span style="color: #94a3b8; font-weight: 700; font-size: 0.9rem;">CENTER</span>
-                    <span style="color: #3b82f6; font-weight: 700; font-size: 0.9rem;">RIGHT</span>
+                    <span style="color: #ef4444; font-weight: 700; font-size: 0.9rem;">RIGHT</span>
                 </div>
                 
                 <div style="position: relative; margin: 30px 0;">
@@ -3589,11 +3610,6 @@ loadPromptClicks()
   font-family: 'Inter', sans-serif;
 }
 </style>
-
-<div class="intro-text">
-   <h2>Citation Generator</h2>
-    <p>It's important to include correct citations for your work. There are many types of formats for citations including: MLA, APA, Chicago. This tool can help you create citations for your sources.</p>
-</div>
 
 <div class="cite-card" id="citation-tool">
   <div class="cite-row">

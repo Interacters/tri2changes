@@ -327,7 +327,7 @@ date: 2025-12-12
         </p>
     </div>
 
-    <style>
+<style>
         .intro-slides-container {
             position: relative;
             min-height: 500px;
@@ -2799,7 +2799,7 @@ loadPromptClicks()
 
             <div class="content-placeholder">
                 <p>
-                <style>
+<style>
         .thesis-gen-card {
             background: linear-gradient(160deg, #856ccadd, #5b6ebce1);
             border: 1px solid rgba(255,255,255,0.08);
@@ -5332,9 +5332,20 @@ resetBtn.addEventListener('click', () => {
         </div>
     </div>
 
-    <script type="module">
+<script type="module">
         let currentSection = 0;
         const totalSections = document.querySelectorAll('.section-container').length;
+
+        window.addEventListener('DOMContentLoaded', () => {
+        const savedSection = localStorage.getItem('english_module_section');
+        if (savedSection !== null) {
+            const sectionNum = parseInt(savedSection);
+            if (!isNaN(sectionNum) && sectionNum >= 0 && sectionNum < totalSections) {
+                currentSection = sectionNum;
+            }
+        }
+        updateProgress();
+    });
 
         function formatDuration(totalSeconds) {
             if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return null;
@@ -5342,6 +5353,7 @@ resetBtn.addEventListener('click', () => {
             const seconds = Math.round(totalSeconds % 60);
             return `${minutes}:${String(seconds).padStart(2, '0')}`;
         }
+        
 
         function truncateText(text, maxLen) {
             const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
@@ -5495,6 +5507,8 @@ resetBtn.addEventListener('click', () => {
             }
 
             // Scroll to top smoothly
+            localStorage.setItem('english_module_section', currentSection);
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -5524,9 +5538,6 @@ resetBtn.addEventListener('click', () => {
                 }
             });
         });
-
-        // Initialize
-        updateProgress();
     </script>
 </body>
 </html>

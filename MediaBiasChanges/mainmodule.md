@@ -310,6 +310,11 @@ date: 2025-12-12
                     <div class="step-circle">4</div>
                     <div class="step-label">Performance Review</div>
                 </div>
+                
+                <div class="step" data-step="5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Wrap Up</div>
+                </div>
             </div>
         </div>
 
@@ -827,6 +832,10 @@ date: 2025-12-12
                     <div>
                         <p style="color: #22c55e; font-weight: 700; margin-bottom: 5px;">4️⃣ Performance Review</p>
                         <p style="color: #cbd5e1; font-size: 0.9rem;">Assess your skills and get personalized resources</p>
+                    </div>
+                    <div>
+                        <p style="color: #22c55e; font-weight: 700; margin-bottom: 5px;">5️⃣ Wrap Up</p>
+                        <p style="color: #cbd5e1; font-size: 0.9rem;">Review what you learned and the work you completed</p>
                     </div>
                 </div>
             </div>
@@ -5282,6 +5291,45 @@ const API_BASE = `${pythonURI}/api`;
                 <button class="nav-btn nav-btn-prev" onclick="prevSection()">
                     ← Previous
                 </button>
+                <button class="nav-btn nav-btn-next" onclick="nextSection()">
+                    Next Section →
+                </button>
+            </div>
+        </div>
+        
+        <!-- Section 5: Wrap Up -->
+        <div class="section-container" id="section-5">
+            <div class="section-header">
+                <h2 class="section-title">Wrap Up</h2>
+                <p class="section-description">
+                    A quick recap of what you completed and the skills you practiced.
+                </p>
+            </div>
+
+            <div class="content-placeholder">
+                <p>Learning highlights from this module:</p>
+                <ul style="margin: 12px 0 20px 22px; color: #cbd5e1; line-height: 1.7;">
+                    <li>Recognize bias and evaluate source credibility.</li>
+                    <li>Compare perspectives and support claims with evidence.</li>
+                    <li>Draft stronger thesis statements and refine your argument.</li>
+                    <li>Generate proper citations in MLA, APA, and Chicago styles.</li>
+                    <li>Reflect on your performance and next steps.</li>
+                </ul>
+
+                <p>Activity recap (auto-filled from your work above):</p>
+                <ul style="margin: 12px 0 0 22px; color: #cbd5e1; line-height: 1.7;">
+                    <li><strong>Media Bias Game:</strong> <span id="wrap-game-summary">No attempts recorded yet.</span></li>
+                    <li><strong>AI Help Chat:</strong> <span id="wrap-chat-summary">No chats yet.</span></li>
+                    <li><strong>Thesis Generator:</strong> <span id="wrap-thesis-summary">No thesis statements yet.</span></li>
+                    <li><strong>Citation Generator:</strong> <span id="wrap-citation-summary">No citations saved yet.</span></li>
+                    <li><strong>Performance Reflection:</strong> <span id="wrap-reflection-summary">No rating submitted yet.</span></li>
+                </ul>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn nav-btn-prev" onclick="prevSection()">
+                    ← Previous
+                </button>
                 <button class="nav-btn nav-btn-next" disabled>
                     Complete ✓
                 </button>
@@ -5292,6 +5340,133 @@ const API_BASE = `${pythonURI}/api`;
     <script type="module">
         let currentSection = 0;
         const totalSections = document.querySelectorAll('.section-container').length;
+
+        function formatDuration(totalSeconds) {
+            if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return null;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.round(totalSeconds % 60);
+            return `${minutes}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function truncateText(text, maxLen) {
+            const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
+            if (!cleaned) return '';
+            if (cleaned.length <= maxLen) return cleaned;
+            return cleaned.slice(0, Math.max(0, maxLen - 3)) + '...';
+        }
+
+        function setSummaryText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
+        function refreshWrapUpSummary() {
+            if (!document.getElementById('section-5')) return;
+
+            let gameSummary = 'No attempts recorded yet.';
+            try {
+                const raw = localStorage.getItem('biasGameData_v1');
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    const attempts = Array.isArray(data.attempts) ? data.attempts : [];
+                    if (attempts.length) {
+                        const times = attempts
+                            .map(attempt => Number(attempt.time))
+                            .filter(time => Number.isFinite(time) && time > 0);
+                        const best = times.length ? Math.min(...times) : null;
+                        const lastAttempt = attempts[attempts.length - 1] || null;
+                        const lastTime = lastAttempt ? Number(lastAttempt.time) : null;
+                        const bestText = best ? formatDuration(best) : null;
+                        const lastText = Number.isFinite(lastTime) ? formatDuration(lastTime) : null;
+
+                        gameSummary = `Attempts: ${attempts.length}`;
+                        if (bestText) gameSummary += `, best time ${bestText}`;
+                        if (lastText) gameSummary += `, last time ${lastText}`;
+                        gameSummary += '.';
+
+                        const prompts = lastAttempt && Array.isArray(lastAttempt.prompts)
+                            ? lastAttempt.prompts.filter(Boolean)
+                            : [];
+                        if (prompts.length) {
+                            const shown = prompts.slice(0, 3).join('; ');
+                            const suffix = prompts.length > 3 ? '...' : '';
+                            gameSummary += ` Prompts used: ${shown}${suffix}`;
+                        }
+                    }
+                }
+            } catch (err) {
+                // ignore storage errors
+            }
+            setSummaryText('wrap-game-summary', gameSummary);
+
+            let chatSummary = 'No chats yet.';
+            const chatLog = document.getElementById('ai-chat-log');
+            if (chatLog) {
+                const userMessages = chatLog.querySelectorAll('.chat-bubble.user');
+                const aiMessages = chatLog.querySelectorAll('.chat-bubble.ai');
+                const total = userMessages.length + aiMessages.length;
+                if (total > 0) {
+                    chatSummary = `Messages: ${total} (${userMessages.length} you, ${aiMessages.length} AI)`;
+                    const lastUser = userMessages[userMessages.length - 1];
+                    if (lastUser && lastUser.textContent) {
+                        const lastQuestion = lastUser.textContent.replace(/^You:\s*/, '');
+                        const snippet = truncateText(lastQuestion, 120);
+                        if (snippet) {
+                            chatSummary += `; last question: "${snippet}"`;
+                        }
+                    }
+                    chatSummary += '.';
+                }
+            }
+            setSummaryText('wrap-chat-summary', chatSummary);
+
+            let thesisSummary = 'No thesis statements yet.';
+            const thesisOutput = document.getElementById('thesis-output');
+            if (thesisOutput) {
+                const statements = thesisOutput.querySelectorAll('.thesis-statement');
+                if (statements.length) {
+                    const lastStatement = statements[statements.length - 1].textContent || '';
+                    thesisSummary = `Statements generated: ${statements.length}`;
+                    const snippet = truncateText(lastStatement, 160);
+                    if (snippet) {
+                        thesisSummary += `; latest: "${snippet}"`;
+                    }
+                    thesisSummary += '.';
+                }
+            }
+            setSummaryText('wrap-thesis-summary', thesisSummary);
+
+            let citationSummary = 'No citations saved yet.';
+            try {
+                const saved = JSON.parse(localStorage.getItem('biasGame_citations_v1') || '[]');
+                if (Array.isArray(saved) && saved.length) {
+                    const counts = saved.reduce((acc, item) => {
+                        const style = item && item.style ? String(item.style).toLowerCase() : '';
+                        if (Object.prototype.hasOwnProperty.call(acc, style)) acc[style] += 1;
+                        return acc;
+                    }, { apa: 0, mla: 0, chicago: 0 });
+                    citationSummary = `Saved citations: ${saved.length} (APA: ${counts.apa}, MLA: ${counts.mla}, Chicago: ${counts.chicago}).`;
+                }
+            } catch (err) {
+                // ignore storage errors
+            }
+            setSummaryText('wrap-citation-summary', citationSummary);
+
+            let reflectionSummary = 'No rating submitted yet.';
+            const selectedRating = document.querySelector('input[name="rating"]:checked');
+            if (selectedRating && selectedRating.value) {
+                reflectionSummary = `Your rating: ${selectedRating.value}/5.`;
+            } else {
+                const ratingEl = document.getElementById('your-rating');
+                if (ratingEl) {
+                    const ratingText = (ratingEl.textContent || '').trim();
+                    if (ratingText && ratingText !== '-') {
+                        reflectionSummary = `Your rating: ${ratingText}/5.`;
+                    }
+                }
+            }
+            setSummaryText('wrap-reflection-summary', reflectionSummary);
+        }
 
         function updateProgress() {
             // Update step indicators
@@ -5319,6 +5494,10 @@ const API_BASE = `${pythonURI}/api`;
                     section.classList.add('active');
                 }
             });
+
+            if (currentSection === totalSections - 1) {
+                refreshWrapUpSummary();
+            }
 
             // Scroll to top smoothly
             window.scrollTo({ top: 0, behavior: 'smooth' });

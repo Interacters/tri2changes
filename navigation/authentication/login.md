@@ -107,21 +107,63 @@ show_reading_time: false
 <script type="module">
     import { login, pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
-    // Function to handle Python login
-    window.pythonLogin = function () {
-        const options = {
-            URL: `${pythonURI}/api/authenticate`,
-            callback: pythonDatabase,
-            message: "message",
-            method: "POST",
-            cache: "no-cache",
-            body: {
-                uid: document.getElementById("uid").value,
-                password: document.getElementById("password").value,
-            }
-        };
-        login(options);
+window.pythonLogin = async function () {
+    const uid = document.getElementById("uid").value;
+    const password = document.getElementById("password").value;
+    
+    if (!uid || !password) {
+        document.getElementById("message").textContent = "Please enter both username and password";
+        return;
     }
+    
+    try {
+        const response = await fetch(`${pythonURI}/api/authenticate`, {
+            method: 'POST',
+            mode: 'cors',
+            credentials: 'include',  // CRITICAL: This allows cookies to be set
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'client'
+            },
+            body: JSON.stringify({ uid, password })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            document.getElementById("message").textContent = errorData.message || `Login failed: ${response.status}`;
+            return;
+        }
+        
+        // Wait for the response to complete (cookie is set now)
+        const data = await response.json();
+        console.log("Login successful:", data);
+        
+        // Small delay to ensure cookie is fully set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Now verify the session is active
+        const verifyResponse = await fetch(`${pythonURI}/api/id`, {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'client'
+            }
+        });
+        
+        if (verifyResponse.ok) {
+            // Session verified, redirect to profile
+            window.location.href = '{{site.baseurl}}/profile';
+        } else {
+            throw new Error('Session verification failed');
+        }
+        
+    } catch (error) {
+        console.error("Login error:", error);
+        document.getElementById("message").textContent = `Error: ${error.message}`;
+    }
+}
 
     // Function to fetch and display Python data
     function pythonDatabase() {

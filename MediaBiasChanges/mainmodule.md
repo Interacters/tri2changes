@@ -867,6 +867,12 @@ date: 2025-12-12
         <button class="nav-btn nav-btn-prev" id="intro-prev-btn">
             ← Previous
         </button>
+
+        <!-- Added: Skip Intro button (only for the introduction section) -->
+        <button class="nav-btn nav-btn-ghost" id="skip-intro-btn" title="Skip the introduction and go to Module 1">
+            Skip Intro
+        </button>
+
         <button class="nav-btn nav-btn-next" id="intro-next-btn">
             Next Slide →
         </button>
@@ -918,6 +924,23 @@ date: 2025-12-12
     document.getElementById('intro-prev-btn').addEventListener('click', function() {
         changeIntroSlide(-1);
     });
+
+// New: Skip Intro -> jump directly to the first module (Media Bias Game)
+    const skipBtn = document.getElementById('skip-intro-btn');
+    if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+            // window.nextSection is defined later on the page; calling it will move from section 0 -> 1
+            if (typeof window.nextSection === 'function') {
+                window.nextSection();
+            } else {
+                // fallback: set saved section so when page logic initializes it will open module 1
+                localStorage.setItem('english_module_section', '1');
+                // if functions don't exist yet, a reload will cause initialization to pick up saved section
+                // (unlikely needed, but safe)
+                window.location.reload();
+            }
+        });
+    }
 
     document.querySelectorAll('.slide-dot').forEach(dot => {
         dot.addEventListener('click', function() {
@@ -1639,12 +1662,6 @@ function showSignInPrompt() {
         signupBtn.textContent = 'Verifying GitHub...';
         
         try {
-            await window.authManager.signup(name, uid, password);
-            successMsg.textContent = 'Account created! Logging in...';
-            successMsg.style.display = 'block';
-            signupBtn.textContent = 'Logging in...';
-            
-            // Wait a moment for backend to process, then login
             await new Promise(resolve => setTimeout(resolve, 500));
             
             try {
@@ -4180,7 +4197,22 @@ if (parentheticalEl) {
       console.warn('Proxy fetch failed', err);
     }
     return null;
-  }
+  }// ...existing code...
+    <div class="navigation-buttons">
+        <button class="nav-btn nav-btn-prev" id="intro-prev-btn">
+            ← Previous
+        </button>
+
+        <!-- Added: Skip Intro button (only for the introduction section) -->
+        <button class="nav-btn nav-btn-ghost" id="skip-intro-btn" title="Skip the introduction and go to Module 1">
+            Skip Intro
+        </button>
+
+        <button class="nav-btn nav-btn-next" id="intro-next-btn">
+            Next Slide →
+        </button>
+    </div>
+// ...existing code...
 
   function parseMetadataFromHtml(html, url) {
     const parser = new DOMParser();
@@ -5302,6 +5334,12 @@ resetBtn.addEventListener('click', () => {
                 <button class="nav-btn nav-btn-prev" onclick="prevSection()">
                     ← Previous
                 </button>
+
+                <!-- Added: Skip Intro button (only for the introduction section) -->
+                 <button class="nav-btn nav-btn-ghost" id="skip-intro-btn" title="Skip the introduction and go to Module 1">
+                Skip Intro
+                 </button>
+
                 <button class="nav-btn nav-btn-next" onclick="nextSection()">
                     Next Section →
                 </button>

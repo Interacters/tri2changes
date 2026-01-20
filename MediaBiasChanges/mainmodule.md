@@ -424,7 +424,7 @@ date: 2025-12-12
         
         .spectrum-bar {
             height: 12px;
-            background: linear-gradient(to right, #ef4444, #94a3b8, #3b82f6);
+            background: linear-gradient(to right, #3b82f6, #94a3b8, #ef4444);
             border-radius: 10px;
             margin: 20px 0;
         }
@@ -950,14 +950,14 @@ date: 2025-12-12
         0: {
             emoji: '📢',
             title: 'Far Left',
-            color: '#dc2626',
+            color: '#1e40af',
             description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
             traits: '✓ Advocacy journalism<br>✓ Social justice focus<br>✓ Bold reform proposals'
         },
         25: {
             emoji: '🗣️',
             title: 'Left-Leaning',
-            color: '#ef4444',
+            color: '#3b82f6',
             description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
             traits: '✓ Progressive values<br>✓ Government solutions<br>✓ Social equity emphasis'
         },
@@ -971,14 +971,14 @@ date: 2025-12-12
         75: {
             emoji: '🎙️',
             title: 'Right-Leaning',
-            color: '#3b82f6',
+            color: '#ef4444',
             description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
             traits: '✓ Conservative values<br>✓ Market solutions<br>✓ Traditional institutions'
         },
         100: {
             emoji: '📣',
             title: 'Far Right',
-            color: '#1e40af',
+            color: '#a01414',
             description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
             traits: '✓ Advocacy journalism<br>✓ Nationalist focus<br>✓ Traditional values defense'
         }

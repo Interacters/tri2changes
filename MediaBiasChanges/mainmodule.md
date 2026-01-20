@@ -523,7 +523,7 @@ date: 2025-12-12
         <!-- Slide 1: Welcome -->
         <div class="intro-slide active" data-slide="0">
             <div style="text-align: center; margin-bottom: 30px;">
-                <h3 style="color: #60a5fa; font-size: 2rem; margin-bottom: 15px;">🎮 Choose Your Media Superpower!</h3>
+                <h3 style="color: #60a5fa; font-size: 2rem; margin-bottom: 15px;"> Choose Your Media Superpower!</h3>
                 <p style="color: #cbd5e1; font-size: 1.1rem;">Click on each skill to unlock what you'll master</p>
             </div>
 
@@ -594,7 +594,7 @@ date: 2025-12-12
                         </p>
                         <div style="background: rgba(96, 165, 250, 0.2); padding: 12px; border-radius: 8px; border-left: 3px solid #60a5fa;">
                             <p style="color: #60a5fa; font-weight: 700; font-size: 0.95rem;">
-                                🚀 Can you join the informed 4%? Let's find out!
+                                Can you join the informed 4%? Let's find out!
                             </p>
                         </div>
                     </div>

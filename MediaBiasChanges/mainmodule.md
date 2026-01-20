@@ -604,7 +604,7 @@ date: 2025-12-12
 
         <!-- Slide 2: Understanding Bias -->
         <div class="intro-slide" data-slide="1">
-            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">🎨 The Media Spectrum Explorer</h3>
+            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>
             <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
                 Media bias is how stories get framed. Drag the slider to explore different perspectives!
             </p>
@@ -644,10 +644,10 @@ date: 2025-12-12
 
             <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
                 <h4 style="color: #a78bfa; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.5rem;">💡</span> Pro Tip
+                    <span style="font-size: 1.5rem;"></span> Pro Tip
                 </h4>
                 <p style="color: #e2e8f0; line-height: 1.6;">
-                    <strong>No source is 100% unbiased.</strong> The goal isn't perfection—it's <strong class="highlight-text">understanding the perspective</strong> each source brings. Smart readers consume multiple viewpoints!
+                    <strong>No source is 100% unbiased.</strong> Don't strive for perfection. Just consider the value each source brings. Smart readers consume multiple viewpoints to have a well rounded opinon.
                 </p>
             </div>
         </div>
@@ -664,7 +664,7 @@ date: 2025-12-12
                     <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px; flex: 1;">
                         "Spending Spree Threatens Economic Stability"
                     </h4>
-                    <span style="font-size: 1.5rem;">👆</span>
+                    <span style="font-size: 1.5rem;"></span>
                 </div>
                 <div class="headline-analysis" id="headline1">
                     <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
@@ -672,7 +672,7 @@ date: 2025-12-12
                         <p style="color: #e2e8f0;">"Government Proposes $6 Trillion Budget"</p>
                     </div>
                     <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px;">
-                        <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 8px; font-weight: 700;">🚨 Loaded Language Detected:</p>
+                        <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 8px; font-weight: 700;"> Loaded Language Detected:</p>
                         <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
                             <strong>"Spending spree"</strong> = suggests reckless behavior<br>
                             <strong>"Threatens"</strong> = creates fear and urgency<br>
@@ -687,7 +687,7 @@ date: 2025-12-12
                     <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px; flex: 1;">
                         "Republicans Block Critical Voting Rights Protections"
                     </h4>
-                    <span style="font-size: 1.5rem;">👆</span>
+                    <span style="font-size: 1.5rem;"></span>
                 </div>
                 <div class="headline-analysis" id="headline2">
                     <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
@@ -695,7 +695,7 @@ date: 2025-12-12
                         <p style="color: #e2e8f0;">"Senate Republicans Vote Against Voting Rights Bill"</p>
                     </div>
                     <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px;">
-                        <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 8px; font-weight: 700;">🚨 Loaded Language Detected:</p>
+                        <p style="color: #fbbf24; font-size: 0.85rem; margin-bottom: 8px; font-weight: 700;"> Loaded Language Detected:</p>
                         <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
                             <strong>"Block"</strong> = implies obstruction vs. legitimate opposition<br>
                             <strong>"Critical protections"</strong> = assumes necessity (opinion)<br>
@@ -710,7 +710,7 @@ date: 2025-12-12
                     <h4 style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 10px; flex: 1;">
                         "Senate Votes 52-48 on Voting Rights Legislation"
                     </h4>
-                    <span style="font-size: 1.5rem;">👆</span>
+                    <span style="font-size: 1.5rem;"></span>
                 </div>
                 <div class="headline-analysis" id="headline3">
                     <div style="background: rgba(148, 163, 184, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">

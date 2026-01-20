@@ -654,7 +654,7 @@ date: 2025-12-12
 
         <!-- Slide 3: Spot the Bias -->
         <div class="intro-slide" data-slide="2">
-            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 15px; text-align: center;">🔍 Headline Detective Game</h3>
+            <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 15px; text-align: center;"> Headline Detective Game</h3>
             <p style="color: #cbd5e1; margin-bottom: 25px; text-align: center;">
                 Same story, different spin! Click each headline to reveal how bias works.
             </p>
@@ -729,7 +729,7 @@ date: 2025-12-12
             </div>
 
             <div style="background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(168, 85, 247, 0.1)); border: 2px solid rgba(96, 165, 250, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
-                <h4 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.1rem;">🎯 Bias Detection Checklist:</h4>
+                <h4 style="color: #60a5fa; margin-bottom: 15px; font-size: 1.1rem;"> Bias Detection Checklist:</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                     <div style="display: flex; align-items: start; gap: 10px;">
                         <span style="color: #22c55e; font-size: 1.2rem;">✓</span>
@@ -753,7 +753,7 @@ date: 2025-12-12
 
         <!-- Slide 4: Quiz -->
         <div class="intro-slide" data-slide="3">
-            <h3 style="color: #a78bfa; font-size: 1.8rem; margin-bottom: 15px; text-align: center;">🎮 Bias Buster Challenge</h3>
+            <h3 style="color: #a78bfa; font-size: 1.8rem; margin-bottom: 15px; text-align: center;"> Bias Buster Challenge</h3>
             <p style="color: #cbd5e1; margin-bottom: 25px; text-align: center;">
                 Can you spot the bias signals? Choose the best answer!
             </p>
@@ -801,7 +801,7 @@ date: 2025-12-12
 
         <!-- Slide 5: Why It Matters -->
         <div class="intro-slide" data-slide="4">
-            <h3 style="color: #22c55e; font-size: 1.8rem; margin-bottom: 15px;">📈 Why Media Literacy Matters for YOU</h3>
+            <h3 style="color: #22c55e; font-size: 1.8rem; margin-bottom: 15px;"> Why Media Literacy Matters for YOU</h3>
             <p style="color: #cbd5e1; margin-bottom: 25px;">
                 These aren't just abstract concepts—they directly impact your academic success and future career.
             </p>

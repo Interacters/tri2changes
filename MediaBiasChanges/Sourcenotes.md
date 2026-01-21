@@ -8,23 +8,29 @@
 
         .source-tools-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 30px;
+            grid-template-columns: 55% 45%;
+            gap: 15px;
+            margin-top: 25px;
             font-family: 'Inter', sans-serif;
         }
 
         .tool-card {
             background: linear-gradient(160deg, #555dc2d2, #564ea0ff);
             border-radius: 12px;
-            padding: 20px;
+            padding: 18px;
             color: #ffffff;
         }
 
         .tool-card h3 {
-            margin: 0 0 15px 0;
-            font-size: 1.3rem;
+            margin: 0 0 12px 0;
+            font-size: 1.2rem;
             color: #ffffff;
+        }
+
+        .tool-card-description {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 15px;
         }
 
         .source-item {
@@ -95,8 +101,8 @@
 
         .add-source-form {
             display: grid;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .form-input {
@@ -106,7 +112,7 @@
             background: rgba(255,255,255,0.15);
             color: #ffffff;
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .form-input::placeholder {
@@ -136,13 +142,13 @@
         .synthesis-panel {
             background: rgba(0,0,0,0.2);
             border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
+            padding: 12px;
+            margin-top: 12px;
         }
 
         .synthesis-panel h4 {
-            margin: 0 0 10px 0;
-            font-size: 1rem;
+            margin: 0 0 8px 0;
+            font-size: 0.95rem;
             color: #7ad2f9;
         }
 
@@ -153,14 +159,10 @@
         }
 
         .synthesis-list li {
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: rgba(255,255,255,0.9);
-        }
-
-        .synthesis-list li:last-child {
-            border-bottom: none;
         }
 
         .notes-sidebar {
@@ -248,16 +250,11 @@
             .source-tools-container {
                 grid-template-columns: 1fr;
             }
-
-            .notes-sidebar {
-                width: 300px;
-            }
         }
 
         @media (max-width: 768px) {
-            .notes-sidebar {
-                width: 100%;
-                right: -100%;
+            .source-tools-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -266,14 +263,13 @@
     <div class="source-tools-container">
         <!-- Source Synthesis Helper -->
         <div class="tool-card">
-            <h3>📚 Source Tracker</h3>
-            <p style="font-size: 0.85rem; margin-bottom: 15px; color: rgba(255,255,255,0.8);">
+            <h3>Source Tracker</h3>
+            <p class="tool-card-description">
                 Track your sources and identify trends, gaps, and contradictions
             </p>
 
             <form class="add-source-form" id="add-source-form">
-                <input type="text" class="form-input" id="source-title" placeholder="Source title" required>
-                <input type="text" class="form-input" id="source-author" placeholder="Author(s)">
+                <input type="text" class="form-input" id="source-url" placeholder="Source URL" required>
                 <select class="form-select" id="source-category">
                     <option value="">Select category...</option>
                     <option value="supports">Supports my argument</option>
@@ -289,7 +285,7 @@
             <div id="sources-list"></div>
 
             <div class="synthesis-panel">
-                <h4>💡 Synthesis Insights</h4>
+                <h4>Synthesis Insights</h4>
                 <ul class="synthesis-list" id="synthesis-insights">
                     <li>Add sources to see patterns and insights</li>
                 </ul>
@@ -298,8 +294,8 @@
 
         <!-- Quick References -->
         <div class="tool-card">
-            <h3>🔗 References Tracker</h3>
-            <p style="font-size: 0.85rem; margin-bottom: 15px; color: rgba(255,255,255,0.8);">
+            <h3>References Tracker</h3>
+            <p class="tool-card-description">
                 Track what your sources are referencing
             </p>
 
@@ -307,8 +303,8 @@
                 <select class="form-select" id="ref-parent-source">
                     <option value="">Select parent source...</option>
                 </select>
-                <input type="text" class="form-input" id="ref-title" placeholder="Referenced work title" required>
-                <input type="text" class="form-input" id="ref-author" placeholder="Referenced author">
+                <input type="text" class="form-input" id="ref-url" placeholder="Reference URL" required>
+                <input type="text" class="form-input" id="ref-title" placeholder="Reference title">
                 <button type="submit" class="btn-small" style="background: #7ad2f9; color: #082033;">Add Reference</button>
             </form>
 
@@ -369,11 +365,10 @@
             container.innerHTML = sources.map((source, index) => `
                 <div class="source-item">
                     <div class="source-header">
-                        <div class="source-title">${source.title}</div>
+                        <div class="source-title">${extractDomain(source.url)}</div>
                         <button class="btn-small btn-delete" onclick="deleteSource(${index})">✕</button>
                     </div>
-                    ${source.author ? `<div class="source-meta">by ${source.author}</div>` : ''}
-                    ${source.keyPoint ? `<div style="font-size: 0.85rem; color: rgba(255,255,255,0.9); margin-top: 6px;">${source.keyPoint}</div>` : ''}
+                    ${source.keyPoint ? `<div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); margin-top: 6px;">${source.keyPoint}</div>` : ''}
                     <div class="source-tags">
                         ${source.category ? `<span class="tag">${source.category}</span>` : ''}
                         ${source.references?.length ? `<span class="tag">${source.references.length} refs</span>` : ''}
@@ -382,11 +377,20 @@
             `).join('');
 
             // Update dropdowns
-            const options = sources.map((s, i) => `<option value="${i}">${s.title}</option>`).join('');
+            const options = sources.map((s, i) => `<option value="${i}">${extractDomain(s.url)}</option>`).join('');
             parentSelect.innerHTML = '<option value="">Select parent source...</option>' + options;
             noteSelect.innerHTML = '<option value="">Select source...</option>' + options;
 
             updateSynthesis(sources);
+        }
+
+        function extractDomain(url) {
+            try {
+                const domain = new URL(url).hostname.replace('www.', '');
+                return domain;
+            } catch {
+                return url.substring(0, 30) + (url.length > 30 ? '...' : '');
+            }
         }
 
         function updateSynthesis(sources) {
@@ -424,8 +428,7 @@
 
             const newSource = {
                 id: Date.now(),
-                title: document.getElementById('source-title').value,
-                author: document.getElementById('source-author').value,
+                url: document.getElementById('source-url').value,
                 category: document.getElementById('source-category').value,
                 keyPoint: document.getElementById('source-key-point').value,
                 references: [],
@@ -450,8 +453,8 @@
             }
 
             const reference = {
-                title: document.getElementById('ref-title').value,
-                author: document.getElementById('ref-author').value
+                url: document.getElementById('ref-url').value,
+                title: document.getElementById('ref-title').value
             };
 
             if (!sources[parentIndex].references) {
@@ -477,10 +480,10 @@
 
             container.innerHTML = sourcesWithRefs.map(source => `
                 <div class="source-item">
-                    <div class="source-title" style="margin-bottom: 8px;">${source.title}</div>
+                    <div class="source-title" style="margin-bottom: 8px;">${extractDomain(source.url)}</div>
                     ${source.references.map(ref => `
-                        <div style="font-size: 0.8rem; color: rgba(255,255,255,0.8); padding-left: 15px; margin-top: 4px;">
-                            → ${ref.title}${ref.author ? ` (${ref.author})` : ''}
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.8); padding-left: 12px; margin-top: 4px;">
+                            → <a href="${ref.url}" target="_blank" style="color: #7ad2f9; text-decoration: none;">${ref.title || extractDomain(ref.url)}</a>
                         </div>
                     `).join('')}
                 </div>
@@ -518,7 +521,7 @@
 
             const newNote = {
                 sourceId: sources[sourceIndex].id,
-                sourceTitle: sources[sourceIndex].title,
+                sourceTitle: extractDomain(sources[sourceIndex].url),
                 content: document.getElementById('note-content').value,
                 createdAt: new Date().toISOString()
             };

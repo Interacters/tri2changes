@@ -4383,7 +4383,13 @@ resetBtn.addEventListener('click', () => {
 
             <div class="content-placeholder">
                 <p>
-<style>
+
+            <div class="results-container" id="results-container">
+                <!-- Activity results will be injected here -->
+            </div>
+            
+
+            <style>
         * {
             margin: 0;
             padding: 0;
@@ -4907,157 +4913,6 @@ resetBtn.addEventListener('click', () => {
             margin-bottom: 30px;
         }
 
-        /* Activity Questions Styles */
-        .activity-questions-container {
-            background: rgba(30, 41, 59, 0.5);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .activity-question {
-            margin-bottom: 30px;
-            background: rgba(15, 23, 42, 0.6);
-            padding: 25px;
-            border-radius: 12px;
-            border-left: 4px solid #60a5fa;
-        }
-
-        .activity-question h3 {
-            font-size: 1.1rem;
-            color: #e2e8f0;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .yes-no-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .yes-no-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 15px 20px;
-            border: 2px solid rgba(148, 163, 184, 0.3);
-            background: rgba(15, 23, 42, 0.4);
-            color: #e2e8f0;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
-
-        .yes-no-btn:hover {
-            border-color: #60a5fa;
-            background: rgba(96, 165, 250, 0.1);
-        }
-
-        .yes-no-btn.selected {
-            background: #60a5fa;
-            border-color: #60a5fa;
-            color: #1e3a8a;
-        }
-
-        .yes-no-btn.selected.yes {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-color: #10b981;
-        }
-
-        .yes-no-btn.selected.no {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            border-color: #ef4444;
-        }
-
-        /* Progress Bar Styles */
-        .progress-bar-container {
-            display: none;
-            margin-top: 15px;
-            animation: slideIn 0.5s ease;
-        }
-
-        .progress-bar-container.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .progress-bar-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #cbd5e1;
-        }
-
-        .progress-bar-wrapper {
-            background: rgba(100, 116, 139, 0.2);
-            border-radius: 8px;
-            height: 30px;
-            overflow: hidden;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            display: flex;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981, #059669);
-            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
-            color: white;
-            font-weight: 700;
-            font-size: 0.85rem;
-            min-width: 40px;
-        }
-
-        .progress-bar-fill.no-votes {
-            background: linear-gradient(90deg, #ef4444, #dc2626);
-        }
-
-        .progress-stat {
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
-        /* Results Modal Enhancement */
-        .results-container {
-            display: none;
-        }
-
-        .results-container.show {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .activity-results {
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        .activity-results h4 {
-            color: #60a5fa;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
         @media (max-width: 768px) {
             .survey-container {
                 padding: 40px 30px;
@@ -5067,16 +4922,13 @@ resetBtn.addEventListener('click', () => {
                 font-size: 2rem;
             }
 
-            .activity-question {
-                padding: 20px;
+            .rating-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 15px;
             }
 
-            .yes-no-buttons {
-                flex-direction: column;
-            }
-
-            .yes-no-btn {
-                min-width: 100%;
+            .rating-number {
+                font-size: 2.5rem;
             }
 
             .modal-content {
@@ -5106,68 +4958,50 @@ resetBtn.addEventListener('click', () => {
     <div class="survey-container">
         <div class="survey-header">
             <h2>Performance Reflection</h2>
-            <p>Share your confidence in each activity you completed. Your honest feedback helps us understand what's working and improves the learning experience for everyone!</p>
+            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
         </div>
 
         <form id="survey-form">
-            <div class="activity-questions-container">
-                <!-- Media Bias Activity Question -->
-                <div class="activity-question" data-activity="media-bias">
-                    <h3>📰 Media Bias Sorting Game: Did you feel confident in identifying media bias?</h3>
-                    <div class="yes-no-buttons">
-                        <button type="button" class="yes-no-btn yes-option" value="yes">✓ Yes</button>
-                        <button type="button" class="yes-no-btn no-option" value="no">✗ No</button>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-label">
-                            <span>Yes responses:</span>
-                            <span class="progress-stat"><span class="yes-percent">-</span>% | <span class="total-responses">0</span> responses</span>
-                        </div>
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar-fill" style="width: 0%"></div>
-                        </div>
-                    </div>
+            <div class="rating-grid">
+                <div class="rating-option">
+                    <input type="radio" id="rating-1" name="rating" value="1">
+                    <label for="rating-1" class="rating-label">
+                        <span class="rating-number">1</span>
+                        <span class="rating-text">Poor</span>
+                    </label>
                 </div>
-
-                <!-- Thesis Activity Question -->
-                <div class="activity-question" data-activity="thesis">
-                    <h3>✍️ Thesis Generator: Did you feel confident writing your thesis statement?</h3>
-                    <div class="yes-no-buttons">
-                        <button type="button" class="yes-no-btn yes-option" value="yes">✓ Yes</button>
-                        <button type="button" class="yes-no-btn no-option" value="no">✗ No</button>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-label">
-                            <span>Yes responses:</span>
-                            <span class="progress-stat"><span class="yes-percent">-</span>% | <span class="total-responses">0</span> responses</span>
-                        </div>
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar-fill" style="width: 0%"></div>
-                        </div>
-                    </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-2" name="rating" value="2">
+                    <label for="rating-2" class="rating-label">
+                        <span class="rating-number">2</span>
+                        <span class="rating-text">Fair</span>
+                    </label>
                 </div>
-
-                <!-- Citation Activity Question -->
-                <div class="activity-question" data-activity="citations">
-                    <h3>📚 Citation Generator: Did you feel confident creating citations?</h3>
-                    <div class="yes-no-buttons">
-                        <button type="button" class="yes-no-btn yes-option" value="yes">✓ Yes</button>
-                        <button type="button" class="yes-no-btn no-option" value="no">✗ No</button>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-label">
-                            <span>Yes responses:</span>
-                            <span class="progress-stat"><span class="yes-percent">-</span>% | <span class="total-responses">0</span> responses</span>
-                        </div>
-                        <div class="progress-bar-wrapper">
-                            <div class="progress-bar-fill" style="width: 0%"></div>
-                        </div>
-                    </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-3" name="rating" value="3">
+                    <label for="rating-3" class="rating-label">
+                        <span class="rating-number">3</span>
+                        <span class="rating-text">Good</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-4" name="rating" value="4">
+                    <label for="rating-4" class="rating-label">
+                        <span class="rating-number">4</span>
+                        <span class="rating-text">Excellent</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating-5" name="rating" value="5">
+                    <label for="rating-5" class="rating-label">
+                        <span class="rating-number">5</span>
+                        <span class="rating-text">Superior</span>
+                    </label>
                 </div>
             </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">
-                <span>Submit Feedback</span>
+                <span>Submit Rating</span>
             </button>
         </form>
     </div>
@@ -5176,10 +5010,25 @@ resetBtn.addEventListener('click', () => {
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
             
-            <h2 class="result-title">Thanks for Your Feedback!</h2>
+            <div id="result-badge"></div>
+            <h2 class="result-title" id="result-title"></h2>
+            <p class="result-message" id="result-message"></p>
             
-            <div class="results-container" id="results-container">
-                <!-- Activity results will be injected here -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="your-rating">-</div>
+                    <div class="stat-label">Your Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="class-avg">-</div>
+                    <div class="stat-label">Class Average</div>
+                </div>
+            </div>
+
+            <div class="resources-section">
+                <h3 class="resources-title" id="resources-title"></h3>
+                <p class="resources-intro" id="resources-intro"></p>
+                <div id="resources-list"></div>
             </div>
 
             <button class="modal-btn" onclick="closeModal()">Got it, thanks!</button>
@@ -5189,27 +5038,301 @@ resetBtn.addEventListener('click', () => {
     <!-- Admin View (visible to admins only) -->
     <div class="admin-container" id="admin-section" style="display: none;">
         <div class="admin-header">
-            <h2>All Activity Feedback</h2>
+            <h2> All Performance Ratings</h2>
         </div>
 
-        <div id="admin-activity-stats" class="admin-stats-grid">
-            <!-- Activity stats will be injected here -->
-        </div>
+        <div class="admin-stats-grid" id="admin-stats-grid"></div>
 
         <table class="ratings-table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Username</th>
-                    <th>Media Bias</th>
-                    <th>Thesis</th>
-                    <th>Citations</th>
+                    <th>Rating</th>
                     <th>Timestamp</th>
                 </tr>
             </thead>
             <tbody id="ratings-tbody"></tbody>
         </table>
     </div>
+
+    <script type="module">
+    import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
+    const API_BASE = `${pythonURI}/api`;
+
+
+        const resourcesByTier = {
+            1: {
+                title: 'Building Foundations',
+                intro: 'Start with these fundamentals to strengthen your English skills:',
+                items: [
+                    { text: 'Grammarly Handbook - Grammar Basics', url: 'https://www.grammarly.com/blog/category/handbook/' },
+                    { text: 'Khan Academy Grammar Course (Free)', url: 'https://www.khanacademy.org/humanities/grammar' },
+                    { text: 'Basic Essay Structure (YouTube)', url: 'https://www.youtube.com/watch?v=sQEr5D1sSrU' },
+                    { text: 'Purdue OWL - Writing Process Guide', url: 'https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html' },
+                    { text: 'Quizlet - Vocabulary Building', url: 'https://quizlet.com/subject/english-vocabulary/' }
+                ]
+            },
+            2: {
+                title: 'Developing Skills',
+                intro: "You're on the right track! These resources will help you improve:",
+                items: [
+                    { text: 'MLA Citation Guide - Purdue OWL', url: 'https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html' },
+                    { text: 'Hemingway Editor - Improve Clarity', url: 'https://www.hemingwayapp.com/' },
+                    { text: 'How to Write a Thesis Statement', url: 'https://www.youtube.com/watch?v=AzcJP7WS_5A' },
+                    { text: 'UNC Writing Center - Essay Tips', url: 'https://writingcenter.unc.edu/tips-and-tools/' },
+                    { text: 'Coursera - Academic English Writing (Free)', url: 'https://www.coursera.org/learn/writing-skills' }
+                ]
+            },
+            3: {
+                title: 'Solidifying Skills',
+                intro: "You're right on track! Strengthen your skills with these:",
+                items: [
+                    { text: 'APA Format Guide - Research Papers', url: 'https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html' },
+                    { text: 'Thesaurus.com - Vocabulary Enhancement', url: 'https://www.thesaurus.com/' },
+                    { text: 'Literary Analysis Techniques', url: 'https://www.youtube.com/watch?v=mhHfnhh-pB4' },
+                    { text: 'Harvard Writing Center - Essay Strategies', url: 'https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing' },
+                    { text: 'edX - Advanced Grammar Course', url: 'https://www.edx.org/learn/english-grammar' }
+                ]
+            },
+            4: {
+                title: 'Advancing Excellence',
+                intro: 'Great work! Take your skills to the next level:',
+                items: [
+                    { text: 'The New Yorker - Literary Journalism', url: 'https://www.newyorker.com/culture/culture-desk' },
+                    { text: 'Literary Devices Guide - Advanced Analysis', url: 'https://literarydevices.net/' },
+                    { text: 'Advanced Rhetorical Analysis', url: 'https://www.youtube.com/watch?v=QUF-5UDtRJs' },
+                    { text: 'MLA Style Center - Advanced Citations', url: 'https://style.mla.org/' },
+                    { text: 'MasterClass - Creative Writing (Paid)', url: 'https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing' }
+                ]
+            },
+            5: {
+                title: '🚀 Mastery Level',
+                intro: 'Exceptional! Challenge yourself with these advanced resources:',
+                items: [
+                    { text: 'London Review of Books - Critical Essays', url: 'https://www.lrb.co.uk/' },
+                    { text: 'JSTOR - Academic Research Database', url: 'https://www.jstor.org/' },
+                    { text: 'Yale Lecture Series - Literary Theory', url: 'https://www.youtube.com/watch?v=8y8BXcjUNVU' },
+                    { text: 'Chicago Manual of Style - Professional Writing', url: 'https://www.chicagomanualofstyle.org/home.html' },
+                    { text: 'Poetry Foundation - Advanced Literary Forms', url: 'https://www.poets.org/poetsorg/text/learning-guide-poetry-terms' },
+                    { text: 'Stanford Philosophy - Critical Thinking', url: 'https://philosophy.stanford.edu/teaching-guide' }
+                ]
+            }
+        };
+
+        // Check if user is authenticated and get their role
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/id`, {
+                    ...fetchOptions
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    return userData;
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+            return null;
+        }
+
+        // Load all performances (admin only)
+        async function loadAllPerformances() {
+            try {
+                const response = await fetch(`${API_BASE}/performance`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const performances = await response.json();
+                    displayAllPerformances(performances);
+                    displayAdminStats(performances);
+                }
+            } catch (error) {
+                console.error('Failed to load performances:', error);
+            }
+        }
+
+        // Display all performances in table
+        function displayAllPerformances(performances) {
+            const tbody = document.getElementById('ratings-tbody');
+            tbody.innerHTML = '';
+
+            performances.reverse().forEach(perf => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${perf.id}</td>
+                    <td><span class="username-link" onclick="showUserInfo(${perf.user_id}, '${perf.username}')">${perf.username || 'Guest'}</span></td>
+                    <td><span class="rating-badge rating-${perf.rating}">${perf.rating}/5</span></td>
+                    <td class="timestamp">${new Date(perf.timestamp).toLocaleString()}</td>
+                `;
+            });
+        }
+
+        // Display admin statistics
+        function displayAdminStats(performances) {
+            const statsGrid = document.getElementById('admin-stats-grid');
+            
+            const total = performances.length;
+            const average = total > 0 
+                ? (performances.reduce((sum, p) => sum + p.rating, 0) / total).toFixed(1)
+                : 0;
+            
+            const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            performances.forEach(p => distribution[p.rating]++);
+            const mostCommon = Object.entries(distribution)
+                .sort((a, b) => b[1] - a[1])[0][0];
+
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${total}</div>
+                    <div class="stat-label">Total Ratings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${average}</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${mostCommon}</div>
+                    <div class="stat-label">Most Common</div>
+                </div>
+            `;
+        }
+
+        // Show user info when clicking username
+        window.showUserInfo = async function(userId, username) {
+            try {
+                const response = await fetch(`${API_BASE}/performance/user/${userId}`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const userPerfs = await response.json();
+                    const totalRatings = userPerfs.length;
+                    const avgRating = totalRatings > 0 
+                        ? (userPerfs.reduce((sum, p) => sum + p.rating, 0) / totalRatings).toFixed(1)
+                        : 0;
+                    
+                    const ratings = userPerfs.map(p => p.rating).join(', ');
+                    
+                    alert(`User: ${username}\nUser ID: ${userId}\n\nTotal Ratings: ${totalRatings}\nAverage Rating: ${avgRating}\nAll Ratings: ${ratings || 'None'}`);
+                } else {
+                    alert(`User: ${username}\nUser ID: ${userId}\n\nCould not load rating history.`);
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                alert(`User: ${username}\nUser ID: ${userId}\n\nError loading rating history.`);
+            }
+        }
+
+        document.getElementById('survey-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rating = document.querySelector('input[name="rating"]:checked');
+            if (!rating) {
+                alert('Please select a rating before submitting.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading"></div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/performance/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ rating: parseInt(rating.value) })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResults(data);
+                    
+                    // Reload admin view if visible
+                    if (document.getElementById('admin-section').style.display !== 'none') {
+                        loadAllPerformances();
+                    }
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error occurred'));
+                }
+            } catch (error) {
+                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8404.');
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Submit Rating</span>';
+            }
+        });
+
+        function showResults(data) {
+            const badgeColors = {
+                'underprepared': 'badge-underprepared',
+                'average': 'badge-average',
+                'overprepared': 'badge-overprepared'
+            };
+
+            const titles = {
+                'underprepared': "Let's Build Your Skills!",
+                'overprepared': 'Excellent Work!',
+                'average': "You're On Track!"
+            };
+
+            document.getElementById('result-badge').innerHTML = 
+                `<span class="result-badge ${badgeColors[data.status]}">${data.status.toUpperCase()}</span>`;
+            document.getElementById('result-title').textContent = titles[data.status] || 'Your Results';
+            document.getElementById('result-message').textContent = data.message;
+            document.getElementById('your-rating').textContent = data.your_rating;
+            document.getElementById('class-avg').textContent = data.average_rating;
+
+            const resources = resourcesByTier[data.your_rating];
+            document.getElementById('resources-title').textContent = resources.title;
+            document.getElementById('resources-intro').textContent = resources.intro;
+            
+            const resourcesList = document.getElementById('resources-list');
+            resourcesList.innerHTML = resources.items.map(item => 
+                `<div class="resource-item">
+                    <a href="${item.url}" target="_blank">${item.text}</a>
+                </div>`
+            ).join('');
+
+            document.getElementById('results-modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('results-modal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('results-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', async () => {
+            const user = await checkAuth();
+            
+            if (user) {
+                console.log('User logged in:', user.uid, 'Role:', user.role);
+                
+                // Show admin section if user is admin
+                if (user.role === 'Admin') {
+                    document.getElementById('admin-section').style.display = 'block';
+                    loadAllPerformances();
+                }
+            } else {
+                console.log('No user logged in');
+            }
+        });
+    </script>
+</body>
+
+            
 
 <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';

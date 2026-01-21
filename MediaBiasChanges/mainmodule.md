@@ -4197,22 +4197,7 @@ if (parentheticalEl) {
       console.warn('Proxy fetch failed', err);
     }
     return null;
-  }// ...existing code...
-    <div class="navigation-buttons">
-        <button class="nav-btn nav-btn-prev" id="intro-prev-btn">
-            ← Previous
-        </button>
-
-        <!-- Added: Skip Intro button (only for the introduction section) -->
-        <button class="nav-btn nav-btn-ghost" id="skip-intro-btn" title="Skip the introduction and go to Module 1">
-            Skip Intro
-        </button>
-
-        <button class="nav-btn nav-btn-next" id="intro-next-btn">
-            Next Slide →
-        </button>
-    </div>
-// ...existing code...
+    }
 
   function parseMetadataFromHtml(html, url) {
     const parser = new DOMParser();

@@ -4875,6 +4875,157 @@ resetBtn.addEventListener('click', () => {
             margin-bottom: 30px;
         }
 
+        /* Activity Questions Styles */
+        .activity-questions-container {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .activity-question {
+            margin-bottom: 30px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #60a5fa;
+        }
+
+        .activity-question h3 {
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .yes-no-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .yes-no-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px 20px;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.4);
+            color: #e2e8f0;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .yes-no-btn:hover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .yes-no-btn.selected {
+            background: #60a5fa;
+            border-color: #60a5fa;
+            color: #1e3a8a;
+        }
+
+        .yes-no-btn.selected.yes {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+        }
+
+        .yes-no-btn.selected.no {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: #ef4444;
+        }
+
+        /* Progress Bar Styles */
+        .progress-bar-container {
+            display: none;
+            margin-top: 15px;
+            animation: slideIn 0.5s ease;
+        }
+
+        .progress-bar-container.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .progress-bar-wrapper {
+            background: rgba(100, 116, 139, 0.2);
+            border-radius: 8px;
+            height: 30px;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            display: flex;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-width: 40px;
+        }
+
+        .progress-bar-fill.no-votes {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .progress-stat {
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* Results Modal Enhancement */
+        .results-container {
+            display: none;
+        }
+
+        .results-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .activity-results {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .activity-results h4 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
         @media (max-width: 768px) {
             .survey-container {
                 padding: 40px 30px;
@@ -4884,13 +5035,16 @@ resetBtn.addEventListener('click', () => {
                 font-size: 2rem;
             }
 
-            .rating-grid {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: 15px;
+            .activity-question {
+                padding: 20px;
             }
 
-            .rating-number {
-                font-size: 2.5rem;
+            .yes-no-buttons {
+                flex-direction: column;
+            }
+
+            .yes-no-btn {
+                min-width: 100%;
             }
 
             .modal-content {
@@ -4920,50 +5074,68 @@ resetBtn.addEventListener('click', () => {
     <div class="survey-container">
         <div class="survey-header">
             <h2>Performance Reflection</h2>
-            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+            <p>Share your confidence in each activity you completed. Your honest feedback helps us understand what's working and improves the learning experience for everyone!</p>
         </div>
 
         <form id="survey-form">
-            <div class="rating-grid">
-                <div class="rating-option">
-                    <input type="radio" id="rating-1" name="rating" value="1">
-                    <label for="rating-1" class="rating-label">
-                        <span class="rating-number">1</span>
-                        <span class="rating-text">Poor</span>
-                    </label>
+            <div class="activity-questions-container">
+                <!-- Media Bias Activity Question -->
+                <div class="activity-question" data-activity="media-bias">
+                    <h3>📰 Media Bias Sorting Game: Did you feel confident in identifying media bias?</h3>
+                    <div class="yes-no-buttons">
+                        <button type="button" class="yes-no-btn yes-option" value="yes">✓ Yes</button>
+                        <button type="button" class="yes-no-btn no-option" value="no">✗ No</button>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span>Yes responses:</span>
+                            <span class="progress-stat"><span class="yes-percent">-</span>% | <span class="total-responses">0</span> responses</span>
+                        </div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-2" name="rating" value="2">
-                    <label for="rating-2" class="rating-label">
-                        <span class="rating-number">2</span>
-                        <span class="rating-text">Fair</span>
-                    </label>
+
+                <!-- Thesis Activity Question -->
+                <div class="activity-question" data-activity="thesis">
+                    <h3>✍️ Thesis Generator: Did you feel confident writing your thesis statement?</h3>
+                    <div class="yes-no-buttons">
+                        <button type="button" class="yes-no-btn yes-option" value="yes">✓ Yes</button>
+                        <button type="button" class="yes-no-btn no-option" value="no">✗ No</button>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span>Yes responses:</span>
+                            <span class="progress-stat"><span class="yes-percent">-</span>% | <span class="total-responses">0</span> responses</span>
+                        </div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-3" name="rating" value="3">
-                    <label for="rating-3" class="rating-label">
-                        <span class="rating-number">3</span>
-                        <span class="rating-text">Good</span>
-                    </label>
-                </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-4" name="rating" value="4">
-                    <label for="rating-4" class="rating-label">
-                        <span class="rating-number">4</span>
-                        <span class="rating-text">Excellent</span>
-                    </label>
-                </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-5" name="rating" value="5">
-                    <label for="rating-5" class="rating-label">
-                        <span class="rating-number">5</span>
-                        <span class="rating-text">Superior</span>
-                    </label>
+
+                <!-- Citation Activity Question -->
+                <div class="activity-question" data-activity="citations">
+                    <h3>📚 Citation Generator: Did you feel confident creating citations?</h3>
+                    <div class="yes-no-buttons">
+                        <button type="button" class="yes-no-btn yes-option" value="yes">✓ Yes</button>
+                        <button type="button" class="yes-no-btn no-option" value="no">✗ No</button>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span>Yes responses:</span>
+                            <span class="progress-stat"><span class="yes-percent">-</span>% | <span class="total-responses">0</span> responses</span>
+                        </div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">
-                <span>Submit Rating</span>
+                <span>Submit Feedback</span>
             </button>
         </form>
     </div>
@@ -4972,25 +5144,10 @@ resetBtn.addEventListener('click', () => {
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
             
-            <div id="result-badge"></div>
-            <h2 class="result-title" id="result-title"></h2>
-            <p class="result-message" id="result-message"></p>
+            <h2 class="result-title">Thanks for Your Feedback!</h2>
             
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="your-rating">-</div>
-                    <div class="stat-label">Your Rating</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="class-avg">-</div>
-                    <div class="stat-label">Class Average</div>
-                </div>
-            </div>
-
-            <div class="resources-section">
-                <h3 class="resources-title" id="resources-title"></h3>
-                <p class="resources-intro" id="resources-intro"></p>
-                <div id="resources-list"></div>
+            <div class="results-container" id="results-container">
+                <!-- Activity results will be injected here -->
             </div>
 
             <button class="modal-btn" onclick="closeModal()">Got it, thanks!</button>
@@ -5000,17 +5157,21 @@ resetBtn.addEventListener('click', () => {
     <!-- Admin View (visible to admins only) -->
     <div class="admin-container" id="admin-section" style="display: none;">
         <div class="admin-header">
-            <h2> All Performance Ratings</h2>
+            <h2>All Activity Feedback</h2>
         </div>
 
-        <div class="admin-stats-grid" id="admin-stats-grid"></div>
+        <div id="admin-activity-stats" class="admin-stats-grid">
+            <!-- Activity stats will be injected here -->
+        </div>
 
         <table class="ratings-table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Username</th>
-                    <th>Rating</th>
+                    <th>Media Bias</th>
+                    <th>Thesis</th>
+                    <th>Citations</th>
                     <th>Timestamp</th>
                 </tr>
             </thead>
@@ -5021,180 +5182,117 @@ resetBtn.addEventListener('click', () => {
 <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
+    // Activity data storage
+    const activityData = {
+        'media-bias': { label: 'Media Bias', icon: '📰' },
+        'thesis': { label: 'Thesis', icon: '✍️' },
+        'citations': { label: 'Citations', icon: '📚' }
+    };
 
-        const resourcesByTier = {
-            1: {
-                title: 'Building Foundations',
-                intro: 'Start with these fundamentals to strengthen your English skills:',
-                items: [
-                    { text: 'Grammarly Handbook - Grammar Basics', url: 'https://www.grammarly.com/blog/category/handbook/' },
-                    { text: 'Khan Academy Grammar Course (Free)', url: 'https://www.khanacademy.org/humanities/grammar' },
-                    { text: 'Basic Essay Structure (YouTube)', url: 'https://www.youtube.com/watch?v=sQEr5D1sSrU' },
-                    { text: 'Purdue OWL - Writing Process Guide', url: 'https://owl.purdue.edu/owl/general_writing/the_writing_process/index.html' },
-                    { text: 'Quizlet - Vocabulary Building', url: 'https://quizlet.com/subject/english-vocabulary/' }
-                ]
-            },
-            2: {
-                title: 'Developing Skills',
-                intro: "You're on the right track! These resources will help you improve:",
-                items: [
-                    { text: 'MLA Citation Guide - Purdue OWL', url: 'https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_formatting_and_style_guide.html' },
-                    { text: 'Hemingway Editor - Improve Clarity', url: 'https://www.hemingwayapp.com/' },
-                    { text: 'How to Write a Thesis Statement', url: 'https://www.youtube.com/watch?v=AzcJP7WS_5A' },
-                    { text: 'UNC Writing Center - Essay Tips', url: 'https://writingcenter.unc.edu/tips-and-tools/' },
-                    { text: 'Coursera - Academic English Writing (Free)', url: 'https://www.coursera.org/learn/writing-skills' }
-                ]
-            },
-            3: {
-                title: 'Solidifying Skills',
-                intro: "You're right on track! Strengthen your skills with these:",
-                items: [
-                    { text: 'APA Format Guide - Research Papers', url: 'https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/general_format.html' },
-                    { text: 'Thesaurus.com - Vocabulary Enhancement', url: 'https://www.thesaurus.com/' },
-                    { text: 'Literary Analysis Techniques', url: 'https://www.youtube.com/watch?v=mhHfnhh-pB4' },
-                    { text: 'Harvard Writing Center - Essay Strategies', url: 'https://writingcenter.fas.harvard.edu/pages/strategies-essay-writing' },
-                    { text: 'edX - Advanced Grammar Course', url: 'https://www.edx.org/learn/english-grammar' }
-                ]
-            },
-            4: {
-                title: 'Advancing Excellence',
-                intro: 'Great work! Take your skills to the next level:',
-                items: [
-                    { text: 'The New Yorker - Literary Journalism', url: 'https://www.newyorker.com/culture/culture-desk' },
-                    { text: 'Literary Devices Guide - Advanced Analysis', url: 'https://literarydevices.net/' },
-                    { text: 'Advanced Rhetorical Analysis', url: 'https://www.youtube.com/watch?v=QUF-5UDtRJs' },
-                    { text: 'MLA Style Center - Advanced Citations', url: 'https://style.mla.org/' },
-                    { text: 'MasterClass - Creative Writing (Paid)', url: 'https://www.masterclass.com/classes/margaret-atwood-teaches-creative-writing' }
-                ]
-            },
-            5: {
-                title: '🚀 Mastery Level',
-                intro: 'Exceptional! Challenge yourself with these advanced resources:',
-                items: [
-                    { text: 'London Review of Books - Critical Essays', url: 'https://www.lrb.co.uk/' },
-                    { text: 'JSTOR - Academic Research Database', url: 'https://www.jstor.org/' },
-                    { text: 'Yale Lecture Series - Literary Theory', url: 'https://www.youtube.com/watch?v=8y8BXcjUNVU' },
-                    { text: 'Chicago Manual of Style - Professional Writing', url: 'https://www.chicagomanualofstyle.org/home.html' },
-                    { text: 'Poetry Foundation - Advanced Literary Forms', url: 'https://www.poets.org/poetsorg/text/learning-guide-poetry-terms' },
-                    { text: 'Stanford Philosophy - Critical Thinking', url: 'https://philosophy.stanford.edu/teaching-guide' }
-                ]
-            }
-        };
+    // Track user responses
+    const userResponses = {
+        'media-bias': null,
+        'thesis': null,
+        'citations': null
+    };
 
-        // Check if user is authenticated and get their role
-        async function checkAuth() {
-            try {
-                const response = await fetch(`${pythonURI}/api/id`, {
-                    ...fetchOptions
-                });
-                
-                if (response.ok) {
-                    const userData = await response.json();
-                    return userData;
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-            }
-            return null;
-        }
-
-        // Load all performances (admin only)
-        async function loadAllPerformances() {
-            try {
-                const response = await fetch(`${pythonURI}/performance`, {
-                    ...fetchOptions,
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const performances = await response.json();
-                    displayAllPerformances(performances);
-                    displayAdminStats(performances);
-                }
-            } catch (error) {
-                console.error('Failed to load performances:', error);
-            }
-        }
-
-        // Display all performances in table
-        function displayAllPerformances(performances) {
-            const tbody = document.getElementById('ratings-tbody');
-            tbody.innerHTML = '';
-
-            performances.reverse().forEach(perf => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${perf.id}</td>
-                    <td><span class="username-link" onclick="showUserInfo(${perf.user_id}, '${perf.username}')">${perf.username || 'Guest'}</span></td>
-                    <td><span class="rating-badge rating-${perf.rating}">${perf.rating}/5</span></td>
-                    <td class="timestamp">${new Date(perf.timestamp).toLocaleString()}</td>
-                `;
+    // Check if user is authenticated and get their role
+    async function checkAuth() {
+        try {
+            const response = await fetch(`${pythonURI}/api/id`, {
+                ...fetchOptions
             });
-        }
-
-        // Display admin statistics
-        function displayAdminStats(performances) {
-            const statsGrid = document.getElementById('admin-stats-grid');
             
-            const total = performances.length;
-            const average = total > 0 
-                ? (performances.reduce((sum, p) => sum + p.rating, 0) / total).toFixed(1)
-                : 0;
-            
-            const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
-            performances.forEach(p => distribution[p.rating]++);
-            const mostCommon = Object.entries(distribution)
-                .sort((a, b) => b[1] - a[1])[0][0];
-
-            statsGrid.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-value">${total}</div>
-                    <div class="stat-label">Total Ratings</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${average}</div>
-                    <div class="stat-label">Average Rating</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${mostCommon}</div>
-                    <div class="stat-label">Most Common</div>
-                </div>
-            `;
-        }
-
-        // Show user info when clicking username
-        window.showUserInfo = async function(userId, username) {
-            try {
-                const response = await fetch(`${pythonURI}/api/performance/user/${userId}`, {
-                ...fetchOptions,
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const userPerfs = await response.json();
-                    const totalRatings = userPerfs.length;
-                    const avgRating = totalRatings > 0 
-                        ? (userPerfs.reduce((sum, p) => sum + p.rating, 0) / totalRatings).toFixed(1)
-                        : 0;
-                    
-                    const ratings = userPerfs.map(p => p.rating).join(', ');
-                    
-                    alert(`User: ${username}\nUser ID: ${userId}\n\nTotal Ratings: ${totalRatings}\nAverage Rating: ${avgRating}\nAll Ratings: ${ratings || 'None'}`);
-                } else {
-                    alert(`User: ${username}\nUser ID: ${userId}\n\nCould not load rating history.`);
-                }
-            } catch (error) {
-                console.error('Error loading user info:', error);
-                alert(`User: ${username}\nUser ID: ${userId}\n\nError loading rating history.`);
+            if (response.ok) {
+                const userData = await response.json();
+                return userData;
             }
+        } catch (error) {
+            console.error('Auth check failed:', error);
         }
+        return null;
+    }
 
+    // Load current vote percentages for all activities
+    async function loadActivityVotes() {
+        try {
+            const response = await fetch(`${pythonURI}/api/activity-votes`, {
+                ...fetchOptions,
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const votes = await response.json();
+                updateProgressBars(votes);
+            }
+        } catch (error) {
+            console.error('Failed to load activity votes:', error);
+        }
+    }
+
+    // Update progress bars with vote data
+    function updateProgressBars(votes) {
+        Object.keys(activityData).forEach(activity => {
+            const voteData = votes[activity];
+            if (!voteData) return;
+
+            const container = document.querySelector(`[data-activity="${activity}"] .progress-bar-container`);
+            if (!container) return;
+
+            const yesCount = voteData.yes || 0;
+            const noCount = voteData.no || 0;
+            const total = yesCount + noCount;
+            const yesPercent = total > 0 ? Math.round((yesCount / total) * 100) : 0;
+
+            // Update progress bar
+            const progressBar = container.querySelector('.progress-bar-fill');
+            if (progressBar) {
+                progressBar.style.width = `${yesPercent}%`;
+                progressBar.textContent = `${yesPercent}%`;
+                progressBar.classList.remove('no-votes');
+            }
+
+            // Update statistics
+            container.querySelector('.yes-percent').textContent = yesPercent;
+            container.querySelector('.total-responses').textContent = total;
+
+            // Show progress bars
+            container.classList.add('show');
+        });
+    }
+
+    // Initialize yes/no button handlers
+    function initializeButtonHandlers() {
+        document.querySelectorAll('.activity-question').forEach(question => {
+            const activity = question.dataset.activity;
+            const buttons = question.querySelectorAll('.yes-no-btn');
+
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Remove previous selection
+                    buttons.forEach(b => b.classList.remove('selected', 'yes', 'no'));
+                    
+                    // Add selection to clicked button
+                    btn.classList.add('selected');
+                    btn.classList.add(btn.value === 'yes' ? 'yes' : 'no');
+                    
+                    // Store response
+                    userResponses[activity] = btn.value;
+                });
+            });
+        });
+    }
+
+    // Submit all activity votes
     document.getElementById('survey-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const rating = document.querySelector('input[name="rating"]:checked');
-        if (!rating) {
-            alert('Please select a rating before submitting.');
+
+        // Verify all activities have responses
+        const allAnswered = Object.values(userResponses).every(response => response !== null);
+        if (!allAnswered) {
+            alert('Please answer all questions before submitting.');
             return;
         }
 
@@ -5203,10 +5301,10 @@ resetBtn.addEventListener('click', () => {
         submitBtn.innerHTML = '<div class="loading"></div>';
 
         try {
-            const response = await fetch(`${pythonURI}/api/performance/submit`, {
+            const response = await fetch(`${pythonURI}/api/activity-votes/submit`, {
                 ...fetchOptions,
                 method: 'POST',
-                body: JSON.stringify({ rating: parseInt(rating.value) })
+                body: JSON.stringify(userResponses)
             });
             
             const data = await response.json();
@@ -5216,82 +5314,179 @@ resetBtn.addEventListener('click', () => {
                 
                 // Reload admin view if visible
                 if (document.getElementById('admin-section').style.display !== 'none') {
-                    loadAllPerformances();
+                    loadAllActivityVotes();
                 }
             } else {
                 alert('Error: ' + (data.error || 'Unknown error occurred'));
             }
         } catch (error) {
-            alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8404.');
+            alert('Failed to submit. Please ensure you are logged in and your backend server is running.');
             console.error(error);
         } finally {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>Submit Rating</span>';
+            submitBtn.innerHTML = '<span>Submit Feedback</span>';
         }
     });
 
-        function showResults(data) {
-            const badgeColors = {
-                'underprepared': 'badge-underprepared',
-                'average': 'badge-average',
-                'overprepared': 'badge-overprepared'
-            };
+    // Display results with animated progress bars
+    function showResults(data) {
+        const resultsContainer = document.getElementById('results-container');
+        resultsContainer.innerHTML = '';
 
-            const titles = {
-                'underprepared': "Let's Build Your Skills!",
-                'overprepared': 'Excellent Work!',
-                'average': "You're On Track!"
-            };
+        // Display each activity's result
+        Object.keys(activityData).forEach(activity => {
+            const voteData = data[activity];
+            if (!voteData) return;
 
-            document.getElementById('result-badge').innerHTML = 
-                `<span class="result-badge ${badgeColors[data.status]}">${data.status.toUpperCase()}</span>`;
-            document.getElementById('result-title').textContent = titles[data.status] || 'Your Results';
-            document.getElementById('result-message').textContent = data.message;
-            document.getElementById('your-rating').textContent = data.your_rating;
-            document.getElementById('class-avg').textContent = data.average_rating;
+            const yesCount = voteData.yes || 0;
+            const noCount = voteData.no || 0;
+            const total = yesCount + noCount;
+            const yesPercent = total > 0 ? Math.round((yesPercent / total) * 100) : 0;
+            const userVote = userResponses[activity];
 
-            const resources = resourcesByTier[data.your_rating];
-            document.getElementById('resources-title').textContent = resources.title;
-            document.getElementById('resources-intro').textContent = resources.intro;
-            
-            const resourcesList = document.getElementById('resources-list');
-            resourcesList.innerHTML = resources.items.map(item => 
-                `<div class="resource-item">
-                    <a href="${item.url}" target="_blank">${item.text}</a>
-                </div>`
-            ).join('');
-
-            document.getElementById('results-modal').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('results-modal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('results-modal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
-
-        // Initialize page
-        window.addEventListener('DOMContentLoaded', async () => {
-            const user = await checkAuth();
-            
-            if (user) {
-                console.log('User logged in:', user.uid, 'Role:', user.role);
-                
-                // Show admin section if user is admin
-                if (user.role === 'Admin') {
-                    document.getElementById('admin-section').style.display = 'block';
-                    loadAllPerformances();
-                }
-            } else {
-                console.log('No user logged in');
-            }
+            const activityResult = document.createElement('div');
+            activityResult.className = 'activity-results';
+            activityResult.innerHTML = `
+                <h4>${activityData[activity].icon} ${activityData[activity].label}</h4>
+                <p style="color: #cbd5e1; margin-bottom: 12px;">
+                    You voted: <strong>${userVote === 'yes' ? '✓ Yes' : '✗ No'}</strong>
+                </p>
+                <div class="progress-bar-label">
+                    <span>Class Confidence:</span>
+                    <span class="progress-stat">${yesPercent}% Yes | ${100 - yesPercent}% No</span>
+                </div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar-fill" style="width: ${yesPercent}%;">
+                        ${yesPercent}%
+                    </div>
+                </div>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-top: 8px;">
+                    Based on ${total} responses from your classmates
+                </p>
+            `;
+            resultsContainer.appendChild(activityResult);
         });
-    </script>
+
+        // Show results container
+        document.getElementById('results-container').classList.add('show');
+        document.getElementById('results-modal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('results-modal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('results-modal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+    // Load admin votes display
+    async function loadAllActivityVotes() {
+        try {
+            const response = await fetch(`${pythonURI}/api/activity-votes/all`, {
+                ...fetchOptions,
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const allVotes = await response.json();
+                displayAdminActivityStats(allVotes);
+                displayActivityVotesTable(allVotes);
+            }
+        } catch (error) {
+            console.error('Failed to load all activity votes:', error);
+        }
+    }
+
+    // Display admin statistics for all activities
+    function displayAdminActivityStats(allVotes) {
+        const statsGrid = document.getElementById('admin-activity-stats');
+        statsGrid.innerHTML = '';
+
+        Object.keys(activityData).forEach(activity => {
+            const voteData = allVotes[activity] || {};
+            const yesCount = voteData.yes || 0;
+            const noCount = voteData.no || 0;
+            const total = yesCount + noCount;
+            const yesPercent = total > 0 ? Math.round((yesCount / total) * 100) : 0;
+
+            const stat = document.createElement('div');
+            stat.className = 'stat-card';
+            stat.innerHTML = `
+                <div class="stat-value">${yesPercent}%</div>
+                <div class="stat-label">${activityData[activity].label} (${total} votes)</div>
+            `;
+            statsGrid.appendChild(stat);
+        });
+    }
+
+    // Display activity votes in table
+    function displayActivityVotesTable(allVotes) {
+        const tbody = document.getElementById('ratings-tbody');
+        tbody.innerHTML = '';
+
+        // Note: This would need backend support for retrieving individual votes
+        // For now, we'll show aggregate data
+        Object.entries(allVotes).forEach(([activity, votes]) => {
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>-</td>
+                <td>All Users</td>
+                <td><span class="rating-badge rating-4">${votes.yes || 0} Yes</span></td>
+                <td><span class="rating-badge rating-2">${votes.no || 0} No</span></td>
+                <td>-</td>
+                <td class="timestamp">${new Date().toLocaleString()}</td>
+            `;
+        });
+    }
+
+    // Show user info when clicking username
+    window.showUserInfo = async function(userId, username) {
+        try {
+            const response = await fetch(`${pythonURI}/api/activity-votes/user/${userId}`, {
+                ...fetchOptions,
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const userVotes = await response.json();
+                const votesSummary = Object.entries(userVotes)
+                    .map(([activity, vote]) => `${activity}: ${vote}`)
+                    .join('\n');
+                
+                alert(`User: ${username}\nUser ID: ${userId}\n\nVotes:\n${votesSummary || 'None'}`);
+            } else {
+                alert(`User: ${username}\nUser ID: ${userId}\n\nCould not load voting history.`);
+            }
+        } catch (error) {
+            console.error('Error loading user info:', error);
+            alert(`User: ${username}\nUser ID: ${userId}\n\nError loading voting history.`);
+        }
+    }
+
+    // Initialize page
+    window.addEventListener('DOMContentLoaded', async () => {
+        initializeButtonHandlers();
+        await loadActivityVotes();
+        
+        const user = await checkAuth();
+        
+        if (user) {
+            console.log('User logged in:', user.uid, 'Role:', user.role);
+            
+            // Show admin section if user is admin
+            if (user.role === 'Admin') {
+                document.getElementById('admin-section').style.display = 'block';
+                await loadAllActivityVotes();
+            }
+        } else {
+            console.log('No user logged in');
+        }
+    });
+</script>
 </body>
 </p>
                 <p style="margin-top: 20px; font-size: 0.9rem;">

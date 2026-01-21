@@ -867,6 +867,12 @@ date: 2025-12-12
         <button class="nav-btn nav-btn-prev" id="intro-prev-btn">
             ← Previous
         </button>
+
+        <!-- Added: Skip Intro button (only for the introduction section) -->
+        <button class="nav-btn nav-btn-ghost" id="skip-intro-btn" title="Skip the introduction and go to Module 1">
+            Skip Intro
+        </button>
+
         <button class="nav-btn nav-btn-next" id="intro-next-btn">
             Next Slide →
         </button>
@@ -918,6 +924,23 @@ date: 2025-12-12
     document.getElementById('intro-prev-btn').addEventListener('click', function() {
         changeIntroSlide(-1);
     });
+
+// New: Skip Intro -> jump directly to the first module (Media Bias Game)
+    const skipBtn = document.getElementById('skip-intro-btn');
+    if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+            // window.nextSection is defined later on the page; calling it will move from section 0 -> 1
+            if (typeof window.nextSection === 'function') {
+                window.nextSection();
+            } else {
+                // fallback: set saved section so when page logic initializes it will open module 1
+                localStorage.setItem('english_module_section', '1');
+                // if functions don't exist yet, a reload will cause initialization to pick up saved section
+                // (unlikely needed, but safe)
+                window.location.reload();
+            }
+        });
+    }
 
     document.querySelectorAll('.slide-dot').forEach(dot => {
         dot.addEventListener('click', function() {
@@ -1639,12 +1662,6 @@ function showSignInPrompt() {
         signupBtn.textContent = 'Verifying GitHub...';
         
         try {
-            await window.authManager.signup(name, uid, password);
-            successMsg.textContent = 'Account created! Logging in...';
-            successMsg.style.display = 'block';
-            signupBtn.textContent = 'Logging in...';
-            
-            // Wait a moment for backend to process, then login
             await new Promise(resolve => setTimeout(resolve, 500));
             
             try {
@@ -4180,7 +4197,22 @@ if (parentheticalEl) {
       console.warn('Proxy fetch failed', err);
     }
     return null;
-  }
+  }// ...existing code...
+    <div class="navigation-buttons">
+        <button class="nav-btn nav-btn-prev" id="intro-prev-btn">
+            ← Previous
+        </button>
+
+        <!-- Added: Skip Intro button (only for the introduction section) -->
+        <button class="nav-btn nav-btn-ghost" id="skip-intro-btn" title="Skip the introduction and go to Module 1">
+            Skip Intro
+        </button>
+
+        <button class="nav-btn nav-btn-next" id="intro-next-btn">
+            Next Slide →
+        </button>
+    </div>
+// ...existing code...
 
   function parseMetadataFromHtml(html, url) {
     const parser = new DOMParser();
@@ -5497,6 +5529,12 @@ resetBtn.addEventListener('click', () => {
                 <button class="nav-btn nav-btn-prev" onclick="prevSection()">
                     ← Previous
                 </button>
+
+                <!-- Added: Skip Intro button (only for the introduction section) -->
+                 <button class="nav-btn nav-btn-ghost" id="skip-intro-btn" title="Skip the introduction and go to Module 1">
+                Skip Intro
+                 </button>
+
                 <button class="nav-btn nav-btn-next" onclick="nextSection()">
                     Next Section →
                 </button>
@@ -5530,6 +5568,39 @@ resetBtn.addEventListener('click', () => {
                     <li><strong>Citation Generator:</strong> <span id="wrap-citation-summary">No citations saved yet.</span></li>
                     <li><strong>Performance Reflection:</strong> <span id="wrap-reflection-summary">No rating submitted yet.</span></li>
                 </ul>
+
+                <!-- Bias Profile -->
+                <div class="bias-profile-cta">
+                    <h3>🔍 Discover Your Bias Profile</h3>
+                    <p>
+                        Based on your activity in this module, our AI will analyze your media literacy skills and potential biases.
+                        Get personalized insights and recommendations!
+                    </p>
+
+                    <button id="analyze-bias-btn" class="nav-btn nav-btn-next">
+                        Analyze My Bias Profile 🧠
+                    </button>
+
+                    <p class="bias-profile-note">
+                        ℹ️ This analysis uses Google Gemini AI and only processes data from this session
+                    </p>
+                </div>
+
+                <div id="bias-analysis-modal" class="modal">
+                    <div class="modal-content">
+                        <button id="close-bias-modal" class="modal-close" type="button">&times;</button>
+
+                        <div id="bias-loading">
+                            <div class="loading" aria-hidden="true"></div>
+                            <h2>Analyzing Your Data...</h2>
+                            <p>This may take 10-15 seconds</p>
+                        </div>
+
+                        <div id="bias-results" hidden>
+                            <!-- Results will be inserted here -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="navigation-buttons">
@@ -5542,6 +5613,202 @@ resetBtn.addEventListener('click', () => {
             </div>
         </div>
     </div>
+
+<script type="module">
+    import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+
+    const analyzeBtn = document.getElementById('analyze-bias-btn');
+    const biasModal = document.getElementById('bias-analysis-modal');
+    const closeBiasModal = document.getElementById('close-bias-modal');
+    const biasLoading = document.getElementById('bias-loading');
+    const biasResults = document.getElementById('bias-results');
+    const loadingTemplate = biasLoading ? biasLoading.innerHTML : '';
+
+    function showBiasModal() {
+        if (biasModal) biasModal.style.display = 'block';
+    }
+
+    function hideBiasModal() {
+        if (biasModal) biasModal.style.display = 'none';
+    }
+
+    function showBiasLoading() {
+        if (!biasLoading || !biasResults) return;
+        biasLoading.innerHTML = loadingTemplate;
+        biasLoading.hidden = false;
+        biasResults.hidden = true;
+    }
+
+    function showBiasError(message) {
+        if (!biasLoading || !biasResults) return;
+        biasLoading.innerHTML = `
+            <h2>Analysis Error</h2>
+            <p>${message}</p>
+            <button type="button" class="modal-btn" id="close-bias-error">Close</button>
+        `;
+        biasLoading.hidden = false;
+        biasResults.hidden = true;
+
+        const closeError = document.getElementById('close-bias-error');
+        if (closeError) {
+            closeError.addEventListener('click', hideBiasModal, { once: true });
+        }
+    }
+
+    if (analyzeBtn && biasModal && closeBiasModal && biasLoading && biasResults) {
+        analyzeBtn.addEventListener('click', async () => {
+            const user = window.authManager ? window.authManager.getCurrentUser() : null;
+            if (!user || user.uid === 'guest') {
+                alert('Please sign in to analyze your bias profile');
+                return;
+            }
+
+            showBiasModal();
+            showBiasLoading();
+
+            const frontendData = collectUserData();
+
+            try {
+                const response = await fetch(`${pythonURI}/api/analyze-bias/${user.uid}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(frontendData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Analysis failed');
+                }
+
+                const data = await response.json();
+                displayBiasAnalysis(data.analysis);
+            } catch (error) {
+                console.error('Error:', error);
+                showBiasError(error.message);
+            }
+        });
+
+        closeBiasModal.addEventListener('click', hideBiasModal);
+    }
+
+    function collectUserData() {
+        // Game data
+        const gameData = JSON.parse(localStorage.getItem('biasGameData_v1') || '{}');
+        const attempts = gameData.attempts || [];
+        const gamePrompts = attempts.length > 0 && attempts[attempts.length - 1].prompts
+            ? attempts[attempts.length - 1].prompts
+            : [];
+
+        // Citation data
+        const citations = JSON.parse(localStorage.getItem('biasGame_citations_v1') || '[]');
+        const citationFormats = citations.reduce((acc, cite) => {
+            acc[cite.style] = (acc[cite.style] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Chat data
+        const chatLog = document.getElementById('ai-chat-log');
+        const chatMessages = chatLog ? chatLog.querySelectorAll('.chat-bubble').length : 0;
+        const chatQuestions = chatLog
+            ? Array.from(chatLog.querySelectorAll('.chat-bubble.user')).map(el => el.textContent.replace('You: ', ''))
+            : [];
+
+        // Thesis data
+        const thesisOutput = document.getElementById('thesis-output');
+        const thesisCount = thesisOutput ? thesisOutput.querySelectorAll('.thesis-card').length : 0;
+        const thesisTopics = thesisOutput
+            ? Array.from(thesisOutput.querySelectorAll('.thesis-statement')).map(el => el.textContent.substring(0, 100))
+            : [];
+
+        return {
+            game_prompts: gamePrompts,
+            citation_count: citations.length,
+            citation_formats: citationFormats,
+            has_works_cited: citations.length > 0,
+            chat_messages: chatMessages,
+            chat_questions: chatQuestions.slice(0, 10), // Last 10 questions
+            thesis_count: thesisCount,
+            thesis_topics: thesisTopics
+        };
+    }
+
+    function displayBiasAnalysis(analysis) {
+        if (!biasLoading || !biasResults) return;
+        biasLoading.hidden = true;
+        biasResults.hidden = false;
+
+        const strengths = Array.isArray(analysis.learning_patterns?.strengths)
+            ? analysis.learning_patterns.strengths
+            : [];
+        const weaknesses = Array.isArray(analysis.learning_patterns?.weaknesses)
+            ? analysis.learning_patterns.weaknesses
+            : [];
+        const recommendations = Array.isArray(analysis.recommendations)
+            ? analysis.recommendations
+            : [];
+
+        const resultsHTML = `
+            <h1>Your Bias Profile</h1>
+
+            <section>
+                <h3>📊 Bias Awareness Score</h3>
+                <p><strong>Score:</strong> ${analysis.bias_likelihood}/10</p>
+                <p>${analysis.bias_explanation}</p>
+            </section>
+
+            <section>
+                <h3>🧠 Media Literacy Knowledge</h3>
+                <p><strong>Score:</strong> ${analysis.knowledge_score}/10</p>
+                <p>${analysis.knowledge_explanation}</p>
+            </section>
+
+            <section>
+                <h3>🎯 Political Awareness Analysis</h3>
+                <ul>
+                    <li><strong>Left Exposure:</strong> ${analysis.personalized_insights.left_leaning_tendencies}/10</li>
+                    <li><strong>Center Preference:</strong> ${analysis.personalized_insights.center_preference}/10</li>
+                    <li><strong>Right Exposure:</strong> ${analysis.personalized_insights.right_leaning_tendencies}/10</li>
+                </ul>
+                <p>${analysis.personalized_insights.explanation}</p>
+            </section>
+
+            <section>
+                <h3>✅ Your Strengths</h3>
+                <ul>
+                    ${strengths.map(s => `<li>${s}</li>`).join('')}
+                </ul>
+            </section>
+
+            <section>
+                <h3>⚠️ Areas to Improve</h3>
+                <ul>
+                    ${weaknesses.map(w => `<li>${w}</li>`).join('')}
+                </ul>
+            </section>
+
+            <section>
+                <h3>💡 Personalized Recommendations</h3>
+                <ol>
+                    ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                </ol>
+            </section>
+
+            <section>
+                <h3>🌟 Unique Insight</h3>
+                <blockquote>${analysis.interesting_observation}</blockquote>
+            </section>
+
+            <button type="button" class="modal-btn" id="close-bias-results">Close Analysis</button>
+        `;
+
+        biasResults.innerHTML = resultsHTML;
+
+        const closeResults = document.getElementById('close-bias-results');
+        if (closeResults) {
+            closeResults.addEventListener('click', hideBiasModal, { once: true });
+        }
+    }
+</script>
 
 <script type="module">
         let currentSection = 0;

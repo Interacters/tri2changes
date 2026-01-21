@@ -4369,12 +4369,7 @@ resetBtn.addEventListener('click', () => {
             <div class="content-placeholder">
                 <p>
 
-            <div class="results-container" id="results-container">
-                <!-- Activity results will be injected here -->
-            </div>
-            
-
-            <style>
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -5315,6 +5310,7 @@ resetBtn.addEventListener('click', () => {
             }
         });
     </script>
+
 </p>
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>

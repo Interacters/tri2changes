@@ -665,7 +665,7 @@
         </table>
     </div>
 
-    <script type="module">
+<script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
     const API_BASE = `${pythonURI}/api`;
 
@@ -938,5 +938,4 @@
                 console.log('No user logged in');
             }
         });
-    </script>
-</body>
+</script>

@@ -93,7 +93,7 @@ date: 2025-12-12
         .progress-steps {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: normal;
             position: relative;
             margin-bottom: 20px;
         }

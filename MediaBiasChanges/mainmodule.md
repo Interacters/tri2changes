@@ -2546,7 +2546,6 @@ loadPromptClicks()
             font-size: 0.9rem;
         }
     </style>
-<body>
     <div class="thesis-gen-card">
 
         <div class="thesis-form-group">
@@ -2784,7 +2783,6 @@ loadPromptClicks()
     document.getElementById('thesis-generate').addEventListener('click', generateThesis);
     document.getElementById('thesis-clear').addEventListener('click', clearThesisForm);
 </script>
-</body>
 </p>
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
@@ -4327,7 +4325,6 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </style>
-<body>
     <div class="survey-container">
         <div class="survey-header">
             <h2>Performance Reflection</h2>

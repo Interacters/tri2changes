@@ -2078,7 +2078,7 @@ async function postScore(username, finalTime) {
     async function fetchLeaderboard() {
     const tbody = document.getElementById('leaderboard-body');
     try {
-        const response = await fetch(pythonURI + '/api/media/leaderboard');
+        const response = await fetch(pythonURI + '/api/media/leaderboard?limit=5');
         if (!response.ok) throw new Error('Failed to fetch leaderboard');
         const data = await response.json();
         

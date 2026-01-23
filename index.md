@@ -5,10 +5,6 @@ hide: true
 show_reading_time: false
 ---
 
-{% extends "layouts/base.html" %}
-{% set project = "Home" %}
-
-{% block body %}
 <style>
     :root {
         --primary: #2563eb;
@@ -229,6 +225,3 @@ show_reading_time: false
 
 </div>
 
-
-
-{% endblock %}

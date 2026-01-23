@@ -4190,6 +4190,70 @@ resetBtn.addEventListener('click', () => {
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
+        .bias-profile-cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .bias-profile-cta h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .bias-profile-cta p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .bias-profile-note {
+            font-size: 0.85rem;
+            margin-top: 15px;
+            opacity: 0.8;
+        }
+
+        #bias-analysis-modal .modal-content {
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #bias-results section {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        #bias-results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        #bias-results ul,
+        #bias-results ol {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+
+        #bias-results li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        #bias-results blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+            font-style: italic;
+            color: #4a5568;
+            margin: 15px 0;
+        }
+
         /* Admin View Styles */
         .admin-container {
             background: rgba(255, 255, 255, 0.95);
@@ -4325,7 +4389,6 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </style>
-<body>
     <div class="survey-container">
         <div class="survey-header">
             <h2>Performance Reflection</h2>
@@ -4427,7 +4490,7 @@ resetBtn.addEventListener('click', () => {
         </table>
     </div>
 
-<script type="module">
+    <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
     const API_BASE = `${pythonURI}/api`;
 
@@ -4491,154 +4554,6 @@ resetBtn.addEventListener('click', () => {
             }
         };
 
-        // Check if user is authenticated and get their role
-        async function checkAuth() {
-            try {
-                const response = await fetch(`${API_BASE}/id`, {
-                    ...fetchOptions
-                });
-                
-                if (response.ok) {
-                    const userData = await response.json();
-                    return userData;
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-            }
-            return null;
-        }
-
-        // Load all performances (admin only)
-        async function loadAllPerformances() {
-            try {
-                const response = await fetch(`${API_BASE}/performance`, {
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const performances = await response.json();
-                    displayAllPerformances(performances);
-                    displayAdminStats(performances);
-                }
-            } catch (error) {
-                console.error('Failed to load performances:', error);
-            }
-        }
-
-        // Display all performances in table
-        function displayAllPerformances(performances) {
-            const tbody = document.getElementById('ratings-tbody');
-            tbody.innerHTML = '';
-
-            performances.reverse().forEach(perf => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${perf.id}</td>
-                    <td><span class="username-link" onclick="showUserInfo(${perf.user_id}, '${perf.username}')">${perf.username || 'Guest'}</span></td>
-                    <td><span class="rating-badge rating-${perf.rating}">${perf.rating}/5</span></td>
-                    <td class="timestamp">${new Date(perf.timestamp).toLocaleString()}</td>
-                `;
-            });
-        }
-
-        // Display admin statistics
-        function displayAdminStats(performances) {
-            const statsGrid = document.getElementById('admin-stats-grid');
-            
-            const total = performances.length;
-            const average = total > 0 
-                ? (performances.reduce((sum, p) => sum + p.rating, 0) / total).toFixed(1)
-                : 0;
-            
-            const distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
-            performances.forEach(p => distribution[p.rating]++);
-            const mostCommon = Object.entries(distribution)
-                .sort((a, b) => b[1] - a[1])[0][0];
-
-            statsGrid.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-value">${total}</div>
-                    <div class="stat-label">Total Ratings</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${average}</div>
-                    <div class="stat-label">Average Rating</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${mostCommon}</div>
-                    <div class="stat-label">Most Common</div>
-                </div>
-            `;
-        }
-
-        // Show user info when clicking username
-        window.showUserInfo = async function(userId, username) {
-            try {
-                const response = await fetch(`${API_BASE}/performance/user/${userId}`, {
-                    credentials: 'include'
-                });
-                
-                if (response.ok) {
-                    const userPerfs = await response.json();
-                    const totalRatings = userPerfs.length;
-                    const avgRating = totalRatings > 0 
-                        ? (userPerfs.reduce((sum, p) => sum + p.rating, 0) / totalRatings).toFixed(1)
-                        : 0;
-                    
-                    const ratings = userPerfs.map(p => p.rating).join(', ');
-                    
-                    alert(`User: ${username}\nUser ID: ${userId}\n\nTotal Ratings: ${totalRatings}\nAverage Rating: ${avgRating}\nAll Ratings: ${ratings || 'None'}`);
-                } else {
-                    alert(`User: ${username}\nUser ID: ${userId}\n\nCould not load rating history.`);
-                }
-            } catch (error) {
-                console.error('Error loading user info:', error);
-                alert(`User: ${username}\nUser ID: ${userId}\n\nError loading rating history.`);
-            }
-        }
-
-        document.getElementById('survey-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const rating = document.querySelector('input[name="rating"]:checked');
-            if (!rating) {
-                alert('Please select a rating before submitting.');
-                return;
-            }
-
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loading"></div>';
-
-            try {
-                const response = await fetch(`${API_BASE}/performance/submit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ rating: parseInt(rating.value) })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showResults(data);
-                    
-                    // Reload admin view if visible
-                    if (document.getElementById('admin-section').style.display !== 'none') {
-                        loadAllPerformances();
-                    }
-                } else {
-                    alert('Error: ' + (data.error || 'Unknown error occurred'));
-                }
-            } catch (error) {
-                alert('Failed to submit. Please ensure you are logged in and your Flask server is running on port 8404.');
-                console.error(error);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Submit Rating</span>';
-            }
-        });
-
         function showResults(data) {
             const badgeColors = {
                 'underprepared': 'badge-underprepared',
@@ -4700,7 +4615,7 @@ resetBtn.addEventListener('click', () => {
                 console.log('No user logged in');
             }
         });
-</script>
+    </script>
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
 

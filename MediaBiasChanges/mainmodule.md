@@ -5282,7 +5282,7 @@ resetBtn.addEventListener('click', () => {
             document.getElementById('results-modal').style.display = 'block';
         }
 
-        function closeModal() {
+        window.closeModal = function() {
             document.getElementById('results-modal').style.display = 'none';
         }
 

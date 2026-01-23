@@ -1,13 +1,17 @@
 ---
 layout: null
+permalink: media/microblog.html
 ---
 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Development Journey</title>
+    <title>English Skills Module - Development Journey</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
@@ -15,214 +19,307 @@ layout: null
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
         }
         
         h1 {
-            text-align: center;
-            color: #2d3748;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 12px;
+            font-weight: 700;
         }
         
         .subtitle {
-            text-align: center;
-            color: #718096;
+            color: #64748b;
+            font-size: 1.1rem;
             margin-bottom: 40px;
-            font-style: italic;
+            font-weight: 500;
         }
         
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        .activity-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 24px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .activity-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
         }
         
-        th {
-            padding: 20px;
-            text-align: left;
-            font-size: 1.2em;
-            font-weight: 600;
+        .activity-title {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .emoji {
+            font-size: 1.8rem;
+        }
+        
+        .activity-desc {
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            font-size: 1rem;
+        }
+        
+        .tech-section {
+            background: rgba(102, 126, 234, 0.08);
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 16px;
+        }
+        
+        .tech-title {
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
         
-        tbody tr {
-            transition: all 0.3s ease;
-        }
-        
-        tbody tr:nth-child(odd) {
-            background: #f7fafc;
-        }
-        
-        tbody tr:nth-child(even) {
-            background: #edf2f7;
-        }
-        
-        tbody tr:hover {
-            background: #e6fffa;
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-        
-        td {
-            padding: 25px 20px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .requirement {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 1.05em;
-        }
-        
-        .implementation {
-            color: #4a5568;
-            line-height: 1.6;
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         
         .tech-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            margin: 2px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
         
-        tbody tr:last-child td {
-            border-bottom: none;
+        code {
+            background: #1e293b;
+            color: #a5f3fc;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #fef3c7, #fed7aa);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 600;
+            color: #92400e;
         }
         
         @media (max-width: 768px) {
             .container {
-                padding: 20px;
+                padding: 30px 25px;
             }
             
             h1 {
-                font-size: 1.8em;
+                font-size: 2rem;
             }
             
-            th, td {
-                padding: 15px 10px;
-                font-size: 0.9em;
-            }
-            
-            table {
-                display: block;
-                overflow-x: auto;
+            .activity-title {
+                font-size: 1.3rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Our Project Journey</h1>
-        <p class="subtitle"></p>
+        <h1>🚀 English Skills Module</h1>
+        <p class="subtitle">Building a comprehensive learning platform with AI, gamification, and real-time data</p>
         
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 35%;">What We Needed</th>
-                    <th style="width: 65%;">How We Engineered It</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="requirement">Store user information</td>
-                    <td class="implementation">
-                        Implemented a <span class="tech-badge">NoSQL</span> database solution leveraging 
-                        <span class="tech-badge">MongoDB</span> with <span class="tech-badge">sharding</span> 
-                        for horizontal scalability and <span class="tech-badge">Redis</span> caching layer 
-                        for optimized read performance and session management.
-                    </td>
-                </tr>
-                <tr>
-                    <td class="requirement">Let users log in</td>
-                    <td class="implementation">
-                        Architected a secure <span class="tech-badge">OAuth 2.0</span> authentication flow 
-                        with <span class="tech-badge">JWT</span> tokens, implementing 
-                        <span class="tech-badge">bcrypt</span> hashing for password encryption and 
-                        <span class="tech-badge">2FA</span> capabilities for enhanced security posture.
-                    </td>
-                </tr>
-                <tr>
-                    <td class="requirement">Show data on a page</td>
-                    <td class="implementation">
-                        Developed a responsive, component-based UI utilizing <span class="tech-badge">React</span> 
-                        with <span class="tech-badge">Redux</span> for state management, 
-                        <span class="tech-badge">Webpack</span> bundling, and <span class="tech-badge">SSR</span> 
-                        for optimal SEO and performance metrics.
-                    </td>
-                </tr>
-                <tr>
-                    <td class="requirement">Handle form submissions</td>
-                    <td class="implementation">
-                        Built a <span class="tech-badge">RESTful API</span> backend with 
-                        <span class="tech-badge">Node.js</span> and <span class="tech-badge">Express</span>, 
-                        incorporating <span class="tech-badge">Joi</span> validation schemas, 
-                        <span class="tech-badge">CSRF</span> protection, and asynchronous 
-                        <span class="tech-badge">queue processing</span> via <span class="tech-badge">RabbitMQ</span>.
-                    </td>
-                </tr>
-                <tr>
-                    <td class="requirement">Deploy the app</td>
-                    <td class="implementation">
-                        Orchestrated a <span class="tech-badge">CI/CD</span> pipeline using 
-                        <span class="tech-badge">Docker</span> containerization, 
-                        <span class="tech-badge">Kubernetes</span> orchestration, 
-                        <span class="tech-badge">GitHub Actions</span> for automated testing, and deployed 
-                        to <span class="tech-badge">AWS ECS</span> with <span class="tech-badge">auto-scaling</span> groups.
-                    </td>
-                </tr>
-                <tr>
-                    <td class="requirement">Make it fast</td>
-                    <td class="implementation">
-                        Optimized performance through <span class="tech-badge">CDN</span> integration, 
-                        <span class="tech-badge">lazy loading</span>, <span class="tech-badge">code splitting</span>, 
-                        <span class="tech-badge">Gzip compression</span>, database 
-                        <span class="tech-badge">indexing</span>, and <span class="tech-badge">memcached</span> 
-                        for sub-100ms response times.
-                    </td>
-                </tr>
-                <tr>
-                    <td class="requirement">Track what users do</td>
-                    <td class="implementation">
-                        Integrated comprehensive <span class="tech-badge">analytics</span> stack with 
-                        <span class="tech-badge">Google Analytics</span>, <span class="tech-badge">Mixpanel</span>, 
-                        custom <span class="tech-badge">ETL pipelines</span> feeding into 
-                        <span class="tech-badge">BigQuery</span>, and real-time dashboards via 
-                        <span class="tech-badge">Grafana</span> and <span class="tech-badge">Prometheus</span>.
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="activity-card">
+            <div class="activity-title">
+                <span class="emoji">🎮</span>
+                Media Bias Sorting Game
+            </div>
+            <p class="activity-desc">
+                Interactive drag-and-drop game where students categorize news sources by political bias (Left, Center, Right). 
+                Features a <span class="highlight">real-time leaderboard</span> tracking completion times and authentication via GitHub credentials.
+            </p>
+            <div class="tech-section">
+                <div class="tech-title">How We Built It</div>
+                <div class="tech-list">
+                    <span class="tech-badge">localStorage API</span>
+                    <span class="tech-badge">Drag & Drop API</span>
+                    <span class="tech-badge">Flask Backend</span>
+                    <span class="tech-badge">SQLite Database</span>
+                    <span class="tech-badge">GitHub OAuth</span>
+                </div>
+                <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                    Persistent game state using <code>localStorage</code> with session recovery, server-side leaderboard using <code>POST /api/media/score</code>, and click tracking for popular prompts.
+                </p>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div class="activity-title">
+                <span class="emoji">🤖</span>
+                AI-Powered Help Chat
+            </div>
+            <p class="activity-desc">
+                Real-time assistance chatbot providing hints or detailed information about news sources and media literacy. 
+                Features <span class="highlight">smart prompts ranked by popularity</span> that update live every 5 seconds.
+            </p>
+            <div class="tech-section">
+                <div class="tech-title">How We Built It</div>
+                <div class="tech-list">
+                    <span class="tech-badge">Anthropic Claude API</span>
+                    <span class="tech-badge">WebSocket-style Updates</span>
+                    <span class="tech-badge">Flask REST API</span>
+                    <span class="tech-badge">JSON Storage</span>
+                </div>
+                <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                    Integrated Claude Sonnet via <code>fetch('/api/chat')</code> with mode selection (hint/info). Live prompt ranking using <code>setInterval()</code> and server-side click counting at <code>/api/prompts/clicks</code>.
+                </p>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div class="activity-title">
+                <span class="emoji">📝</span>
+                AI Thesis Generator
+            </div>
+            <p class="activity-desc">
+                Generate multiple thesis statements with strength scores (1-10), supporting arguments, and counterarguments. 
+                Analyzes topic, position, and optional supporting points to create <span class="highlight">3-5 unique thesis variations</span>.
+            </p>
+            <div class="tech-section">
+                <div class="tech-title">How We Built It</div>
+                <div class="tech-list">
+                    <span class="tech-badge">Claude AI</span>
+                    <span class="tech-badge">Dynamic Forms</span>
+                    <span class="tech-badge">JSON Parsing</span>
+                    <span class="tech-badge">Copy-to-Clipboard API</span>
+                </div>
+                <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                    Backend endpoint <code>POST /api/thesis/generate</code> sends structured prompts to Claude, returning JSON with thesis statements, strength ratings, and recommendations. Frontend displays with copy functionality.
+                </p>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div class="activity-title">
+                <span class="emoji">📚</span>
+                Citation Generator
+            </div>
+            <p class="activity-desc">
+                Automatically generate APA, MLA (9th ed.), and Chicago author-date citations. Features <span class="highlight">metadata scraping from URLs</span> 
+                and a persistent "Works Cited" list with 100+ citation storage capacity.
+            </p>
+            <div class="tech-section">
+                <div class="tech-title">How We Built It</div>
+                <div class="tech-list">
+                    <span class="tech-badge">DOMParser API</span>
+                    <span class="tech-badge">Meta Tag Scraping</span>
+                    <span class="tech-badge">CORS Proxy</span>
+                    <span class="tech-badge">localStorage</span>
+                    <span class="tech-badge">Custom Algorithms</span>
+                </div>
+                <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                    Implemented <code>parseMetadataFromHtml()</code> to extract Open Graph tags, publication dates, and author info. Backend proxy at <code>/api/media/fetch_meta</code> bypasses CORS. Citations formatted via custom functions (<code>fmtAPA</code>, <code>fmtMLA9</code>, <code>fmtChicago</code>).
+                </p>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div class="activity-title">
+                <span class="emoji">📊</span>
+                Performance Reflection & Analytics
+            </div>
+            <p class="activity-desc">
+                Students rate their understanding (1-5) and receive personalized resource recommendations. 
+                Admins view <span class="highlight">aggregated statistics</span> and individual performance histories with role-based access control.
+            </p>
+            <div class="tech-section">
+                <div class="tech-title">How We Built It</div>
+                <div class="tech-list">
+                    <span class="tech-badge">Session Management</span>
+                    <span class="tech-badge">Role-Based Auth</span>
+                    <span class="tech-badge">SQLite Queries</span>
+                    <span class="tech-badge">DataTables.js</span>
+                    <span class="tech-badge">Real-time Stats</span>
+                </div>
+                <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                    Backend endpoints: <code>POST /api/performance/submit</code>, <code>GET /api/performance/stats</code>. Frontend checks <code>user.role === 'Admin'</code> to display management dashboard with edit/delete capabilities via <code>PUT</code> and <code>DELETE</code> requests.
+                </p>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div class="activity-title">
+                <span class="emoji">🧠</span>
+                AI Bias Profile Analysis
+            </div>
+            <p class="activity-desc">
+                Comprehensive personality assessment using <span class="highlight">Google Gemini AI</span> to analyze student activity patterns, 
+                media consumption habits, and learning strengths/weaknesses across the entire module.
+            </p>
+            <div class="tech-section">
+                <div class="tech-title">How We Built It</div>
+                <div class="tech-list">
+                    <span class="tech-badge">Google Gemini</span>
+                    <span class="tech-badge">Data Aggregation</span>
+                    <span class="tech-badge">Structured JSON</span>
+                    <span class="tech-badge">Multi-source Analysis</span>
+                </div>
+                <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                    Collects data from all activities (game prompts, chat questions, thesis topics, citations, performance ratings) via <code>collectUserData()</code>. 
+                    Sends to <code>POST /api/analyze-bias/:uid</code> which combines frontend + backend data, prompts Gemini, and returns structured insights.
+                </p>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div class="activity-title">
+                <span class="emoji">🎯</span>
+                Admin Management Dashboard
+            </div>
+            <p class="activity-desc">
+                Complete oversight panel for teachers and administrators. View user profiles, track GitHub commits (30-day rolling), 
+                manage performance ratings, and monitor media game leaderboard with <span class="highlight">CRUD operations</span> on all data.
+            </p>
+            <div class="tech-section">
+                <div class="tech-title">How We Built It</div>
+                <div class="tech-list">
+                    <span class="tech-badge">DataTables</span>
+                    <span class="tech-badge">GitHub API</span>
+                    <span class="tech-badge">RESTful CRUD</span>
+                    <span class="tech-badge">Session Auth</span>
+                    <span class="tech-badge">Batch Processing</span>
+                </div>
+                <p style="margin-top: 12px; color: #64748b; font-size: 0.9rem;">
+                    Three-tab interface (Users, Performance, Media) with tabbed navigation. Fetches GitHub commits via <code>POST /api/analytics/commits/:uid</code> with rate limiting (15 users per batch, 4s delay). 
+                    Edit/delete actions use <code>PUT</code> and <code>DELETE</code> methods with confirmation dialogs.
+                </p>
+            </div>
+        </div>
     </div>
 </body>
 </html>

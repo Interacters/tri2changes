@@ -4190,6 +4190,70 @@ resetBtn.addEventListener('click', () => {
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
+        .bias-profile-cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .bias-profile-cta h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .bias-profile-cta p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .bias-profile-note {
+            font-size: 0.85rem;
+            margin-top: 15px;
+            opacity: 0.8;
+        }
+
+        #bias-analysis-modal .modal-content {
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #bias-results section {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        #bias-results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        #bias-results ul,
+        #bias-results ol {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+
+        #bias-results li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        #bias-results blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+            font-style: italic;
+            color: #4a5568;
+            margin: 15px 0;
+        }
+
         /* Admin View Styles */
         .admin-container {
             background: rgba(255, 255, 255, 0.95);
@@ -4798,74 +4862,6 @@ resetBtn.addEventListener('click', () => {
     const closeBiasModal = document.getElementById('close-bias-modal');
     const biasLoading = document.getElementById('bias-loading');
     const biasResults = document.getElementById('bias-results');
-    const loadingTemplate = biasLoading ? biasLoading.innerHTML : '';
-
-    function showBiasModal() {
-        if (biasModal) biasModal.style.display = 'block';
-    }
-
-    function hideBiasModal() {
-        if (biasModal) biasModal.style.display = 'none';
-    }
-
-    function showBiasLoading() {
-        if (!biasLoading || !biasResults) return;
-        biasLoading.innerHTML = loadingTemplate;
-        biasLoading.hidden = false;
-        biasResults.hidden = true;
-    }
-
-    function showBiasError(message) {
-        if (!biasLoading || !biasResults) return;
-        biasLoading.innerHTML = `
-            <h2>Analysis Error</h2>
-            <p>${message}</p>
-            <button type="button" class="modal-btn" id="close-bias-error">Close</button>
-        `;
-        biasLoading.hidden = false;
-        biasResults.hidden = true;
-
-        const closeError = document.getElementById('close-bias-error');
-        if (closeError) {
-            closeError.addEventListener('click', hideBiasModal, { once: true });
-        }
-    }
-
-    if (analyzeBtn && biasModal && closeBiasModal && biasLoading && biasResults) {
-        analyzeBtn.addEventListener('click', async () => {
-            const user = window.authManager ? window.authManager.getCurrentUser() : null;
-            if (!user || user.uid === 'guest') {
-                alert('Please sign in to analyze your bias profile');
-                return;
-            }
-
-            showBiasModal();
-            showBiasLoading();
-
-            const frontendData = collectUserData();
-
-            try {
-                const response = await fetch(`${pythonURI}/api/analyze-bias/${user.uid}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(frontendData)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Analysis failed');
-                }
-
-                const data = await response.json();
-                displayBiasAnalysis(data.analysis);
-            } catch (error) {
-                console.error('Error:', error);
-                showBiasError(error.message);
-            }
-        });
-
-        closeBiasModal.addEventListener('click', hideBiasModal);
-    }
 
     function collectUserData() {
         // Game data
@@ -4909,22 +4905,11 @@ resetBtn.addEventListener('click', () => {
     }
 
     function displayBiasAnalysis(analysis) {
-        if (!biasLoading || !biasResults) return;
         biasLoading.hidden = true;
         biasResults.hidden = false;
 
-        const strengths = Array.isArray(analysis.learning_patterns?.strengths)
-            ? analysis.learning_patterns.strengths
-            : [];
-        const weaknesses = Array.isArray(analysis.learning_patterns?.weaknesses)
-            ? analysis.learning_patterns.weaknesses
-            : [];
-        const recommendations = Array.isArray(analysis.recommendations)
-            ? analysis.recommendations
-            : [];
-
         const resultsHTML = `
-            <h1>Your Bias Profile</h1>
+            <h1>🎯 Your Bias Profile</h1>
 
             <section>
                 <h3>📊 Bias Awareness Score</h3>
@@ -4951,21 +4936,21 @@ resetBtn.addEventListener('click', () => {
             <section>
                 <h3>✅ Your Strengths</h3>
                 <ul>
-                    ${strengths.map(s => `<li>${s}</li>`).join('')}
+                    ${analysis.learning_patterns.strengths.map(s => `<li>${s}</li>`).join('')}
                 </ul>
             </section>
 
             <section>
                 <h3>⚠️ Areas to Improve</h3>
                 <ul>
-                    ${weaknesses.map(w => `<li>${w}</li>`).join('')}
+                    ${analysis.learning_patterns.weaknesses.map(w => `<li>${w}</li>`).join('')}
                 </ul>
             </section>
 
             <section>
                 <h3>💡 Personalized Recommendations</h3>
                 <ol>
-                    ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
                 </ol>
             </section>
 
@@ -4974,16 +4959,64 @@ resetBtn.addEventListener('click', () => {
                 <blockquote>${analysis.interesting_observation}</blockquote>
             </section>
 
-            <button type="button" class="modal-btn" id="close-bias-results">Close Analysis</button>
+            <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">
+                Close Analysis
+            </button>
         `;
 
         biasResults.innerHTML = resultsHTML;
-
-        const closeResults = document.getElementById('close-bias-results');
-        if (closeResults) {
-            closeResults.addEventListener('click', hideBiasModal, { once: true });
-        }
     }
+
+    analyzeBtn.addEventListener('click', async () => {
+        // Check if user is logged in
+        const user = window.authManager ? window.authManager.getCurrentUser() : null;
+        if (!user || user.uid === 'guest') {
+            alert('Please sign in to analyze your bias profile');
+            return;
+        }
+
+        // Show modal and loading state
+        biasModal.style.display = 'block';
+        biasLoading.hidden = false;
+        biasResults.hidden = true;
+
+        // Collect frontend data
+        const frontendData = collectUserData();
+
+        try {
+            const response = await fetch(`${pythonURI}/api/analyze-bias/${user.uid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(frontendData)
+            });
+
+            if (!response.ok) {
+                throw new Error('Analysis failed');
+            }
+
+            const data = await response.json();
+            displayBiasAnalysis(data.analysis);
+
+        } catch (error) {
+            console.error('Error:', error);
+            biasResults.innerHTML = `
+                <h2>Analysis Error</h2>
+                <p>Unable to complete analysis. Please try again later.</p>
+                <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">
+                    Close
+                </button>
+            `;
+            biasLoading.hidden = true;
+            biasResults.hidden = false;
+        }
+    });
+
+    closeBiasModal.addEventListener('click', () => {
+        biasModal.style.display = 'none';
+    });
 </script>
 
 <script type="module">

@@ -428,6 +428,70 @@
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
+        .bias-profile-cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .bias-profile-cta h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .bias-profile-cta p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .bias-profile-note {
+            font-size: 0.85rem;
+            margin-top: 15px;
+            opacity: 0.8;
+        }
+
+        #bias-analysis-modal .modal-content {
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        #bias-results section {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        #bias-results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        #bias-results ul,
+        #bias-results ol {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+
+        #bias-results li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        #bias-results blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+            font-style: italic;
+            color: #4a5568;
+            margin: 15px 0;
+        }
+
         /* Admin View Styles */
         .admin-container {
             background: rgba(255, 255, 255, 0.95);
@@ -563,7 +627,7 @@
             }
         }
     </style>
-<body>
+
     <div class="survey-container">
         <div class="survey-header">
             <h2>Performance Reflection</h2>
@@ -668,7 +732,6 @@
 <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
     const API_BASE = `${pythonURI}/api`;
-
 
         const resourcesByTier = {
             1: {
@@ -939,3 +1002,4 @@
             }
         });
 </script>
+    

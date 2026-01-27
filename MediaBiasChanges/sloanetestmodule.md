@@ -1,5 +1,5 @@
 ---
-permalink: /english_help/
+permalink: /sloanetestmodule/
 author: Interactors
 date: 2025-12-12
 ---
@@ -49,7 +49,7 @@ date: 2025-12-12
 
         body {
             min-height: 100vh;
-            background: #c9c9f5;
+            background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #1e293b 100%);
             font-family: 'DM Sans', system-ui, -apple-system, sans-serif !important;
             color: #e2e8f0;
             padding: 20px;
@@ -486,6 +486,7 @@ date: 2025-12-12
 
 body {
   min-height: 100vh;
+  background: url('{{ site.baseurl }}/MediaBiasChanges/media/assets/spacebackground.jpg') no-repeat center center fixed;
   background-size: cover;
   background-color: #061226;
   padding: 20px;

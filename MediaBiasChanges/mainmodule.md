@@ -4640,7 +4640,7 @@ resetBtn.addEventListener('click', () => {
             citation_formats: citationFormats,
             has_works_cited: citations.length > 0,
             chat_messages: chatMessages,
-            chat_questions: chatQuestions.slice(0, 10), // Last 10 questions
+            chat_questions: chatQuestions.slice(0, 10), // Last 10 question
             thesis_count: thesisCount,
             thesis_topics: thesisTopics
         };

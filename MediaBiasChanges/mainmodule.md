@@ -4627,7 +4627,7 @@ resetBtn.addEventListener('click', () => {
             ? Array.from(chatLog.querySelectorAll('.chat-bubble.user')).map(el => el.textContent.replace('You: ', ''))
             : [];
 
-        // Thesis data
+        // Thesis data.
 
         const thesisOutput = document.getElementById('thesis-output');
         const thesisCount = thesisOutput ? thesisOutput.querySelectorAll('.thesis-card').length : 0;

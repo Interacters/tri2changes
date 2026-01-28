@@ -175,12 +175,12 @@ date: 2025-12-12
 
         /* Section Container */
         .section-container {
-            background: rgba(15, 23, 42, 0.6);
+            background: #4b4478;
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 40px;
+            /* border-radius: 16px; */
+            padding: 10px;
             margin-bottom: 30px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            /* border: 1px solid rgba(148, 163, 184, 0.1); */
             display: none;
         }
 

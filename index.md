@@ -30,7 +30,7 @@ show_reading_time: false
     }
 
     .hero-section {
-        background: #c9c9f5;
+        background: #8787cd;
         border-radius: 12px;
         padding: 3rem 2.5rem;
         margin-bottom: 2rem;
@@ -56,7 +56,7 @@ show_reading_time: false
     }
 
     .tools-section {
-        background: #c9c9f5;
+        background: #8787cd;
         border-radius: 12px;
         padding: 2rem 2.5rem;
         margin-bottom: 2rem;

@@ -1,3 +1,138 @@
+</div>
+
+            <style>
+                .media-spectrum-intro {
+                    margin-bottom: 30px;
+                }
+                
+                .spectrum-bar {
+                    height: 12px;
+                    background: linear-gradient(to right, #3b82f6, #94a3b8, #ef4444);
+                    border-radius: 10px;
+                    margin: 20px 0;
+                }
+            </style>
+
+            <div class="media-spectrum-intro">
+                <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>
+                <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
+                    Media bias is how stories get framed. Drag the slider to explore different perspectives!
+                </p>
+
+                <div style="position: relative; padding: 40px 20px;">
+                    <div class="spectrum-bar"></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <span style="color: #3b82f6; font-weight: 700; font-size: 0.9rem;">LEFT</span>
+                        <span style="color: #94a3b8; font-weight: 700; font-size: 0.9rem;">CENTER</span>
+                        <span style="color: #ef4444; font-weight: 700; font-size: 0.9rem;">RIGHT</span>
+                    </div>
+                    
+                    <div style="position: relative; margin: 30px 0;">
+                        <input type="range" min="0" max="100" value="50" 
+                               id="bias-slider" 
+                               style="width: 100%; height: 8px; border-radius: 5px; background: rgba(148, 163, 184, 0.3); outline: none; cursor: pointer;">
+                    </div>
+
+                    <div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; min-height: 200px; transition: all 0.3s;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">⚖️</div>
+                            <h4 style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 15px;" id="bias-title">Center/Neutral</h4>
+                            <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8;" id="bias-description">
+                                Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
+                            </p>
+                            <div style="margin-top: 20px; padding: 15px; background: rgba(148, 163, 184, 0.1); border-radius: 10px;">
+                                <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;" id="bias-key">Key Characteristics:</p>
+                                <p style="color: #e2e8f0; font-size: 0.9rem;" id="bias-traits">
+                                    ✓ Fact-based headlines<br>
+                                    ✓ Multiple perspectives<br>
+                                    ✓ Minimal opinion language
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
+                    <h4 style="color: #a78bfa; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem;"></span> Pro Tip
+                    </h4>
+                    <p style="color: #e2e8f0; line-height: 1.6;">
+                        <strong>No source is 100% unbiased.</strong> Don't strive for perfection. Just consider the value each source brings. Smart readers consume multiple viewpoints to have a well rounded opinon.
+                    </p>
+                </div>
+            </div>
+
+            <script>
+                (function() {
+                    const biasSlider = document.getElementById('bias-slider');
+                    const biasData = {
+                        0: {
+                            emoji: '📢',
+                            title: 'Far Left',
+                            color: '#1e40af',
+                            description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
+                            traits: '✓ Advocacy journalism<br>✓ Social justice focus<br>✓ Bold reform proposals'
+                        },
+                        25: {
+                            emoji: '🗣️',
+                            title: 'Left-Leaning',
+                            color: '#3b82f6',
+                            description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
+                            traits: '✓ Progressive values<br>✓ Government solutions<br>✓ Social equity emphasis'
+                        },
+                        50: {
+                            emoji: '⚖️',
+                            title: 'Center/Neutral',
+                            color: '#94a3b8',
+                            description: 'Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints. Prioritizes verifiable information over interpretation.',
+                            traits: '✓ Fact-based headlines<br>✓ Multiple perspectives<br>✓ Minimal opinion language'
+                        },
+                        75: {
+                            emoji: '🎙️',
+                            title: 'Right-Leaning',
+                            color: '#ef4444',
+                            description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
+                            traits: '✓ Conservative values<br>✓ Market solutions<br>✓ Traditional institutions'
+                        },
+                        100: {
+                            emoji: '📣',
+                            title: 'Far Right',
+                            color: '#a01414',
+                            description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
+                            traits: '✓ Advocacy journalism<br>✓ Nationalist focus<br>✓ Traditional values defense'
+                        }
+                    };
+
+                    if (biasSlider) {
+                        biasSlider.addEventListener('input', function() {
+                            const value = parseInt(this.value, 10);
+                            let closestKey = 50;
+                            let minDiff = Math.abs(value - 50);
+                            
+                            Object.keys(biasData).forEach(key => {
+                                const diff = Math.abs(value - parseInt(key, 10));
+                                if (diff < minDiff) {
+                                    minDiff = diff;
+                                    closestKey = key;
+                                }
+                            });
+                            
+                            const data = biasData[closestKey];
+                            const infoBox = document.getElementById('bias-info-box');
+                            
+                            document.getElementById('bias-emoji').textContent = data.emoji;
+                            document.getElementById('bias-title').textContent = data.title;
+                            document.getElementById('bias-title').style.color = data.color;
+                            document.getElementById('bias-description').textContent = data.description;
+                            document.getElementById('bias-traits').innerHTML = data.traits;
+                            infoBox.style.borderColor = data.color;
+                        });
+                    }
+                })();
+            </script>
+
+            <div class="content-placeholder">
+                <p>
 <style>
 * {
   margin: 0;
@@ -7,9 +142,8 @@
 
 body {
   min-height: 100vh;
-  background: url('{{ site.baseurl }}/MediaBiasChanges/media/assets/spacebackground.jpg') no-repeat center center fixed;
   background-size: cover;
-  background-color: #061226;
+  background-color: #9393c7;
   padding: 20px;
 }
 
@@ -223,7 +357,6 @@ body {
     <div class="leaderboard">
         <div class="leaderboard-header">
             <h3>Top Players</h3>
-            <button class="btn btn-ghost" id="refresh-lb">Refresh</button>
         </div>
         <table class="leaderboard-table">
             <thead>
@@ -253,6 +386,7 @@ class AuthManager {
         this.currentUser = null;
     }
 
+    // Try to login via the main /api/authenticate endpoint
     async login(uid, password) {
         const requestOptions = {
             method: 'POST',
@@ -278,7 +412,8 @@ class AuthManager {
         return data.user;
     }
 
-    async signup(name, uid, password) {
+    // Simplified signup for non-students (just GitHub ID + password)
+    async signupGuest(uid, password) {
         // First verify GitHub ID exists
         const isValidGitHub = await this.verifyGitHubAccount(uid);
         if (!isValidGitHub) {
@@ -295,14 +430,12 @@ class AuthManager {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                name: name,
                 uid: uid,
-                password: password,
-                email: `${uid}@github.user`
+                password: password
             })
         };
 
-        const response = await fetch(`${window.pythonURI}/api/user`, requestOptions);
+        const response = await fetch(`${window.pythonURI}/api/user/guest`, requestOptions);
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
@@ -360,16 +493,9 @@ class AuthManager {
         sessionStorage.removeItem('currentUser');
     }
 
-    setGuestUser() {
-        this.currentUser = {
-            uid: 'guest',
-            name: 'Guest Player',
-            role: 'Guest'
-        };
-        sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-    }
-
-    checkExistingSession() {
+    // Check for existing session
+    async checkExistingSession() {
+        // First check sessionStorage
         const savedUser = sessionStorage.getItem('currentUser');
         if (savedUser) {
             try {
@@ -380,6 +506,33 @@ class AuthManager {
                 sessionStorage.removeItem('currentUser');
             }
         }
+
+        // Then check if there's a valid cookie by calling /api/id
+        try {
+            const response = await fetch(`${window.pythonURI}/api/id`, {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Origin': 'client'
+                }
+            });
+
+            if (response.ok) {
+                const userData = await response.json();
+                this.currentUser = {
+                    uid: userData.uid,
+                    name: userData.name,
+                    role: userData.role
+                };
+                sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                return this.currentUser;
+            }
+        } catch (error) {
+            console.log('No existing session found');
+        }
+
         return null;
     }
 
@@ -388,7 +541,9 @@ class AuthManager {
     }
 }
 
-// Enhanced modal with better GitHub verification UI
+// ============================================================================
+// AUTHENTICATION MODAL UI
+// ============================================================================
 function showSignInPrompt() {
     if (document.getElementById('auth-modal')) {
         document.getElementById('auth-modal').remove();
@@ -401,8 +556,8 @@ function showSignInPrompt() {
         <div style="background:linear-gradient(135deg, #353e74ff, #9384d5ff);padding:40px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.4);max-width:420px;width:90%;">
             <!-- Login Form -->
             <div id="login-form-container">
-                <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">User Login</h2>
-                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">Sign in to save your scores</p>
+                <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">Sign In</h2>
+                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">For students and non-students</p>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">GitHub Username:</label>
                     <input type="text" id="login-uid" placeholder="Your GitHub username" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
@@ -412,24 +567,19 @@ function showSignInPrompt() {
                     <input type="password" id="login-password" placeholder="Enter password" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
                 </div>
                 <div style="display:flex;gap:12px;">
-                    <button id="guest-btn" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Play as Guest</button>
                     <button id="login-btn" style="flex:1;padding:12px;border-radius:10px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;">Login</button>
                 </div>
                 <p id="login-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
                 <p id="login-success" style="color:#4ade80;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
                 <p style="text-align:center;margin-top:20px;color:#c8d7eb;font-size:0.9rem;">
-                    Don't have an account? <a href="#" id="show-signup" style="color:#4299e1;text-decoration:none;font-weight:600;">Sign up</a>
+                    New here? <a href="#" id="show-signup" style="color:#4299e1;text-decoration:none;font-weight:600;">Create Account</a>
                 </p>
             </div>
             
-            <!-- Signup Form -->
+            <!-- Signup Form for Non-Students -->
             <div id="signup-form-container" style="display:none;">
                 <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">Create Account</h2>
-                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;font-size:0.9rem;">⚠️ You must have a GitHub account</p>
-                <div style="margin-bottom:20px;">
-                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Full Name:</label>
-                    <input type="text" id="signup-name" placeholder="Enter your name" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
-                </div>
+                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;font-size:0.9rem;">Simple signup - just GitHub ID & password</p>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">GitHub Username:</label>
                     <div style="position:relative;">
@@ -440,7 +590,7 @@ function showSignInPrompt() {
                 </div>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Password:</label>
-                    <input type="password" id="signup-password" placeholder="8+ characters" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                    <input type="password" id="signup-password" placeholder="Choose a password" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
                 </div>
                 <div style="display:flex;gap:12px;">
                     <button id="back-to-login" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Back</button>
@@ -462,12 +612,6 @@ function showSignInPrompt() {
 
     // Event handlers
     document.getElementById('close-modal').addEventListener('click', () => modal.remove());
-    
-    document.getElementById('guest-btn').addEventListener('click', () => {
-        window.authManager.setGuestUser();
-        modal.remove();
-        if (window.updateAuthButton) window.updateAuthButton();
-    });
     
     // Toggle between login and signup
     document.getElementById('show-signup').addEventListener('click', (e) => {
@@ -510,7 +654,7 @@ function showSignInPrompt() {
         }, 800);
     });
 
-    // Login handler
+    // Login handler - works for BOTH student and non-student accounts
     document.getElementById('login-btn').addEventListener('click', async () => {
         const uid = document.getElementById('login-uid').value.trim();
         const password = document.getElementById('login-password').value;
@@ -537,7 +681,7 @@ function showSignInPrompt() {
             setTimeout(() => {
                 modal.remove();
                 if (window.updateAuthButton) window.updateAuthButton();
-                window.location.reload();
+                if (window.fetchUser) window.fetchUser();
             }, 1000);
         } catch (error) {
             errorMsg.textContent = error.message;
@@ -548,9 +692,8 @@ function showSignInPrompt() {
         }
     });
 
-    // Signup handler - FIXED auto-login
+    // Signup handler - creates guest account and auto-logs in
     document.getElementById('signup-btn').addEventListener('click', async () => {
-        const name = document.getElementById('signup-name').value.trim();
         const uid = document.getElementById('signup-uid').value.trim();
         const password = document.getElementById('signup-password').value;
         const errorMsg = document.getElementById('signup-error');
@@ -560,14 +703,14 @@ function showSignInPrompt() {
         errorMsg.style.display = 'none';
         successMsg.style.display = 'none';
         
-        if (!name || !uid || !password) {
+        if (!uid || !password) {
             errorMsg.textContent = 'Please fill in all fields';
             errorMsg.style.display = 'block';
             return;
         }
         
-        if (password.length < 8) {
-            errorMsg.textContent = 'Password must be at least 8 characters';
+        if (password.length < 2) {
+            errorMsg.textContent = 'Password must be at least 2 characters';
             errorMsg.style.display = 'block';
             return;
         }
@@ -576,19 +719,19 @@ function showSignInPrompt() {
         signupBtn.textContent = 'Verifying GitHub...';
         
         try {
-            await window.authManager.signup(name, uid, password);
+            await window.authManager.signupGuest(uid, password);
             successMsg.textContent = 'Account created! Logging in...';
             successMsg.style.display = 'block';
             signupBtn.textContent = 'Logging in...';
             
-            // Wait a moment for backend to process, then login
+            // Wait for backend to process, then login
             await new Promise(resolve => setTimeout(resolve, 500));
             
             try {
                 await window.authManager.login(uid, password);
                 modal.remove();
                 if (window.updateAuthButton) window.updateAuthButton();
-                window.location.reload();
+                if (window.fetchUser) window.fetchUser();
             } catch (loginError) {
                 console.error('Auto-login failed:', loginError);
                 successMsg.textContent = 'Account created! Please click "Back" and login.';
@@ -615,7 +758,7 @@ window.updateAuthButton = function() {
     
     const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
     
-    if (currentUser && currentUser.uid !== 'guest') {
+    if (currentUser) {
         authBtn.textContent = 'Sign Out';
         authBtn.onclick = () => window.signOut();
     } else {
@@ -627,19 +770,15 @@ window.updateAuthButton = function() {
 // Sign out function
 window.signOut = async function() {
     await window.authManager.logout();
-    window.authManager.setGuestUser();
     window.location.reload();
 };
 
 // Initialize on load
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     if (!window.authManager) {
         window.authManager = new AuthManager();
     }
-    const existingUser = window.authManager.checkExistingSession();
-    if (!existingUser || existingUser.uid === 'guest') {
-        window.authManager.setGuestUser();
-    }
+    await window.authManager.checkExistingSession();
     window.updateAuthButton();
 });
 </script>
@@ -998,7 +1137,7 @@ async function postScore(username, finalTime) {
     async function fetchLeaderboard() {
     const tbody = document.getElementById('leaderboard-body');
     try {
-        const response = await fetch(pythonURI + '/api/media/leaderboard');
+        const response = await fetch(pythonURI + '/api/media/leaderboard?limit=5');
         if (!response.ok) throw new Error('Failed to fetch leaderboard');
         const data = await response.json();
         

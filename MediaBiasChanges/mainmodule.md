@@ -175,12 +175,12 @@ date: 2025-12-12
 
         /* Section Container */
         .section-container {
-            background: rgba(15, 23, 42, 0.6);
+            background: #4b4478;
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 40px;
+            /* border-radius: 16px; */
+            padding: 10px;
             margin-bottom: 30px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            /* border: 1px solid rgba(148, 163, 184, 0.1); */
             display: none;
         }
 
@@ -207,7 +207,7 @@ date: 2025-12-12
         .section-title {
             font-size: 2rem;
             margin-bottom: 12px;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            background: #c7beff;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -235,7 +235,6 @@ date: 2025-12-12
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
             align-items: center;
             gap: 10px;
         }
@@ -357,6 +356,8 @@ date: 2025-12-12
                 }
             </style>
 
+        <div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; min-height: 200px; transition: all 0.3s;">
+
             <div class="media-spectrum-intro">
                 <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>
                 <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
@@ -376,10 +377,8 @@ date: 2025-12-12
                                id="bias-slider" 
                                style="width: 100%; height: 8px; border-radius: 5px; background: rgba(148, 163, 184, 0.3); outline: none; cursor: pointer;">
                     </div>
-
-                    <div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; min-height: 200px; transition: all 0.3s;">
                         <div style="text-align: center;">
-                            <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">⚖️</div>
+                            <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">𓍝</div>
                             <h4 style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 15px;" id="bias-title">Center/Neutral</h4>
                             <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8;" id="bias-description">
                                 Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
@@ -411,35 +410,35 @@ date: 2025-12-12
                     const biasSlider = document.getElementById('bias-slider');
                     const biasData = {
                         0: {
-                            emoji: '📢',
+                            emoji: '︎⚠︎',
                             title: 'Far Left',
                             color: '#1e40af',
                             description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
                             traits: '✓ Advocacy journalism<br>✓ Social justice focus<br>✓ Bold reform proposals'
                         },
                         25: {
-                            emoji: '🗣️',
+                            emoji: '🗣',
                             title: 'Left-Leaning',
                             color: '#3b82f6',
                             description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
                             traits: '✓ Progressive values<br>✓ Government solutions<br>✓ Social equity emphasis'
                         },
                         50: {
-                            emoji: '⚖️',
+                            emoji: '𓍝',
                             title: 'Center/Neutral',
                             color: '#94a3b8',
                             description: 'Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints. Prioritizes verifiable information over interpretation.',
                             traits: '✓ Fact-based headlines<br>✓ Multiple perspectives<br>✓ Minimal opinion language'
                         },
                         75: {
-                            emoji: '🎙️',
+                            emoji: '🎤︎',
                             title: 'Right-Leaning',
                             color: '#ef4444',
                             description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
                             traits: '✓ Conservative values<br>✓ Market solutions<br>✓ Traditional institutions'
                         },
                         100: {
-                            emoji: '📣',
+                            emoji: '⚠︎',
                             title: 'Far Right',
                             color: '#a01414',
                             description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
@@ -487,7 +486,7 @@ date: 2025-12-12
 body {
   min-height: 100vh;
   background-size: cover;
-  background-color: #061226;
+  background-color: #9393c7;
   padding: 20px;
 }
 
@@ -508,7 +507,7 @@ body {
   color: #e2e8f0;
 }
 .game-container {
-    background: linear-gradient(135deg, #353e74ff, #9384d5ff);
+    background: #a7a0d4;
     border-radius: 15px;
     padding: 25px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -701,7 +700,6 @@ body {
     <div class="leaderboard">
         <div class="leaderboard-header">
             <h3>Top Players</h3>
-            <button class="btn btn-ghost" id="refresh-lb">Refresh</button>
         </div>
         <table class="leaderboard-table">
             <thead>
@@ -731,6 +729,7 @@ class AuthManager {
         this.currentUser = null;
     }
 
+    // Try to login via the main /api/authenticate endpoint
     async login(uid, password) {
         const requestOptions = {
             method: 'POST',
@@ -756,7 +755,8 @@ class AuthManager {
         return data.user;
     }
 
-    async signup(name, uid, password) {
+    // Simplified signup for non-students (just GitHub ID + password)
+    async signupGuest(uid, password) {
         // First verify GitHub ID exists
         const isValidGitHub = await this.verifyGitHubAccount(uid);
         if (!isValidGitHub) {
@@ -773,14 +773,12 @@ class AuthManager {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                name: name,
                 uid: uid,
-                password: password,
-                email: `${uid}@github.user`
+                password: password
             })
         };
 
-        const response = await fetch(`${window.pythonURI}/api/user`, requestOptions);
+        const response = await fetch(`${window.pythonURI}/api/user/guest`, requestOptions);
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
@@ -838,16 +836,9 @@ class AuthManager {
         sessionStorage.removeItem('currentUser');
     }
 
-    setGuestUser() {
-        this.currentUser = {
-            uid: 'guest',
-            name: 'Guest Player',
-            role: 'Guest'
-        };
-        sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-    }
-
-    checkExistingSession() {
+    // Check for existing session
+    async checkExistingSession() {
+        // First check sessionStorage
         const savedUser = sessionStorage.getItem('currentUser');
         if (savedUser) {
             try {
@@ -858,6 +849,33 @@ class AuthManager {
                 sessionStorage.removeItem('currentUser');
             }
         }
+
+        // Then check if there's a valid cookie by calling /api/id
+        try {
+            const response = await fetch(`${window.pythonURI}/api/id`, {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Origin': 'client'
+                }
+            });
+
+            if (response.ok) {
+                const userData = await response.json();
+                this.currentUser = {
+                    uid: userData.uid,
+                    name: userData.name,
+                    role: userData.role
+                };
+                sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                return this.currentUser;
+            }
+        } catch (error) {
+            console.log('No existing session found');
+        }
+
         return null;
     }
 
@@ -866,7 +884,9 @@ class AuthManager {
     }
 }
 
-// Enhanced modal with better GitHub verification UI
+// ============================================================================
+// AUTHENTICATION MODAL UI
+// ============================================================================
 function showSignInPrompt() {
     if (document.getElementById('auth-modal')) {
         document.getElementById('auth-modal').remove();
@@ -879,8 +899,8 @@ function showSignInPrompt() {
         <div style="background:linear-gradient(135deg, #353e74ff, #9384d5ff);padding:40px;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.4);max-width:420px;width:90%;">
             <!-- Login Form -->
             <div id="login-form-container">
-                <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">User Login</h2>
-                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">Sign in to save your scores</p>
+                <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">Sign In</h2>
+                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;">For students and non-students</p>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">GitHub Username:</label>
                     <input type="text" id="login-uid" placeholder="Your GitHub username" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
@@ -890,24 +910,19 @@ function showSignInPrompt() {
                     <input type="password" id="login-password" placeholder="Enter password" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
                 </div>
                 <div style="display:flex;gap:12px;">
-                    <button id="guest-btn" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Play as Guest</button>
                     <button id="login-btn" style="flex:1;padding:12px;border-radius:10px;background:#4299e1;color:white;font-weight:700;border:none;cursor:pointer;">Login</button>
                 </div>
                 <p id="login-error" style="color:#ff6b6b;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
                 <p id="login-success" style="color:#4ade80;margin-top:10px;display:none;font-size:0.9rem;text-align:center;"></p>
                 <p style="text-align:center;margin-top:20px;color:#c8d7eb;font-size:0.9rem;">
-                    Don't have an account? <a href="#" id="show-signup" style="color:#4299e1;text-decoration:none;font-weight:600;">Sign up</a>
+                    New here? <a href="#" id="show-signup" style="color:#4299e1;text-decoration:none;font-weight:600;">Create Account</a>
                 </p>
             </div>
             
-            <!-- Signup Form -->
+            <!-- Signup Form for Non-Students -->
             <div id="signup-form-container" style="display:none;">
                 <h2 style="color:#ffffff;margin-bottom:10px;font-size:1.8rem;text-align:center;">Create Account</h2>
-                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;font-size:0.9rem;">⚠️ You must have a GitHub account</p>
-                <div style="margin-bottom:20px;">
-                    <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Full Name:</label>
-                    <input type="text" id="signup-name" placeholder="Enter your name" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
-                </div>
+                <p style="color:#c8d7eb;margin-bottom:25px;text-align:center;font-size:0.9rem;">Simple signup - just GitHub ID & password</p>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">GitHub Username:</label>
                     <div style="position:relative;">
@@ -918,7 +933,7 @@ function showSignInPrompt() {
                 </div>
                 <div style="margin-bottom:20px;">
                     <label style="display:block;color:#e2e8f0;font-weight:600;margin-bottom:8px;">Password:</label>
-                    <input type="password" id="signup-password" placeholder="8+ characters" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
+                    <input type="password" id="signup-password" placeholder="Choose a password" style="width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;" />
                 </div>
                 <div style="display:flex;gap:12px;">
                     <button id="back-to-login" style="flex:1;padding:12px;border-radius:10px;background:rgba(255,255,255,0.2);color:white;font-weight:700;border:none;cursor:pointer;">Back</button>
@@ -940,12 +955,6 @@ function showSignInPrompt() {
 
     // Event handlers
     document.getElementById('close-modal').addEventListener('click', () => modal.remove());
-    
-    document.getElementById('guest-btn').addEventListener('click', () => {
-        window.authManager.setGuestUser();
-        modal.remove();
-        if (window.updateAuthButton) window.updateAuthButton();
-    });
     
     // Toggle between login and signup
     document.getElementById('show-signup').addEventListener('click', (e) => {
@@ -988,7 +997,7 @@ function showSignInPrompt() {
         }, 800);
     });
 
-    // Login handler
+    // Login handler - works for BOTH student and non-student accounts
     document.getElementById('login-btn').addEventListener('click', async () => {
         const uid = document.getElementById('login-uid').value.trim();
         const password = document.getElementById('login-password').value;
@@ -1015,7 +1024,7 @@ function showSignInPrompt() {
             setTimeout(() => {
                 modal.remove();
                 if (window.updateAuthButton) window.updateAuthButton();
-                window.location.reload();
+                if (window.fetchUser) window.fetchUser();
             }, 1000);
         } catch (error) {
             errorMsg.textContent = error.message;
@@ -1026,9 +1035,8 @@ function showSignInPrompt() {
         }
     });
 
-    // Signup handler - FIXED auto-login
+    // Signup handler - creates guest account and auto-logs in
     document.getElementById('signup-btn').addEventListener('click', async () => {
-        const name = document.getElementById('signup-name').value.trim();
         const uid = document.getElementById('signup-uid').value.trim();
         const password = document.getElementById('signup-password').value;
         const errorMsg = document.getElementById('signup-error');
@@ -1038,14 +1046,14 @@ function showSignInPrompt() {
         errorMsg.style.display = 'none';
         successMsg.style.display = 'none';
         
-        if (!name || !uid || !password) {
+        if (!uid || !password) {
             errorMsg.textContent = 'Please fill in all fields';
             errorMsg.style.display = 'block';
             return;
         }
         
-        if (password.length < 8) {
-            errorMsg.textContent = 'Password must be at least 8 characters';
+        if (password.length < 2) {
+            errorMsg.textContent = 'Password must be at least 2 characters';
             errorMsg.style.display = 'block';
             return;
         }
@@ -1054,13 +1062,19 @@ function showSignInPrompt() {
         signupBtn.textContent = 'Verifying GitHub...';
         
         try {
+            await window.authManager.signupGuest(uid, password);
+            successMsg.textContent = 'Account created! Logging in...';
+            successMsg.style.display = 'block';
+            signupBtn.textContent = 'Logging in...';
+            
+            // Wait for backend to process, then login
             await new Promise(resolve => setTimeout(resolve, 500));
             
             try {
                 await window.authManager.login(uid, password);
                 modal.remove();
                 if (window.updateAuthButton) window.updateAuthButton();
-                window.location.reload();
+                if (window.fetchUser) window.fetchUser();
             } catch (loginError) {
                 console.error('Auto-login failed:', loginError);
                 successMsg.textContent = 'Account created! Please click "Back" and login.';
@@ -1087,7 +1101,7 @@ window.updateAuthButton = function() {
     
     const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
     
-    if (currentUser && currentUser.uid !== 'guest') {
+    if (currentUser) {
         authBtn.textContent = 'Sign Out';
         authBtn.onclick = () => window.signOut();
     } else {
@@ -1099,19 +1113,15 @@ window.updateAuthButton = function() {
 // Sign out function
 window.signOut = async function() {
     await window.authManager.logout();
-    window.authManager.setGuestUser();
     window.location.reload();
 };
 
 // Initialize on load
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
     if (!window.authManager) {
         window.authManager = new AuthManager();
     }
-    const existingUser = window.authManager.checkExistingSession();
-    if (!existingUser || existingUser.uid === 'guest') {
-        window.authManager.setGuestUser();
-    }
+    await window.authManager.checkExistingSession();
     window.updateAuthButton();
 });
 </script>
@@ -2231,7 +2241,7 @@ loadPromptClicks()
                 <p>
 <style>
         .thesis-gen-card {
-            background: linear-gradient(160deg, #856ccadd, #5b6ebce1);
+            background: #a7a0d4;
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 24px;
@@ -2260,8 +2270,8 @@ loadPromptClicks()
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
-            color: #d6e9ff;
-            font-size: 0.9rem;
+            color: #38457f;
+            font-size: 1.05rem;
         }
 
         .thesis-input,
@@ -2272,7 +2282,7 @@ loadPromptClicks()
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
             background: rgba(255,255,255,0.05);
-            color: #eaf6ff;
+            color: #23256a;
             font-family: inherit;
             font-size: 0.95rem;
             box-sizing: border-box;
@@ -2814,7 +2824,7 @@ loadPromptClicks()
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
   .cite-card { 
-    background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); 
+    background: #a7a0d4; 
     color:#ffffff; 
     padding:18px; 
     border-radius:12px; 
@@ -2833,7 +2843,7 @@ loadPromptClicks()
   .cite-label { 
     min-width: 110px;
     font-weight:700; 
-    color:#ffffff;
+    color: #0b0839;
     font-size: 0.9rem;
   }
   
@@ -2885,7 +2895,7 @@ loadPromptClicks()
   
   .cite-btn.ghost { 
     background:rgba(255,255,255,0.15); 
-    color:#ffffff; 
+    color: #292745ad; 
     border:1px solid rgba(255,255,255,0.2); 
   }
   
@@ -3758,51 +3768,46 @@ resetBtn.addEventListener('click', () => {
 
             <div class="content-placeholder">
                 <p>
-<style>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Reflection Survey</title>
+    <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
         .survey-container {
-            background: rgba(113, 117, 193, 0.82);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            padding: 60px 50px;
+            padding: 50px 40px;
             border-radius: 30px;
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
-            position: relative;
-            overflow: hidden;
             margin: 0 auto 40px;
-        }
-
-        .survey-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #4facfe);
-            background-size: 300% 300%;
-            animation: gradientShift 4s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
         }
 
         .survey-header {
             text-align: center;
-            margin-bottom: 45px;
+            margin-bottom: 40px;
         }
 
         .survey-header h2 {
             font-size: 2.5rem;
-            background: #fff;
-            background-clip: text;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 15px;
             font-weight: 800;
         }
@@ -3811,43 +3816,19 @@ resetBtn.addEventListener('click', () => {
             color: #4a5568;
             font-size: 1.1rem;
             line-height: 1.7;
-            animation: fadeIn 1s ease-out 0.3s backwards;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .question-block {
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .rating-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
-            gap: 20px;
-            margin: 40px 0;
-        }
-
-        .rating-option {
-            position: relative;
-            cursor: pointer;
-            animation: fadeInUp 0.6s ease-out backwards;
-        }
-
-        .rating-option:nth-child(1) { animation-delay: 0.1s; }
-        .rating-option:nth-child(2) { animation-delay: 0.2s; }
-        .rating-option:nth-child(3) { animation-delay: 0.3s; }
-        .rating-option:nth-child(4) { animation-delay: 0.4s; }
-        .rating-option:nth-child(5) { animation-delay: 0.5s; }
+        .question-block:nth-child(1) { animation-delay: 0.1s; }
+        .question-block:nth-child(2) { animation-delay: 0.2s; }
+        .question-block:nth-child(3) { animation-delay: 0.3s; }
+        .question-block:nth-child(4) { animation-delay: 0.4s; }
+        .question-block:nth-child(5) { animation-delay: 0.5s; }
 
         @keyframes fadeInUp {
             from {
@@ -3860,118 +3841,190 @@ resetBtn.addEventListener('click', () => {
             }
         }
 
-        .rating-option input {
-            display: none;
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
         }
 
-        .rating-label {
+        .rating-buttons {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
             justify-content: center;
-            padding: 30px 15px;
+        }
+
+        .rating-btn {
+            width: 70px;
+            height: 70px;
             border: 3px solid #e2e8f0;
-            border-radius: 20px;
+            border-radius: 15px;
             background: white;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-size: 1.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             position: relative;
             overflow: hidden;
+            color: #667eea;
         }
 
-        .rating-label::before {
+        .rating-btn::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 0;
         }
 
-        .rating-label > * {
+        .rating-btn span {
             position: relative;
             z-index: 1;
         }
 
-        .rating-number {
-            font-size: 3rem;
-            font-weight: 800;
-            color: #667eea;
-            transition: all 0.3s;
-            margin-bottom: 10px;
-        }
-
-        .rating-text {
-            font-size: 0.9rem;
-            color: #718096;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s;
-        }
-
-        .rating-option:hover .rating-label {
+        .rating-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
             border-color: #667eea;
-            transform: translateY(-8px) scale(1.05);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
         }
 
-        .rating-option input:checked + .rating-label {
+        .rating-btn.selected {
             border-color: #667eea;
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
-            transform: scale(1.05);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .rating-option input:checked + .rating-label::before {
+        .rating-btn.selected::before {
             opacity: 1;
         }
 
-        .rating-option input:checked + .rating-label .rating-number,
-        .rating-option input:checked + .rating-label .rating-text {
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .rating-label {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .average-display {
+            display: none;
+            margin-top: 25px;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .average-display.show {
+            display: block;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 300px;
+            }
+        }
+
+        .average-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .average-label-text {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .average-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .progress-bar-container {
+            height: 50px;
+            background: #e2e8f0;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: width 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #667eea;
         }
 
         .submit-btn {
             width: 100%;
-            padding: 18px;
+            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 15px;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .submit-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .submit-btn span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .submit-btn:hover::before {
-            opacity: 1;
+            margin-top: 30px;
         }
 
         .submit-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
-        }
-
-        .submit-btn:active {
-            transform: translateY(-1px);
         }
 
         .submit-btn:disabled {
@@ -3994,372 +4047,572 @@ resetBtn.addEventListener('click', () => {
             to { transform: rotate(360deg); }
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: #31285cbc;
-            backdrop-filter: blur(8px);
-            animation: fadeIn 0.3s ease-out;
-            overflow-y: auto;
-        }
-
-        .modal-content {
-            background: #9281b3ff;
-            margin: 3% auto;
-            padding: 50px;
+        /* Admin View */
+        .admin-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
             border-radius: 30px;
-            width: 90%;
-            max-width: 700px;
-            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
-            animation: slideInScale 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            position: relative;
+            max-width: 1400px;
+            width: 100%;
+            margin: 40px auto;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
         }
 
-        @keyframes slideInScale {
-            from {
-                transform: translateY(-100px) scale(0.8);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
+        .admin-header {
+            margin-bottom: 30px;
+            text-align: center;
         }
 
-        .modal-close {
-            position: absolute;
-            right: 25px;
-            top: 25px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #f3f4f6;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
+        .admin-header h2 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .responses-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .responses-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .responses-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
             color: #4a5568;
         }
 
-        .modal-close:hover {
-            background: #e2e8f0;
-            transform: rotate(90deg);
+        .responses-table tr:hover {
+            background: #f7fafc;
         }
 
-        .result-badge {
+        .rating-badge {
             display: inline-block;
-            padding: 12px 30px;
-            border-radius: 50px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-weight: 700;
             font-size: 1rem;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .badge-underprepared {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .badge-average {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .badge-overprepared {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            color: white;
-        }
-
-        .result-title {
-            font-size: 2.2rem;
-            color: #1a202c;
-            margin-bottom: 20px;
-            font-weight: 800;
-        }
-
-        .result-message {
-            font-size: 1.2rem;
-            color: #4a5568;
-            line-height: 1.8;
-            margin-bottom: 35px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 35px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 25px;
-            border-radius: 15px;
-            color: white;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .resources-section {
-            background: #7973a8ff;
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 30px;
-            border: 2px solid #e2e8f0;
-        }
-
-        .resources-title {
-            font-size: 1.5rem;
-            color: #667eea;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .resources-intro {
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-style: italic;
-        }
-
-        .resource-item {
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            background: #6768a3ff;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-            transition: all 0.3s;
-        }
-
-        .resource-item:hover {
-            transform: translateX(8px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .resource-item a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            display: block;
-        }
-
-        .resource-item a:hover {
-            color: #764ba2;
-        }
-
-        .modal-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 25px;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .bias-profile-cta {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 30px;
-            text-align: center;
-            color: white;
-        }
-
-        .bias-profile-cta h3 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-
-        .bias-profile-cta p {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            opacity: 0.95;
-        }
-
-        .bias-profile-note {
-            font-size: 0.85rem;
-            margin-top: 15px;
-            opacity: 0.8;
-        }
-
-        #bias-analysis-modal .modal-content {
-            max-width: 900px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        #bias-results section {
-            background: rgba(102, 126, 234, 0.1);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        #bias-results h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-        }
-
-        #bias-results ul,
-        #bias-results ol {
-            margin-left: 20px;
-            color: #4a5568;
-        }
-
-        #bias-results li {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-
-        #bias-results blockquote {
-            border-left: 4px solid #667eea;
-            padding-left: 20px;
-            font-style: italic;
-            color: #4a5568;
-            margin: 15px 0;
-        }
+        .rating-1 { background: #fee; color: #c53030; }
+        .rating-2 { background: #fef5e7; color: #d97706; }
+        .rating-3 { background: #fef3c7; color: #b45309; }
+        .rating-4 { background: #e0f2fe; color: #0369a1; }
+        .rating-5 { background: #d1fae5; color: #047857; }
 
         @media (max-width: 768px) {
             .survey-container {
-                padding: 40px 30px;
+                padding: 30px 20px;
             }
 
             .survey-header h2 {
                 font-size: 2rem;
             }
 
-            .rating-grid {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: 15px;
+            .rating-buttons {
+                gap: 8px;
             }
 
-            .rating-number {
-                font-size: 2.5rem;
+            .rating-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.4rem;
             }
 
-            .modal-content {
-                padding: 35px 25px;
-                width: 95%;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .question-text {
+                font-size: 1rem;
             }
         }
     </style>
+</head>
 <body>
     <div class="survey-container">
         <div class="survey-header">
             <h2>Performance Reflection</h2>
-            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+            <p>Rate your understanding and performance across five key English skill-building tasks. See how your ratings compare with the class average.</p>
         </div>
 
         <form id="survey-form">
-            <div class="rating-grid">
-                <div class="rating-option">
-                    <input type="radio" id="rating-1" name="rating" value="1">
-                    <label for="rating-1" class="rating-label">
-                        <span class="rating-number">1</span>
-                        <span class="rating-text">Poor</span>
-                    </label>
+            <div class="question-block" data-question="1">
+                <div class="question-text">1. How well did you perform on understanding media bias?</div>
+                <div class="rating-labels">
+                    <span class="rating-label">Poor</span>
+                    <span class="rating-label">Superior</span>
                 </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-2" name="rating" value="2">
-                    <label for="rating-2" class="rating-label">
-                        <span class="rating-number">2</span>
-                        <span class="rating-text">Fair</span>
-                    </label>
+                <div class="rating-buttons">
+                    <button type="button" class="rating-btn" data-rating="1">
+                        <span>1</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="2">
+                        <span>2</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="3">
+                        <span>3</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="4">
+                        <span>4</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="5">
+                        <span>5</span>
+                    </button>
                 </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-3" name="rating" value="3">
-                    <label for="rating-3" class="rating-label">
-                        <span class="rating-number">3</span>
-                        <span class="rating-text">Good</span>
-                    </label>
+                <div class="average-display">
+                    <div class="average-label">
+                        <span class="average-label-text">Class Average</span>
+                        <span class="average-value">-</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 0%">
+                            <span class="bar-text"></span>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Responses</div>
+                            <div class="stat-value total-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Your Rating</div>
+                            <div class="stat-value your-rating">-</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-4" name="rating" value="4">
-                    <label for="rating-4" class="rating-label">
-                        <span class="rating-number">4</span>
-                        <span class="rating-text">Excellent</span>
-                    </label>
+            </div>
+
+            <div class="question-block" data-question="2">
+                <div class="question-text">2. How well did you perform on thesis writing?</div>
+                <div class="rating-labels">
+                    <span class="rating-label">Poor</span>
+                    <span class="rating-label">Superior</span>
                 </div>
-                <div class="rating-option">
-                    <input type="radio" id="rating-5" name="rating" value="5">
-                    <label for="rating-5" class="rating-label">
-                        <span class="rating-number">5</span>
-                        <span class="rating-text">Superior</span>
-                    </label>
+                <div class="rating-buttons">
+                    <button type="button" class="rating-btn" data-rating="1">
+                        <span>1</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="2">
+                        <span>2</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="3">
+                        <span>3</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="4">
+                        <span>4</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="5">
+                        <span>5</span>
+                    </button>
+                </div>
+                <div class="average-display">
+                    <div class="average-label">
+                        <span class="average-label-text">Class Average</span>
+                        <span class="average-value">-</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 0%">
+                            <span class="bar-text"></span>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Responses</div>
+                            <div class="stat-value total-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Your Rating</div>
+                            <div class="stat-value your-rating">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-block" data-question="3">
+                <div class="question-text">3. How well did you perform on understanding citations?</div>
+                <div class="rating-labels">
+                    <span class="rating-label">Poor</span>
+                    <span class="rating-label">Superior</span>
+                </div>
+                <div class="rating-buttons">
+                    <button type="button" class="rating-btn" data-rating="1">
+                        <span>1</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="2">
+                        <span>2</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="3">
+                        <span>3</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="4">
+                        <span>4</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="5">
+                        <span>5</span>
+                    </button>
+                </div>
+                <div class="average-display">
+                    <div class="average-label">
+                        <span class="average-label-text">Class Average</span>
+                        <span class="average-value">-</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 0%">
+                            <span class="bar-text"></span>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Responses</div>
+                            <div class="stat-value total-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Your Rating</div>
+                            <div class="stat-value your-rating">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-block" data-question="4">
+                <div class="question-text">4. How well did you perform on analyzing argumentative techniques?</div>
+                <div class="rating-labels">
+                    <span class="rating-label">Poor</span>
+                    <span class="rating-label">Superior</span>
+                </div>
+                <div class="rating-buttons">
+                    <button type="button" class="rating-btn" data-rating="1">
+                        <span>1</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="2">
+                        <span>2</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="3">
+                        <span>3</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="4">
+                        <span>4</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="5">
+                        <span>5</span>
+                    </button>
+                </div>
+                <div class="average-display">
+                    <div class="average-label">
+                        <span class="average-label-text">Class Average</span>
+                        <span class="average-value">-</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 0%">
+                            <span class="bar-text"></span>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Responses</div>
+                            <div class="stat-value total-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Your Rating</div>
+                            <div class="stat-value your-rating">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-block" data-question="5">
+                <div class="question-text">5. How well did you perform on research and source evaluation?</div>
+                <div class="rating-labels">
+                    <span class="rating-label">Poor</span>
+                    <span class="rating-label">Superior</span>
+                </div>
+                <div class="rating-buttons">
+                    <button type="button" class="rating-btn" data-rating="1">
+                        <span>1</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="2">
+                        <span>2</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="3">
+                        <span>3</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="4">
+                        <span>4</span>
+                    </button>
+                    <button type="button" class="rating-btn" data-rating="5">
+                        <span>5</span>
+                    </button>
+                </div>
+                <div class="average-display">
+                    <div class="average-label">
+                        <span class="average-label-text">Class Average</span>
+                        <span class="average-value">-</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: 0%">
+                            <span class="bar-text"></span>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Responses</div>
+                            <div class="stat-value total-count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Your Rating</div>
+                            <div class="stat-value your-rating">-</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <button type="submit" class="submit-btn" id="submit-btn">
-                <span>Submit Rating</span>
+                <span>Submit My Ratings</span>
             </button>
         </form>
     </div>
 
-    <div id="results-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-            
-            <div id="result-badge"></div>
-            <h2 class="result-title" id="result-title"></h2>
-            <p class="result-message" id="result-message"></p>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="your-rating">-</div>
-                    <div class="stat-label">Your Rating</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="class-avg">-</div>
-                    <div class="stat-label">Class Average</div>
-                </div>
-            </div>
-
-            <div class="resources-section">
-                <h3 class="resources-title" id="resources-title"></h3>
-                <p class="resources-intro" id="resources-intro"></p>
-                <div id="resources-list"></div>
-            </div>
-
-            <button class="modal-btn" onclick="closeModal()">Got it, thanks!</button>
+    <div class="admin-container" id="admin-section" style="display: none;">
+        <div class="admin-header">
+            <h2>📊 All Student Responses</h2>
         </div>
+
+        <table class="responses-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Q1</th>
+                    <th>Q2</th>
+                    <th>Q3</th>
+                    <th>Q4</th>
+                    <th>Q5</th>
+                    <th>Average</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="responses-tbody"></tbody>
+        </table>
     </div>
 
+    <script type="module">
+        import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
+        const API_BASE = `${pythonURI}/api`;
+
+        const ratings = {};
+
+        // Handle rating button clicks
+        document.querySelectorAll('.rating-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const questionBlock = this.closest('.question-block');
+                const questionNum = questionBlock.dataset.question;
+                const rating = parseInt(this.dataset.rating);
+                
+                // Remove selected from siblings
+                questionBlock.querySelectorAll('.rating-btn').forEach(b => {
+                    b.classList.remove('selected');
+                });
+                
+                // Add selected to this button
+                this.classList.add('selected');
+                
+                // Store rating
+                ratings[`q${questionNum}`] = rating;
+                
+                // Update "Your Rating" in the stats
+                const yourRatingElem = questionBlock.querySelector('.your-rating');
+                if (yourRatingElem) {
+                    yourRatingElem.textContent = rating;
+                }
+            });
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch(`${API_BASE}/id`, {
+                    ...fetchOptions
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    return userData;
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+            return null;
+        }
+
+        // Load statistics for all questions
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/multirating/stats`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    displayStats(stats);
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        // Display statistics
+        function displayStats(stats) {
+            for (let i = 1; i <= 5; i++) {
+                const questionBlock = document.querySelector(`[data-question="${i}"]`);
+                const averageDisplay = questionBlock.querySelector('.average-display');
+                
+                const questionStats = stats[`q${i}`];
+                const average = questionStats.average;
+                const total = questionStats.total;
+                
+                // Calculate percentage for progress bar (out of 5)
+                const percentage = (average / 5) * 100;
+                
+                // Update average value
+                averageDisplay.querySelector('.average-value').textContent = average.toFixed(1);
+                
+                // Update total count
+                averageDisplay.querySelector('.total-count').textContent = total;
+                
+                // Update progress bar
+                const progressBar = averageDisplay.querySelector('.progress-bar');
+                progressBar.style.width = `${percentage}%`;
+                progressBar.querySelector('.bar-text').textContent = average > 0 ? average.toFixed(1) : '';
+                
+                // Show the display
+                averageDisplay.classList.add('show');
+            }
+        }
+
+        // Load all responses (admin only)
+        async function loadAllResponses() {
+            try {
+                const response = await fetch(`${API_BASE}/multirating/responses`, {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const responses = await response.json();
+                    displayAllResponses(responses);
+                }
+            } catch (error) {
+                console.error('Failed to load responses:', error);
+            }
+        }
+
+        // Display all responses in table
+        function displayAllResponses(responses) {
+            const tbody = document.getElementById('responses-tbody');
+            tbody.innerHTML = '';
+
+            responses.reverse().forEach(resp => {
+                const avg = ((resp.q1 + resp.q2 + resp.q3 + resp.q4 + resp.q5) / 5).toFixed(1);
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${resp.id}</td>
+                    <td>${resp.username || 'Guest'}</td>
+                    <td><span class="rating-badge rating-${resp.q1}">${resp.q1}</span></td>
+                    <td><span class="rating-badge rating-${resp.q2}">${resp.q2}</span></td>
+                    <td><span class="rating-badge rating-${resp.q3}">${resp.q3}</span></td>
+                    <td><span class="rating-badge rating-${resp.q4}">${resp.q4}</span></td>
+                    <td><span class="rating-badge rating-${resp.q5}">${resp.q5}</span></td>
+                    <td><strong>${avg}</strong></td>
+                    <td>${new Date(resp.timestamp).toLocaleString()}</td>
+                `;
+            });
+        }
+
+        // Handle form submission
+        document.getElementById('survey-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Check all questions are answered
+            if (Object.keys(ratings).length < 5) {
+                alert('Please rate all 5 questions before submitting.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading"></div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/multirating/submit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(ratings)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Load and display stats
+                    await loadStats();
+                    
+                    // Scroll to first question to see results
+                    document.querySelector('.question-block').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    
+                    // Reload admin view if visible
+                    if (document.getElementById('admin-section').style.display !== 'none') {
+                        loadAllResponses();
+                    }
+                    
+                    alert('✅ Your ratings have been submitted! Scroll up to see the class averages.');
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error occurred'));
+                }
+            } catch (error) {
+                alert('Failed to submit. Please ensure you are logged in and your Flask server is running.');
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Submit My Ratings</span>';
+            }
+        });
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', async () => {
+            const user = await checkAuth();
+            
+            if (user) {
+                console.log('User logged in:', user.uid, 'Role:', user.role);
+                
+                // Load stats on page load
+                loadStats();
+                
+                // Show admin section if user is admin
+                if (user.role === 'Admin') {
+                    document.getElementById('admin-section').style.display = 'block';
+                    loadAllResponses();
+                }
+            } else {
+                console.log('No user logged in - stats will still be visible');
+                loadStats();
+            }
+        });
+    </script>
+</body>
+</html>
 <script type="module">
         import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
         const API_BASE = `${pythonURI}/api`;

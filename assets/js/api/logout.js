@@ -1,19 +1,30 @@
 import { pythonURI, fetchOptions } from './config.js';
 
-// logout from both java and python backends
 export async function handleLogout() {
-    // import config dynamically since we can't use import in non-module script
-
-    // logout from python backend
+    console.log("🚪 Logging out...");
+    
     try {
-        await fetch(pythonURI + '/api/authenticate', {
+        const response = await fetch(pythonURI + '/api/authenticate', {
             ...fetchOptions,
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include' // Important!
         });
+        
+        console.log("📊 Logout response status:", response.status);
+        
+        if (!response.ok) {
+            console.error('❌ Logout failed:', response.status);
+        } else {
+            console.log("✅ Logout successful");
+        }
+        
+        // Clear any local storage/session storage if you're using it
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        return true;
     } catch (e) {
-        // log error but continue
-        console.error('python logout failed:', e);
+        console.error('❌ Python logout failed:', e);
+        return false;
     }
-
-
 }

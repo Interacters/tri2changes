@@ -1,4 +1,4 @@
-import { pythonURI, javaURI, fetchOptions } from './config.js';
+import { pythonURI, fetchOptions } from './config.js';
 
 // logout from both java and python backends
 export async function handleLogout() {
@@ -15,16 +15,5 @@ export async function handleLogout() {
         console.error('python logout failed:', e);
     }
 
-    // logout from java backend
-    try {
-        await fetch(javaURI + '/my/logout', {
-            ...fetchOptions,
-            method: 'POST',
-            credentials: 'include'
-        });
-    } catch (e) {
-        // log error but continue
-        console.error('java logout failed:', e);
-    }
 
 }

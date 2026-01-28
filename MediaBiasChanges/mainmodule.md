@@ -1052,12 +1052,6 @@ function showSignInPrompt() {
         signupBtn.textContent = 'Verifying GitHub...';
         
         try {
-            await window.authManager.signup(name, uid, password);
-            successMsg.textContent = 'Account created! Logging in...';
-            successMsg.style.display = 'block';
-            signupBtn.textContent = 'Logging in...';
-            
-            // Wait a moment for backend to process, then login
             await new Promise(resolve => setTimeout(resolve, 500));
             
             try {

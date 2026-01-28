@@ -373,7 +373,7 @@ show_reading_time: false
                 console.log("🎉 Redirecting to home page...");
                 
                 // Show success message briefly before redirect
-                messageEl.style.background = '#dcfce7';
+                messageEl.style.background = '#4f9869';
                 messageEl.style.color = '#059669';
                 messageEl.textContent = 'Login successful! Redirecting...';
                 messageEl.style.display = 'block';

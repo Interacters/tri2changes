@@ -2471,8 +2471,8 @@ loadPromptClicks()
   /* Import modern, readable font matching thesis generator */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-  .cite-card { 
-    background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); 
+   .cite-card { 
+    background: #a7a0d4; 
     color:#ffffff; 
     padding:18px; 
     border-radius:12px; 
@@ -2491,7 +2491,7 @@ loadPromptClicks()
   .cite-label { 
     min-width: 110px;
     font-weight:700; 
-    color:#ffffff;
+    color: #0b0839;
     font-size: 0.9rem;
   }
   
@@ -2543,7 +2543,7 @@ loadPromptClicks()
   
   .cite-btn.ghost { 
     background:rgba(255,255,255,0.15); 
-    color:#ffffff; 
+    color: #292745ad; 
     border:1px solid rgba(255,255,255,0.2); 
   }
   

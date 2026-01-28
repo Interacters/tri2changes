@@ -4788,7 +4788,6 @@ resetBtn.addEventListener('click', () => {
             return `${minutes}:${String(seconds).padStart(2, '0')}`;
         }
         
-
         function truncateText(text, maxLen) {
             const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
             if (!cleaned) return '';

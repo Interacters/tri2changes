@@ -58,7 +58,7 @@ date: 2025-12-12
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: #31285cbc 
+            background: #423875
         }
 
         /* Progress Tracker */
@@ -175,7 +175,7 @@ date: 2025-12-12
 
         /* Section Container */
         .section-container {
-            background: #4b4478;
+            background: #423875;
             backdrop-filter: blur(10px);
             /* border-radius: 16px; */
             padding: 10px;

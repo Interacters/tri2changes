@@ -2472,7 +2472,7 @@ loadPromptClicks()
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
   .cite-card { 
-    background: #a7a0d4; 
+    background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); 
     color:#ffffff; 
     padding:18px; 
     border-radius:12px; 
@@ -2491,7 +2491,7 @@ loadPromptClicks()
   .cite-label { 
     min-width: 110px;
     font-weight:700; 
-    color: #0b0839;
+    color:#ffffff;
     font-size: 0.9rem;
   }
   
@@ -2543,7 +2543,7 @@ loadPromptClicks()
   
   .cite-btn.ghost { 
     background:rgba(255,255,255,0.15); 
-    color: #292745ad; 
+    color:#ffffff; 
     border:1px solid rgba(255,255,255,0.2); 
   }
   
@@ -2738,6 +2738,219 @@ loadPromptClicks()
     <div id="works-cited-list" class="works-cited-list"></div>
   </div>
 </div>
+
+<!-- ===== Source Notes (slide-over panel, kept collapsed by default) ===== -->
+<style>
+  /* keep styling consistent with cite-card theme, compact and unobtrusive */
+  .notes-slideover {
+    position: fixed;
+    right: -380px;
+    top: 60px;
+    width: 360px;
+    max-width: calc(100% - 40px);
+    height: calc(100vh - 120px);
+    background: linear-gradient(160deg, #564ea0ee, #3b3666ee);
+    color: #fff;
+    border-radius: 12px 0 0 12px;
+    box-shadow: -8px 20px 60px rgba(0,0,0,0.5);
+    padding: 18px;
+    transition: right 0.28s ease;
+    z-index: 12000;
+    overflow: auto;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .notes-slideover.open { right: 0; }
+  .notes-slideover h4 { margin: 0 0 8px 0; font-size: 1.05rem; color: #fff; }
+  .notes-slideover .small { font-size:0.85rem; color: rgba(255,255,255,0.8); margin-bottom:8px; }
+  .notes-slideover .form-input, .notes-slideover .form-select, .notes-slideover .form-textarea {
+    width: 100%; box-sizing: border-box; margin-bottom:8px;
+  }
+  .notes-slideover .source-list { margin-top: 8px; }
+  .notes-slideover .source-item { background: rgba(255,255,255,0.06); padding:8px; border-radius:8px; margin-bottom:8px; font-size:0.85rem; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  .notes-slideover .note-content { font-size:0.85rem; color: rgba(255,255,255,0.9); margin-top:6px; }
+  .notes-slideover .btn-small { padding:6px 10px; border-radius:8px; background: rgba(255,255,255,0.08); border:none; color:#fff; cursor:pointer; font-weight:600; }
+  .notes-slideover .btn-small.ghost { background: transparent; border:1px solid rgba(255,255,255,0.08); }
+  .notes-toggle-inline { display:inline-block; margin-left:8px; font-size:0.9rem; color:#e6f0ff; }
+</style>
+
+<div id="notes-slideover" class="notes-slideover" aria-hidden="true" role="dialog" aria-label="Source notes panel" >
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <h4>Source Notes</h4>
+    <div>
+      <button id="notes-close" class="btn-small ghost" title="Close">Close</button>
+    </div>
+  </div>
+  <div class="small">Add sources and attach quick notes. Saved locally; won't be sent anywhere.</div>
+
+  <form id="notes-add-form" style="margin-bottom:10px;">
+    <input id="notes-source-url" class="form-input" type="text" placeholder="Source URL (https://...)" required />
+    <select id="notes-source-category" class="form-select">
+      <option value="">Category (optional)</option>
+      <option value="supports">Supports</option>
+      <option value="contradicts">Contradicts</option>
+      <option value="background">Background</option>
+      <option value="data">Data</option>
+    </select>
+    <textarea id="notes-source-key" class="form-input form-textarea" placeholder="Key point or quote (optional)"></textarea>
+    <div style="display:flex;gap:8px;">
+      <button type="submit" class="btn-small" style="flex:1;background:#7ad2f9;color:#082033;">Add Source</button>
+      <button type="button" id="notes-clear-form" class="btn-small" style="flex:0;">Clear</button>
+    </div>
+  </form>
+
+  <div id="notes-sources-list" class="source-list" aria-live="polite"></div>
+
+  <div style="margin-top:10px;">
+    <h4 style="margin-bottom:6px;">Quick Notes</h4>
+    <div id="notes-list" style="min-height:40px;"></div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    // Keep keys local and distinct
+    const SOURCES_KEY = 'bias_sources_v1';
+    const NOTES_KEY = 'bias_notes_v1';
+
+    function loadNotesData() {
+      try {
+        return {
+          sources: JSON.parse(localStorage.getItem(SOURCES_KEY) || '[]'),
+          notes: JSON.parse(localStorage.getItem(NOTES_KEY) || '[]')
+        };
+      } catch (e) { return { sources: [], notes: [] }; }
+    }
+    function saveNotesData(data) {
+      try {
+        localStorage.setItem(SOURCES_KEY, JSON.stringify(data.sources || []));
+        localStorage.setItem(NOTES_KEY, JSON.stringify(data.notes || []));
+      } catch (e) { console.warn('saveNotesData failed', e); }
+    }
+
+    function extractDomain(url){ try { return (new URL(url)).hostname.replace(/^www\\./,''); } catch(e){ return url.slice(0,40)+(url.length>40?'…':''); } }
+
+    function renderSources() {
+      const { sources } = loadNotesData();
+      const container = document.getElementById('notes-sources-list');
+      if (!container) return;
+      if (!sources.length) {
+        container.innerHTML = '<div style="color:rgba(255,255,255,0.7);font-style:italic;">No sources yet</div>';
+        return;
+      }
+      container.innerHTML = sources.map((s,i) => `
+        <div class="source-item" data-idx="${i}">
+          <div style="flex:1;">
+            <div style="font-weight:700;">${extractDomain(s.url)}</div>
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.8);">${s.category||''}</div>
+            ${s.keyPoint? `<div class="note-content">${s.keyPoint}</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button class="btn-small" data-action="add-note" data-idx="${i}">+Note</button>
+            <button class="btn-small" data-action="delete-source" data-idx="${i}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderNotes() {
+      const { notes } = loadNotesData();
+      const container = document.getElementById('notes-list');
+      if (!container) return;
+      if (!notes.length) {
+        container.innerHTML = '<div style="color:rgba(255,255,255,0.7);font-style:italic;">No notes yet</div>';
+        return;
+      }
+      container.innerHTML = notes.slice().reverse().map((n, idx) => `
+        <div style="background:rgba(255,255,255,0.04);padding:8px;border-radius:8px;margin-bottom:8px;">
+          <div style="font-weight:700;">${extractDomain(n.sourceUrl)}</div>
+          <div style="font-size:0.85rem;margin-top:6px;">${n.content}</div>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin-top:6px;">${new Date(n.createdAt).toLocaleString()}</div>
+        </div>
+      `).join('');
+    }
+
+    // Form handlers
+    const addForm = document.getElementById('notes-add-form');
+    if (addForm) {
+      addForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const url = document.getElementById('notes-source-url').value.trim();
+        if (!url) { alert('Please enter a source URL'); return; }
+        const category = document.getElementById('notes-source-category').value;
+        const keyPoint = document.getElementById('notes-source-key').value.trim();
+        const data = loadNotesData();
+        data.sources.push({ url, category, keyPoint, addedAt: new Date().toISOString() });
+        saveNotesData(data);
+        addForm.reset();
+        renderSources();
+        renderNotes();
+      });
+    }
+    const clearFormBtn = document.getElementById('notes-clear-form');
+    if (clearFormBtn) clearFormBtn.addEventListener('click', () => addForm.reset());
+
+    // Delegated source list actions (+note, delete)
+    const sourcesListEl = document.getElementById('notes-sources-list');
+    if (sourcesListEl) {
+      sourcesListEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const idx = Number(btn.dataset.idx);
+        const data = loadNotesData();
+        if (action === 'delete-source') {
+          if (!confirm('Delete this source?')) return;
+          data.sources.splice(idx,1);
+          saveNotesData(data);
+          renderSources();
+          renderNotes();
+        } else if (action === 'add-note') {
+          const noteText = prompt('Quick note for this source (keeps simple):');
+          if (!noteText) return;
+          data.notes = data.notes || [];
+          data.notes.push({ sourceUrl: data.sources[idx].url, content: noteText, createdAt: new Date().toISOString() });
+          saveNotesData(data);
+          renderNotes();
+        }
+      });
+    }
+
+    // Toggle slideover
+    const toggleBtn = document.getElementById('cite-notes-toggle');
+    const slide = document.getElementById('notes-slideover');
+    const closeBtn = document.getElementById('notes-close');
+
+    function openNotes() {
+      if (slide) {
+        slide.classList.add('open');
+        slide.setAttribute('aria-hidden','false');
+      }
+      renderSources();
+      renderNotes();
+    }
+    function closeNotes() {
+      if (slide) {
+        slide.classList.remove('open');
+        slide.setAttribute('aria-hidden','true');
+      }
+    }
+    if (toggleBtn) toggleBtn.addEventListener('click', () => {
+      if (slide && slide.classList.contains('open')) closeNotes(); else openNotes();
+    });
+    if (closeBtn) closeBtn.addEventListener('click', closeNotes);
+
+    // Close on Esc
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeNotes(); });
+
+    // Initialize render so nothing breaks
+    renderSources();
+    renderNotes();
+
+    // Prevent interfering with citation UI; no global overrides or form submissions to other handlers
+  })();
+</script>
+<!-- ===== end Source Notes additions ===== -->
 
 <script type="module">
 import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
@@ -3389,7 +3602,7 @@ resetBtn.addEventListener('click', () => {
   loadBtn.addEventListener('click', loadWorksCited);
 })();
 </script>
-</p>
+ </p>
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
             </div>

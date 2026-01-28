@@ -207,7 +207,7 @@ date: 2025-12-12
         .section-title {
             font-size: 2rem;
             margin-bottom: 12px;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            background: #c7beff;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -235,7 +235,6 @@ date: 2025-12-12
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
             align-items: center;
             gap: 10px;
         }
@@ -357,6 +356,8 @@ date: 2025-12-12
                 }
             </style>
 
+        <div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; min-height: 200px; transition: all 0.3s;">
+
             <div class="media-spectrum-intro">
                 <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>
                 <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
@@ -376,10 +377,8 @@ date: 2025-12-12
                                id="bias-slider" 
                                style="width: 100%; height: 8px; border-radius: 5px; background: rgba(148, 163, 184, 0.3); outline: none; cursor: pointer;">
                     </div>
-
-                    <div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; min-height: 200px; transition: all 0.3s;">
                         <div style="text-align: center;">
-                            <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">⚖️</div>
+                            <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">𓍝</div>
                             <h4 style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 15px;" id="bias-title">Center/Neutral</h4>
                             <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8;" id="bias-description">
                                 Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
@@ -411,35 +410,35 @@ date: 2025-12-12
                     const biasSlider = document.getElementById('bias-slider');
                     const biasData = {
                         0: {
-                            emoji: '📢',
+                            emoji: '︎⚠︎',
                             title: 'Far Left',
                             color: '#1e40af',
                             description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
                             traits: '✓ Advocacy journalism<br>✓ Social justice focus<br>✓ Bold reform proposals'
                         },
                         25: {
-                            emoji: '🗣️',
+                            emoji: '🗣',
                             title: 'Left-Leaning',
                             color: '#3b82f6',
                             description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
                             traits: '✓ Progressive values<br>✓ Government solutions<br>✓ Social equity emphasis'
                         },
                         50: {
-                            emoji: '⚖️',
+                            emoji: '𓍝',
                             title: 'Center/Neutral',
                             color: '#94a3b8',
                             description: 'Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints. Prioritizes verifiable information over interpretation.',
                             traits: '✓ Fact-based headlines<br>✓ Multiple perspectives<br>✓ Minimal opinion language'
                         },
                         75: {
-                            emoji: '🎙️',
+                            emoji: '🎤︎',
                             title: 'Right-Leaning',
                             color: '#ef4444',
                             description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
                             traits: '✓ Conservative values<br>✓ Market solutions<br>✓ Traditional institutions'
                         },
                         100: {
-                            emoji: '📣',
+                            emoji: '⚠︎',
                             title: 'Far Right',
                             color: '#a01414',
                             description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
@@ -508,7 +507,7 @@ body {
   color: #e2e8f0;
 }
 .game-container {
-    background: linear-gradient(135deg, #353e74ff, #9384d5ff);
+    background: #a7a0d4;
     border-radius: 15px;
     padding: 25px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -2242,7 +2241,7 @@ loadPromptClicks()
                 <p>
 <style>
         .thesis-gen-card {
-            background: linear-gradient(160deg, #856ccadd, #5b6ebce1);
+            background: #a7a0d4;
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 24px;
@@ -2271,8 +2270,8 @@ loadPromptClicks()
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
-            color: #d6e9ff;
-            font-size: 0.9rem;
+            color: #38457f;
+            font-size: 1.05rem;
         }
 
         .thesis-input,
@@ -2283,7 +2282,7 @@ loadPromptClicks()
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
             background: rgba(255,255,255,0.05);
-            color: #eaf6ff;
+            color: #23256a;
             font-family: inherit;
             font-size: 0.95rem;
             box-sizing: border-box;
@@ -2825,7 +2824,7 @@ loadPromptClicks()
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
   .cite-card { 
-    background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); 
+    background: #a7a0d4; 
     color:#ffffff; 
     padding:18px; 
     border-radius:12px; 
@@ -2844,7 +2843,7 @@ loadPromptClicks()
   .cite-label { 
     min-width: 110px;
     font-weight:700; 
-    color:#ffffff;
+    color: #0b0839;
     font-size: 0.9rem;
   }
   
@@ -2896,7 +2895,7 @@ loadPromptClicks()
   
   .cite-btn.ghost { 
     background:rgba(255,255,255,0.15); 
-    color:#ffffff; 
+    color: #292745ad; 
     border:1px solid rgba(255,255,255,0.2); 
   }
   
@@ -3776,7 +3775,7 @@ resetBtn.addEventListener('click', () => {
             box-sizing: border-box;
         }
         .survey-container {
-            background: rgba(113, 117, 193, 0.82);
+            background: #a7a0d4;
             backdrop-filter: blur(20px);
             padding: 60px 50px;
             border-radius: 30px;
@@ -3945,8 +3944,7 @@ resetBtn.addEventListener('click', () => {
         .submit-btn {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #27214bde;
             border: none;
             border-radius: 15px;
             font-size: 1.2rem;
@@ -3962,7 +3960,7 @@ resetBtn.addEventListener('click', () => {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            background: #27214bde;
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -4199,7 +4197,7 @@ resetBtn.addEventListener('click', () => {
         }
 
         .bias-profile-cta {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #a7a0d4;
             padding: 30px;
             border-radius: 20px;
             margin-top: 30px;
@@ -4293,8 +4291,7 @@ resetBtn.addEventListener('click', () => {
 <body>
     <div class="survey-container">
         <div class="survey-header">
-            <h2>Performance Reflection</h2>
-            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+            <h2>Likert Scale</h2>
         </div>
 
         <form id="survey-form">

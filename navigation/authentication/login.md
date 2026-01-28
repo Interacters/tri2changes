@@ -239,7 +239,7 @@ show_reading_time: false
     <div class="login-card">
         <h1>User Login</h1>
         <hr>
-        <form id="pythonForm" onsubmit="pythonLogin(); return false;">
+        <form id="pythonForm" onsubmit="pythonLogin(event); return false;">
             <div class="form-group">
                 <input type="text" id="uid" placeholder="GitHub ID" required>
             </div>
@@ -255,7 +255,7 @@ show_reading_time: false
     <div class="signup-card">
         <h1>Sign Up</h1>
         <hr>
-        <form id="signupForm" onsubmit="signup(); return false;">
+        <form id="signupForm" onsubmit="signup(event); return false;">
             <div class="form-group">
                 <input type="text" id="name" placeholder="Name" required>
             </div>
@@ -269,7 +269,7 @@ show_reading_time: false
                 <input type="email" id="signupEmail" placeholder="Email" required>
             </div>
             <div class="form-group">
-                <input type="password" id="signupPassword" placeholder="Password" required>
+                <input type="password" id="signupPassword" placeholder="Password (8+ characters)" required>
             </div>
             <label class="switch">
                 <span class="toggle">
@@ -287,90 +287,186 @@ show_reading_time: false
 <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
+    console.log("🔧 Login page loaded");
+    console.log("🔧 Python URI:", pythonURI);
+
     // Function to handle Python login
-    window.pythonLogin = async function () {
-    const uid = document.getElementById("uid").value;
-    const password = document.getElementById("password").value;
-    
-    if (!uid || !password) {
-        document.getElementById("message").textContent = "Please enter both username and password";
-        return;
-    }
-    
-    try {
+    window.pythonLogin = async function (event) {
+        if (event) event.preventDefault();
+        
+        const uid = document.getElementById("uid").value.trim();
+        const password = document.getElementById("password").value;
+        const messageEl = document.getElementById("message");
+        const submitBtn = document.querySelector("#pythonForm button[type='submit']");
+        
+        // Clear previous messages
+        messageEl.style.display = 'none';
+        messageEl.textContent = '';
+        
+        // Validation
+        if (!uid || !password) {
+            messageEl.textContent = "Please enter both username and password";
+            messageEl.style.display = 'block';
+            return false;
+        }
+        
         console.log("🔐 Attempting login for user:", uid);
         
-        const response = await fetch(`${pythonURI}/api/authenticate`, {
-            method: 'POST',
-            mode: 'cors',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Origin': 'client'
-            },
-            body: JSON.stringify({ uid, password })
-        });
+        // Disable button
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
         
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            document.getElementById("message").textContent = errorData.message || `Login failed: ${response.status}`;
-            return;
-        }
-        
-        const data = await response.json();
-        console.log("✅ Server response:", data);
-        
-        // ✅ ADDED: Check if cookie was set
-        const cookieName = 'jwt_python_flask'; // Should match JWT_TOKEN_NAME
-        const cookies = document.cookie.split(';').map(c => c.trim());
-        const jwtCookie = cookies.find(c => c.startsWith(cookieName + '='));
-        
-        if (jwtCookie) {
-            console.log("✅ Cookie found:", cookieName);
-        } else {
-            console.warn("⚠️ Cookie not found in document.cookie (may be HttpOnly)");
-        }
-        
-        // Wait for cookie to be fully set
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Verify session
-        console.log("🔍 Verifying session...");
-        const verifyResponse = await fetch(`${pythonURI}/api/id`, {
-            method: 'GET',
-            mode: 'cors',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Origin': 'client'
-            }
-        });
-        
-        console.log("📊 Verify response status:", verifyResponse.status);
-        
-        if (verifyResponse.ok) {
-            const userData = await verifyResponse.json();
-            console.log("✅ Session verified for:", userData.name);
-            console.log("🎉 Redirecting to profile...");
-            window.location.href = '{{site.baseurl}}/profile';
-        } else {
-            const errorText = await verifyResponse.text();
-            console.error("❌ Session verification failed:", errorText);
-            document.getElementById("message").textContent = "Login succeeded but session verification failed. Please try again.";
-        }
-        
-    } catch (error) {
-        console.error("❌ Login error:", error);
-        document.getElementById("message").textContent = `Error: ${error.message}`;
-    }
-}
-
-    window.signup = async function () {
-        const signupButton = document.querySelector(".signup-card button");
-        signupButton.disabled = true;
-        signupButton.classList.add("disabled");
-
         try {
+            const requestBody = { uid, password };
+            console.log("📤 Request body:", requestBody);
+            
+            const response = await fetch(`${pythonURI}/api/authenticate`, {
+                method: 'POST',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Origin': 'client'
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            console.log("📊 Response status:", response.status);
+            console.log("📊 Response headers:", Object.fromEntries(response.headers.entries()));
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+                console.error("❌ Login failed:", errorData);
+                messageEl.textContent = errorData.message || `Login failed: ${response.status}`;
+                messageEl.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+                return false;
+            }
+            
+            const data = await response.json();
+            console.log("✅ Server response:", data);
+            
+            // Check cookies
+            console.log("🍪 Document cookies:", document.cookie);
+            
+            // Wait a moment for cookie to be set
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Verify session by calling /api/id
+            console.log("🔍 Verifying session...");
+            const verifyResponse = await fetch(`${pythonURI}/api/id`, {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Origin': 'client'
+                }
+            });
+            
+            console.log("📊 Verify response status:", verifyResponse.status);
+            
+            if (verifyResponse.ok) {
+                const userData = await verifyResponse.json();
+                console.log("✅ Session verified for:", userData.name);
+                console.log("🎉 Redirecting to home page...");
+                
+                // Show success message briefly before redirect
+                messageEl.style.background = '#dcfce7';
+                messageEl.style.color = '#059669';
+                messageEl.textContent = 'Login successful! Redirecting...';
+                messageEl.style.display = 'block';
+                
+                // Redirect after a short delay
+                setTimeout(() => {
+                    window.location.href = '{{site.baseurl}}/';
+                }, 1000);
+            } else {
+                const errorText = await verifyResponse.text();
+                console.error("❌ Session verification failed:", errorText);
+                messageEl.textContent = "Login succeeded but session verification failed. Please try again.";
+                messageEl.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+            }
+            
+        } catch (error) {
+            console.error("❌ Login error:", error);
+            messageEl.textContent = `Error: ${error.message}`;
+            messageEl.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Login';
+        }
+        
+        return false;
+    }
+
+    window.signup = async function (event) {
+        if (event) event.preventDefault();
+        
+        const signupButton = document.querySelector(".signup-card button[type='submit']");
+        const messageEl = document.getElementById("signupMessage");
+        
+        // Clear previous messages
+        messageEl.style.display = 'none';
+        messageEl.textContent = '';
+        messageEl.className = '';
+        
+        // Get form values
+        const name = document.getElementById("name").value.trim();
+        const uid = document.getElementById("signupUid").value.trim();
+        const sid = document.getElementById("signupSid").value.trim();
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const kasmNeeded = document.getElementById("kasmNeeded").checked;
+        
+        // Validation
+        if (!name || name.length < 2) {
+            messageEl.textContent = "Name must be at least 2 characters";
+            messageEl.className = 'error';
+            messageEl.style.display = 'block';
+            return false;
+        }
+        
+        if (!uid || uid.length < 2) {
+            messageEl.textContent = "GitHub ID must be at least 2 characters";
+            messageEl.className = 'error';
+            messageEl.style.display = 'block';
+            return false;
+        }
+        
+        if (!password || password.length < 8) {
+            messageEl.textContent = "Password must be at least 8 characters";
+            messageEl.className = 'error';
+            messageEl.style.display = 'block';
+            return false;
+        }
+        
+        if (!email || !email.includes('@')) {
+            messageEl.textContent = "Please enter a valid email address";
+            messageEl.className = 'error';
+            messageEl.style.display = 'block';
+            return false;
+        }
+        
+        console.log("📝 Attempting signup for:", uid);
+        
+        signupButton.disabled = true;
+        signupButton.textContent = 'Creating account...';
+        
+        try {
+            const requestBody = {
+                name: name,
+                uid: uid,
+                sid: sid,
+                email: email,
+                password: password,
+                kasm_server_needed: kasmNeeded
+            };
+            
+            console.log("📤 Signup request:", { ...requestBody, password: '[HIDDEN]' });
+            
             const response = await fetch(`${pythonURI}/api/user`, {
                 method: "POST",
                 mode: 'cors',
@@ -379,33 +475,44 @@ show_reading_time: false
                     "Content-Type": "application/json",
                     "X-Origin": "client"
                 },
-                body: JSON.stringify({
-                    name: document.getElementById("name").value,
-                    uid: document.getElementById("signupUid").value,
-                    email: document.getElementById("signupEmail").value,
-                    password: document.getElementById("signupPassword").value,
-                    kasm_server_needed: document.getElementById("kasmNeeded").checked,
-                })
+                body: JSON.stringify(requestBody)
             });
             
+            console.log("📊 Signup response status:", response.status);
+            
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
+                const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
+                console.error("❌ Signup failed:", errorData);
                 throw new Error(errorData.message || `Signup failed: ${response.status}`);
             }
             
-            document.getElementById("signupMessage").textContent = "Signup successful!";
-            document.getElementById("signupMessage").style.color = "green";
+            const data = await response.json();
+            console.log("✅ Signup successful:", data);
             
+            messageEl.textContent = "Account created successfully! Redirecting to login...";
+            messageEl.style.display = 'block';
+            
+            // Clear form
+            document.getElementById("signupForm").reset();
+            
+            // Wait a moment then focus on login
             setTimeout(() => {
-                window.location.href = '{{site.baseurl}}/login';
-            }, 1500);
+                document.getElementById("uid").value = uid;
+                document.getElementById("uid").focus();
+                messageEl.style.display = 'none';
+                signupButton.disabled = false;
+                signupButton.textContent = 'Sign Up';
+            }, 2000);
             
         } catch (error) {
-            console.error("Signup Error:", error);
-            document.getElementById("signupMessage").style.color = "red";
-            document.getElementById("signupMessage").textContent = `Signup Error: ${error.message}`;
+            console.error("❌ Signup Error:", error);
+            messageEl.className = 'error';
+            messageEl.textContent = `Signup Error: ${error.message}`;
+            messageEl.style.display = 'block';
             signupButton.disabled = false;
-            signupButton.classList.remove("disabled");
+            signupButton.textContent = 'Sign Up';
         }
+        
+        return false;
     }
 </script>

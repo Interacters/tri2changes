@@ -4710,7 +4710,7 @@ resetBtn.addEventListener('click', () => {
 
     analyzeBtn.addEventListener('click', async () => {
         // NO AUTHENTICATION CHECK - Get user ID or use 'guest'
-        
+        let userId = 'guest';  // ← THIS WAS MISSING!
         
         try {
             // Try to get user from authManager if it exists
@@ -4724,6 +4724,8 @@ resetBtn.addEventListener('click', () => {
             // Ignore errors, just use 'guest'
             console.log('Using guest mode');
         }
+
+        console.log('🔍 Analyzing with userId:', userId);
 
         // Show modal and loading state immediately - NO BLOCKING
         biasModal.style.display = 'block';
@@ -4744,7 +4746,8 @@ resetBtn.addEventListener('click', () => {
             });
 
             if (!response.ok) {
-                throw new Error('Analysis failed');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Server returned ${response.status}`);
             }
 
             const data = await response.json();

@@ -4533,7 +4533,7 @@ resetBtn.addEventListener('click', () => {
             </div>
         </div>
         
-        <!-- Section 5: Wrap Up -->
+       <!-- Section 5: Wrap Up -->
         <div class="section-container" id="section-5">
             <div class="section-header">
                 <h2 class="section-title">Wrap Up</h2>
@@ -4637,8 +4637,7 @@ resetBtn.addEventListener('click', () => {
             ? Array.from(chatLog.querySelectorAll('.chat-bubble.user')).map(el => el.textContent.replace('You: ', ''))
             : [];
 
-        // Thesis data.
-
+        // Thesis data
         const thesisOutput = document.getElementById('thesis-output');
         const thesisCount = thesisOutput ? thesisOutput.querySelectorAll('.thesis-card').length : 0;
         const thesisTopics = thesisOutput
@@ -4651,7 +4650,7 @@ resetBtn.addEventListener('click', () => {
             citation_formats: citationFormats,
             has_works_cited: citations.length > 0,
             chat_messages: chatMessages,
-            chat_questions: chatQuestions.slice(0, 10), // Last 10 question
+            chat_questions: chatQuestions.slice(0, 10),
             thesis_count: thesisCount,
             thesis_topics: thesisTopics
         };
@@ -4721,14 +4720,23 @@ resetBtn.addEventListener('click', () => {
     }
 
     analyzeBtn.addEventListener('click', async () => {
-        // Check if user is logged in
-        const user = window.authManager ? window.authManager.getCurrentUser() : null;
-        if (!user || user.uid === 'guest') {
-            alert('Please sign in to analyze your bias profile');
-            return;
+        // NO AUTHENTICATION CHECK - Get user ID or use 'guest'
+        
+        
+        try {
+            // Try to get user from authManager if it exists
+            if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
+                const user = window.authManager.getCurrentUser();
+                if (user && user.uid && user.uid !== 'guest') {
+                    userId = user.uid;
+                }
+            }
+        } catch (e) {
+            // Ignore errors, just use 'guest'
+            console.log('Using guest mode');
         }
 
-        // Show modal and loading state
+        // Show modal and loading state immediately - NO BLOCKING
         biasModal.style.display = 'block';
         biasLoading.hidden = false;
         biasResults.hidden = true;
@@ -4737,7 +4745,7 @@ resetBtn.addEventListener('click', () => {
         const frontendData = collectUserData();
 
         try {
-            const response = await fetch(`${pythonURI}/api/analyze-bias/${user.uid}`, {
+            const response = await fetch(`${pythonURI}/api/analyze-bias/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -4758,6 +4766,7 @@ resetBtn.addEventListener('click', () => {
             biasResults.innerHTML = `
                 <h2>Analysis Error</h2>
                 <p>Unable to complete analysis. Please try again later.</p>
+                <p style="font-size: 0.9em; color: #cbd5e1; margin-top: 10px;">Error details: ${error.message}</p>
                 <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">
                     Close
                 </button>

@@ -3762,12 +3762,7 @@ resetBtn.addEventListener('click', () => {
 
             <div class="content-placeholder">
                 <p>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Reflection Survey</title>
-    <style>
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -4136,8 +4131,7 @@ resetBtn.addEventListener('click', () => {
 <body>
     <div class="survey-container">
         <div class="survey-header">
-            <h2>Performance Reflection</h2>
-            <p>Rate your understanding and performance across five key English skill-building tasks. See how your ratings compare with the class average.</p>
+            <h2>Likert Scale</h2>
         </div>
 
         <form id="survey-form">

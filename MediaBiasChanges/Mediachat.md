@@ -1,4 +1,4 @@
-<style>
+            <style>
                 .media-spectrum-intro {
                     margin-bottom: 30px;
                 }
@@ -439,7 +439,6 @@ window.updateAuthButton = updateAuthButton;
 </script>
   
 <script type="module">
-    console.log("✅ Game script loaded");
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
     // Configuration
@@ -624,8 +623,6 @@ function clearGameStateForIds(ids = []) {
         if (timerDisplay) {
             timerDisplay.textContent = 'Time: 0:00';
         }
-        
-        updateDisplays();
 
         const getRandomSubset = (arr, count) => {
             return [...arr]
@@ -711,7 +708,6 @@ function clearGameStateForIds(ids = []) {
         });
 
         saveData(data);
-        updateDisplays();
         if (showAlert) alert(`Autofill placed ${correctCount} images into their correct bins.`);
     }
 
@@ -751,8 +747,6 @@ function clearGameStateForIds(ids = []) {
     data.gameState[id] = bin.dataset.bin;
     saveData(data);
     // ===== end persist =====
-    
-    updateDisplays();
         });
     });
 
@@ -979,20 +973,27 @@ async function submitFinalTime(username, elapsed) {
                 if (timerHandle) {
                     const elapsed = timerHandle.stop();
 
-                    // Persist prompts + attempt locally (minimal addition)
+                    // ALWAYS get fresh username value
+                    const username = window.currentPlayerUid || 'Guest';
+
+                    // Persist prompts + attempt locally
                     try {
-                      const d = loadData();
-                      d.attempts = d.attempts || [];
-                      const prompts = (d.meta && d.meta.currentChatPrompts) ? d.meta.currentChatPrompts.slice() : [];
-                      d.attempts.push({ username: currentPlayer || 'Guest', time: Number(elapsed) || 0, at: Date.now(), prompts });
-                      // clear ephemeral prompts for next run
-                      if (d.meta) delete d.meta.currentChatPrompts;
-                      saveData(d);
+                    const d = loadData();
+                    d.attempts = d.attempts || [];
+                    const prompts = (d.meta && d.meta.currentChatPrompts) ? d.meta.currentChatPrompts.slice() : [];
+                    d.attempts.push({ 
+                        username: username,  // Use fresh value here too
+                        time: Number(elapsed) || 0, 
+                        at: Date.now(), 
+                        prompts 
+                    });
+                    if (d.meta) delete d.meta.currentChatPrompts;
+                    saveData(d);
                     } catch (err) {
-                      console.warn('save attempt with prompts failed', err);
+                    console.warn('save attempt with prompts failed', err);
                     }
 
-                    submitFinalTime(currentPlayer, elapsed);
+                    submitFinalTime(username, elapsed);  // Use fresh value
                     
                     const minutes = Math.floor(elapsed / 60);
                     const seconds = elapsed % 60;
@@ -1016,4 +1017,3 @@ async function submitFinalTime(username, elapsed) {
         setInterval(fetchLeaderboard, 30000);
     };
 </script>
-

@@ -1096,8 +1096,6 @@ function clearGameStateForIds(ids = []) {
     data.gameState[id] = bin.dataset.bin;
     saveData(data);
     // ===== end persist =====
-    
-    updateDisplays();
         });
     });
 

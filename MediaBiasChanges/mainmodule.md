@@ -1634,7 +1634,7 @@ async function submitFinalTime(username, elapsed) {
 
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
-const PROMPTS_API_BASE = pythonURI || 'http://localhost:8404';
+const PROMPTS_API_BASE = pythonURI;
 ;
 // Smart Prompts Feature
 const PROMPT_TEMPLATES = [
@@ -2258,7 +2258,7 @@ loadPromptClicks()
 <script type="module">
     import {pythonURI} from '{{site.baseurl}}/assets/js/api/config.js';
 
-    const API_BASE = pythonURI || 'http://localhost:8404';
+    const API_BASE = pythonURI;
 
     function addThesisPoint() {
         const container = document.getElementById('thesis-points-container');

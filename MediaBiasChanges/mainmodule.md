@@ -2863,7 +2863,7 @@ loadPromptClicks()
       <option value="data">Data</option>
     </select>
     <textarea id="notes-source-key" class="form-input form-textarea" placeholder="Key point or quote (optional)"></textarea>
-    <div style="display:flex;gap:8px;">
+    <div style="gap:8px;">
       <button type="submit" class="btn-small" style="flex:1;background:#7ad2f9;color:#082033;">Add Source</button>
       <button type="button" id="notes-clear-form" class="btn-small" style="flex:0;">Clear</button>
     </div>

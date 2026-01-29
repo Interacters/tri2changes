@@ -968,8 +968,6 @@ function clearGameStateForIds(ids = []) {
         if (timerDisplay) {
             timerDisplay.textContent = 'Time: 0:00';
         }
-        
-        updateDisplays();
 
         const getRandomSubset = (arr, count) => {
             return [...arr]
@@ -1055,7 +1053,6 @@ function clearGameStateForIds(ids = []) {
         });
 
         saveData(data);
-        updateDisplays();
         if (showAlert) alert(`Autofill placed ${correctCount} images into their correct bins.`);
     }
 

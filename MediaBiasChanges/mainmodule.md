@@ -1666,52 +1666,21 @@ function havePromptClicksChanged(nextPrompts) {
 }
 
 // Load prompt click data
-// Replace your loadPromptClicks function with this improved version
-
 async function loadPromptClicks() {
     let nextPrompts;
     try {
-        console.log('🔄 Fetching prompt clicks from:', `${PROMPTS_API_BASE}/api/prompts/clicks`);
-        
         const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/clicks`);
-        
-        console.log('📡 Response status:', response.status);
-        
         if (response.ok) {
             const data = await response.json();
-            console.log('✅ Received click data:', data);
-            
-            // CRITICAL FIX: Handle both object and array responses
-            let clicksData = data;
-            
-            // If data is wrapped in an object, extract it
-            if (data && typeof data === 'object' && !Array.isArray(data)) {
-                // Check if it's already in the right format {1: 5, 2: 3, etc}
-                if (Object.keys(data).every(key => !isNaN(parseInt(key)))) {
-                    clicksData = data;
-                } else if (data.clicks) {
-                    clicksData = data.clicks;
-                }
-            }
-            
-            console.log('📊 Processed clicks data:', clicksData);
-            
             nextPrompts = PROMPT_TEMPLATES.map(prompt => ({
                 ...prompt,
-                clicks: clicksData[prompt.id] || 0
+                clicks: data[prompt.id] || 0
             }));
-            
-            console.log('✨ Final prompts with clicks:', nextPrompts);
         } else {
-            console.error('❌ Response not OK:', response.status, response.statusText);
-            const errorText = await response.text();
-            console.error('Error body:', errorText);
-            
             nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
         }
     } catch (error) {
-        console.error('💥 Error loading prompt clicks:', error);
-        console.error('Stack trace:', error.stack);
+        console.warn('Could not load prompt clicks:', error);
         nextPrompts = PROMPT_TEMPLATES.map(prompt => ({ ...prompt, clicks: 0 }));
     }
 
@@ -1720,37 +1689,53 @@ async function loadPromptClicks() {
     return changed;
 }
 
-// Also improve the click handler
+// Render prompts sorted by popularity
+function renderSmartPrompts(source) {
+    const trimmedSource = (source || '').trim();
+    if (!trimmedSource || trimmedSource.length < 2) {
+        currentSource = '';
+        smartPromptsSection.style.display = 'none';
+        return;
+    }
+
+    currentSource = trimmedSource;
+    const sorted = [...promptsWithClicks].sort((a, b) => b.clicks - a.clicks);
+    smartPromptsGrid.innerHTML = '';
+    
+    sorted.forEach(prompt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ai-prompt-btn';
+        
+        const promptText = prompt.text.replace('{source}', trimmedSource);
+        btn.innerHTML = `<span style="flex: 1;">${promptText}</span> <span style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;">${prompt.clicks}</span>`;
+        
+        btn.addEventListener('click', () => handlePromptClick(prompt, trimmedSource));
+        smartPromptsGrid.appendChild(btn);
+    });
+
+    smartPromptsSection.style.display = 'block';
+}
+
+// Handle prompt click
 async function handlePromptClick(prompt, source) {
     const filledPrompt = prompt.text.replace('{source}', source);
     aiMessageInput.value = filledPrompt;
 
     try {
-        console.log(`🖱️  Clicking prompt ${prompt.id}:`, prompt.text);
-        
         const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/${prompt.id}/click`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
         
-        console.log('📡 Click response status:', response.status);
-        
         if (response.ok) {
             const data = await response.json();
-            console.log('✅ Click response data:', data);
-            
             const localPrompt = promptsWithClicks.find(p => p.id === prompt.id);
-            if (localPrompt && data.clicks !== undefined) {
-                localPrompt.clicks = data.clicks;
-                console.log(`📈 Updated local clicks for prompt ${prompt.id} to ${data.clicks}`);
-            }
+            if (localPrompt) localPrompt.clicks = data.clicks;
             renderSmartPrompts(source);
-        } else {
-            const errorText = await response.text();
-            console.error('❌ Click failed:', response.status, errorText);
         }
     } catch (error) {
-        console.error('💥 Failed to increment click count:', error);
+        console.error('Failed to increment click count:', error);
     }
 
     aiMessageInput.focus();

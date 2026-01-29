@@ -413,7 +413,7 @@ date: 2025-12-12
 </div>
 
 <!-- The collapsible dark blue box -->
-<div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; transition: all 0.3s;">
+<div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 10px; transition: all 0.3s;">
 
     <div class="media-spectrum-intro">
         <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>

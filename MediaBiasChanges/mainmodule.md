@@ -784,7 +784,6 @@ window.updateAuthButton = updateAuthButton;
 </script>
   
 <script type="module">
-    console.log("✅ Game script loaded");
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
     // Configuration

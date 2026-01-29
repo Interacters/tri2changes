@@ -1631,7 +1631,7 @@ async function submitFinalTime(username, elapsed) {
 
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
-const PROMPTS_API_BASE = pythonURI;
+const PROMPTS_API_BASE = pythonURI || 'http://localhost:8404';
 ;
 // Smart Prompts Feature
 const PROMPT_TEMPLATES = [

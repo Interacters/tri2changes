@@ -4064,7 +4064,6 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </style>
-</head>
 <body>
     <div class="survey-container">
         <div class="survey-header">
@@ -4536,8 +4535,6 @@ resetBtn.addEventListener('click', () => {
             }
         });
     </script>
-</body>
-</html>
 <script type="module">
         import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
         const API_BASE = `${pythonURI}/api`;

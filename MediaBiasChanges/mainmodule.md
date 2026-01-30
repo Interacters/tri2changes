@@ -4782,6 +4782,7 @@ resetBtn.addEventListener('click', () => {
     </div>
 
 
+<!-- Bias Analysis Script - Checks authManager first, then /api/id fallback -->
 <script type="module">
     import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
@@ -4792,15 +4793,28 @@ resetBtn.addEventListener('click', () => {
     const biasResults = document.getElementById('bias-results');
 
     /**
-     * Get current user from /api/id endpoint
-     * This works because you have a valid JWT cookie
+     * Get current user - tries authManager first, then /api/id
      */
     async function getCurrentUser() {
+        // Method 1: Try authManager first
+        if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
+            try {
+                const user = window.authManager.getCurrentUser();
+                if (user && user.uid && user.uid !== 'guest') {
+                    console.log('✅ User from authManager:', user.uid);
+                    return user;
+                }
+            } catch (e) {
+                console.log('⚠️ authManager.getCurrentUser() failed:', e);
+            }
+        }
+
+        // Method 2: Fall back to /api/id
         try {
-            console.log('🔍 Fetching user from /api/id...');
+            console.log('🔍 authManager not available, trying /api/id...');
             const response = await fetch(`${pythonURI}/api/id`, {
                 method: 'GET',
-                credentials: 'include',  // Sends JWT cookie
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -4808,16 +4822,17 @@ resetBtn.addEventListener('click', () => {
 
             if (response.ok) {
                 const userData = await response.json();
-                console.log('✅ User authenticated:', userData.uid);
+                console.log('✅ User from /api/id:', userData.uid || userData._uid);
                 return userData;
             } else {
-                console.log('❌ Not authenticated - /api/id returned', response.status);
-                return null;
+                console.log('❌ /api/id returned:', response.status);
             }
         } catch (e) {
-            console.error('❌ Error fetching user:', e);
-            return null;
+            console.error('❌ Error fetching from /api/id:', e);
         }
+
+        console.log('❌ No authenticated user found');
+        return null;
     }
 
     function collectUserData() {
@@ -4919,6 +4934,7 @@ resetBtn.addEventListener('click', () => {
 
         biasResults.innerHTML = resultsHTML;
     }
+
     analyzeBtn.addEventListener('click', async () => {
         console.log('🔍 Analyze My Bias Profile clicked');
 
@@ -4927,7 +4943,7 @@ resetBtn.addEventListener('click', () => {
         biasLoading.hidden = false;
         biasResults.hidden = true;
 
-        // Get current user from API
+        // Get current user (tries authManager first, then /api/id)
         const currentUser = await getCurrentUser();
         
         if (!currentUser) {

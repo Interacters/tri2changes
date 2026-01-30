@@ -4700,7 +4700,7 @@ resetBtn.addEventListener('click', () => {
             </div>
         </div>
         
-       <!-- Section 5: Wrap Up -->
+   <!-- Section 5: Wrap Up -->
         <div class="section-container" id="section-5">
             <div class="section-header">
                 <h2 class="section-title">Wrap Up</h2>
@@ -4741,8 +4741,15 @@ resetBtn.addEventListener('click', () => {
                     </button>
 
                     <p class="bias-profile-note">
-                        ℹ️ This analysis uses Google Gemini AI and only processes data from this session
+                        ℹ️ This analysis uses Google Gemini AI and combines your session data with your saved progress
                     </p>
+
+                    <!-- Login prompt (hidden by default, shown if not logged in) -->
+                    <div id="login-required-message" style="display: none; margin-top: 15px; padding: 15px; background-color: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: 4px;">
+                        <p style="margin: 0; color: #ffc107;">
+                            ⚠️ Please <a href="{{site.baseurl}}/login" style="color: #ffc107; text-decoration: underline;">log in</a> to view your personalized bias profile analysis.
+                        </p>
+                    </div>
                 </div>
 
                 <div id="bias-analysis-modal" class="modal">
@@ -4752,7 +4759,8 @@ resetBtn.addEventListener('click', () => {
                         <div id="bias-loading">
                             <div class="loading" aria-hidden="true"></div>
                             <h2>Analyzing Your Data...</h2>
-                            <p>This may take 10-15 seconds</p>
+                            <p>Fetching your performance history and session activity...</p>
+                            <p style="font-size: 0.9em; color: #94a3b8;">This may take 10-15 seconds</p>
                         </div>
 
                         <div id="bias-results" hidden>
@@ -4781,6 +4789,7 @@ resetBtn.addEventListener('click', () => {
     const closeBiasModal = document.getElementById('close-bias-modal');
     const biasLoading = document.getElementById('bias-loading');
     const biasResults = document.getElementById('bias-results');
+    const loginRequiredMessage = document.getElementById('login-required-message');
 
     function collectUserData() {
         // Game data
@@ -4886,57 +4895,100 @@ resetBtn.addEventListener('click', () => {
         biasResults.innerHTML = resultsHTML;
     }
 
-    analyzeBtn.addEventListener('click', async () => {
-        // NO AUTHENTICATION CHECK - Get user ID or use 'guest'
-        let userId = 'guest';  // ← THIS WAS MISSING!
-        
-        try {
-            // Try to get user from authManager if it exists
-            if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
-                const user = window.authManager.getCurrentUser();
-                if (user && user.uid && user.uid !== 'guest') {
-                    userId = user.uid;
-                }
-            }
-        } catch (e) {
-            // Ignore errors, just use 'guest'
-            console.log('Using guest mode');
+    async function checkAuthentication() {
+        // Check if authManager exists
+        if (!window.authManager || typeof window.authManager.getCurrentUser !== 'function') {
+            console.log('⚠️ authManager not available');
+            return null;
         }
 
-        console.log('🔍 Analyzing with userId:', userId);
+        try {
+            const user = window.authManager.getCurrentUser();
+            
+            // Verify user is actually logged in (not guest)
+            if (!user || !user.uid || user.uid === 'guest') {
+                console.log('⚠️ No authenticated user found');
+                return null;
+            }
 
-        // Show modal and loading state immediately - NO BLOCKING
+            console.log('✅ Authenticated user:', user.uid);
+            return user;
+        } catch (e) {
+            console.error('❌ Error checking authentication:', e);
+            return null;
+        }
+    }
+
+    analyzeBtn.addEventListener('click', async () => {
+        console.log('🔍 Bias analysis button clicked');
+
+        // Check authentication FIRST
+        const currentUser = await checkAuthentication();
+        
+        if (!currentUser) {
+            // User is not logged in - show login message
+            console.log('⚠️ User not authenticated - showing login prompt');
+            loginRequiredMessage.style.display = 'block';
+            
+            // Optionally scroll to the message
+            loginRequiredMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            return; // Stop execution
+        }
+
+        // User is authenticated - proceed with analysis
+        const userId = currentUser.uid;
+        console.log('✅ Analyzing with authenticated userId:', userId);
+
+        // Hide login message if it was showing
+        loginRequiredMessage.style.display = 'none';
+
+        // Show modal and loading state
         biasModal.style.display = 'block';
         biasLoading.hidden = false;
         biasResults.hidden = true;
 
         // Collect frontend data
         const frontendData = collectUserData();
+        console.log('📊 Frontend data collected:', frontendData);
 
         try {
+            console.log(`🚀 Sending request to ${pythonURI}/api/analyze-bias/${userId}`);
+            
             const response = await fetch(`${pythonURI}/api/analyze-bias/${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include',
+                credentials: 'include', // Important for sending cookies
                 body: JSON.stringify(frontendData)
             });
 
+            console.log('📡 Response status:', response.status);
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `Server returned ${response.status}`);
+                console.error('❌ Server error:', errorData);
+                throw new Error(errorData.error || errorData.details || `Server returned ${response.status}`);
             }
 
             const data = await response.json();
-            displayBiasAnalysis(data.analysis);
+            console.log('✅ Analysis data received:', data);
+            
+            if (data.analysis) {
+                displayBiasAnalysis(data.analysis);
+            } else {
+                throw new Error('No analysis data in response');
+            }
 
         } catch (error) {
-            console.error('Error:', error);
+            console.error('❌ Error during analysis:', error);
             biasResults.innerHTML = `
                 <h2>Analysis Error</h2>
                 <p>Unable to complete analysis. Please try again later.</p>
-                <p style="font-size: 0.9em; color: #cbd5e1; margin-top: 10px;">Error details: ${error.message}</p>
+                <p style="font-size: 0.9em; color: #cbd5e1; margin-top: 10px;">
+                    Error details: ${error.message}
+                </p>
                 <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">
                     Close
                 </button>
@@ -4948,6 +5000,19 @@ resetBtn.addEventListener('click', () => {
 
     closeBiasModal.addEventListener('click', () => {
         biasModal.style.display = 'none';
+    });
+
+    // Optional: Check login status on page load and show/hide button accordingly
+    window.addEventListener('DOMContentLoaded', async () => {
+        const user = await checkAuthentication();
+        if (!user) {
+            console.log('ℹ️ User not logged in on page load');
+            // Optionally disable the button or show a different message
+            // analyzeBtn.disabled = true;
+            // analyzeBtn.textContent = 'Login Required 🔒';
+        } else {
+            console.log('✅ User logged in on page load:', user.uid);
+        }
     });
 </script>
 

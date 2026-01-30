@@ -4781,6 +4781,7 @@ resetBtn.addEventListener('click', () => {
         </div>
     </div>
 
+
 <script type="module">
     import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
@@ -4789,31 +4790,55 @@ resetBtn.addEventListener('click', () => {
     const closeBiasModal = document.getElementById('close-bias-modal');
     const biasLoading = document.getElementById('bias-loading');
     const biasResults = document.getElementById('bias-results');
-    const loginRequiredMessage = document.getElementById('login-required-message');
+
+    /**
+     * Get current user from /api/id endpoint
+     * This works because you have a valid JWT cookie
+     */
+    async function getCurrentUser() {
+        try {
+            console.log('🔍 Fetching user from /api/id...');
+            const response = await fetch(`${pythonURI}/api/id`, {
+                method: 'GET',
+                credentials: 'include',  // Sends JWT cookie
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const userData = await response.json();
+                console.log('✅ User authenticated:', userData.uid);
+                return userData;
+            } else {
+                console.log('❌ Not authenticated - /api/id returned', response.status);
+                return null;
+            }
+        } catch (e) {
+            console.error('❌ Error fetching user:', e);
+            return null;
+        }
+    }
 
     function collectUserData() {
-        // Game data
         const gameData = JSON.parse(localStorage.getItem('biasGameData_v1') || '{}');
         const attempts = gameData.attempts || [];
         const gamePrompts = attempts.length > 0 && attempts[attempts.length - 1].prompts
             ? attempts[attempts.length - 1].prompts
             : [];
 
-        // Citation data
         const citations = JSON.parse(localStorage.getItem('biasGame_citations_v1') || '[]');
         const citationFormats = citations.reduce((acc, cite) => {
             acc[cite.style] = (acc[cite.style] || 0) + 1;
             return acc;
         }, {});
 
-        // Chat data
         const chatLog = document.getElementById('ai-chat-log');
         const chatMessages = chatLog ? chatLog.querySelectorAll('.chat-bubble').length : 0;
         const chatQuestions = chatLog
             ? Array.from(chatLog.querySelectorAll('.chat-bubble.user')).map(el => el.textContent.replace('You: ', ''))
             : [];
 
-        // Thesis data
         const thesisOutput = document.getElementById('thesis-output');
         const thesisCount = thesisOutput ? thesisOutput.querySelectorAll('.thesis-card').length : 0;
         const thesisTopics = thesisOutput
@@ -4894,86 +4919,85 @@ resetBtn.addEventListener('click', () => {
 
         biasResults.innerHTML = resultsHTML;
     }
-
-    async function checkAuthentication() {
-        // Check if authManager exists
-        if (!window.authManager || typeof window.authManager.getCurrentUser !== 'function') {
-            console.log('⚠️ authManager not available');
-            return null;
-        }
-
-        try {
-            const user = window.authManager.getCurrentUser();
-            
-            // Verify user is actually logged in (not guest)
-            if (!user || !user.uid || user.uid === 'guest') {
-                console.log('⚠️ No authenticated user found');
-                return null;
-            }
-
-            console.log('✅ Authenticated user:', user.uid);
-            return user;
-        } catch (e) {
-            console.error('❌ Error checking authentication:', e);
-            return null;
-        }
-    }
-
     analyzeBtn.addEventListener('click', async () => {
-        console.log('🔍 Bias analysis button clicked');
+        console.log('🔍 Analyze My Bias Profile clicked');
 
-        // Check authentication FIRST
-        const currentUser = await checkAuthentication();
-        
-        if (!currentUser) {
-            // User is not logged in - show login message
-            console.log('⚠️ User not authenticated - showing login prompt');
-            loginRequiredMessage.style.display = 'block';
-            
-            // Optionally scroll to the message
-            loginRequiredMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
-            return; // Stop execution
-        }
-
-        // User is authenticated - proceed with analysis
-        const userId = currentUser.uid;
-        console.log('✅ Analyzing with authenticated userId:', userId);
-
-        // Hide login message if it was showing
-        loginRequiredMessage.style.display = 'none';
-
-        // Show modal and loading state
+        // Show loading immediately
         biasModal.style.display = 'block';
         biasLoading.hidden = false;
         biasResults.hidden = true;
 
-        // Collect frontend data
+        // Get current user from API
+        const currentUser = await getCurrentUser();
+        
+        if (!currentUser) {
+            console.error('❌ User not authenticated');
+            biasLoading.hidden = true;
+            biasResults.hidden = false;
+            biasResults.innerHTML = `
+                <h2>🔒 Login Required</h2>
+                <p style="margin: 20px 0;">You must be logged in to view your personalized bias profile analysis.</p>
+                <p style="margin: 20px 0;">Your analysis will include:</p>
+                <ul style="text-align: left; margin: 20px 40px; line-height: 1.8;">
+                    <li>Historical performance data from all your sessions</li>
+                    <li>Media bias game scores and completion times</li>
+                    <li>Citation patterns and research skills</li>
+                    <li>Personalized insights and recommendations</li>
+                </ul>
+                <a href="{{site.baseurl}}/login" class="modal-btn" style="display: inline-block; margin: 10px; text-decoration: none;">
+                    Go to Login Page
+                </a>
+                <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'" style="margin: 10px;">
+                    Close
+                </button>
+            `;
+            return;
+        }
+
+        // Extract user ID (could be uid or _uid)
+        const userId = currentUser.uid || currentUser._uid;
+        console.log('✅ Authenticated user:', userId);
+
+        // Collect frontend session data
         const frontendData = collectUserData();
-        console.log('📊 Frontend data collected:', frontendData);
+        console.log('📊 Session data collected:', {
+            citations: frontendData.citation_count,
+            thesis: frontendData.thesis_count,
+            chat: frontendData.chat_messages
+        });
 
         try {
-            console.log(`🚀 Sending request to ${pythonURI}/api/analyze-bias/${userId}`);
+            const apiUrl = `${pythonURI}/api/analyze-bias/${userId}`;
+            console.log('🚀 Calling API:', apiUrl);
             
-            const response = await fetch(`${pythonURI}/api/analyze-bias/${userId}`, {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include', // Important for sending cookies
+                credentials: 'include',  // Important: sends JWT cookie
                 body: JSON.stringify(frontendData)
             });
 
             console.log('📡 Response status:', response.status);
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('❌ Server error:', errorData);
-                throw new Error(errorData.error || errorData.details || `Server returned ${response.status}`);
+                let errorMessage = `Server error (${response.status})`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.details || errorData.error || errorData.message || errorMessage;
+                    console.error('❌ Server error details:', errorData);
+                } catch (e) {
+                    const errorText = await response.text();
+                    console.error('❌ Server error text:', errorText);
+                    if (errorText) errorMessage = errorText;
+                }
+                
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
-            console.log('✅ Analysis data received:', data);
+            console.log('✅ Analysis received successfully');
             
             if (data.analysis) {
                 displayBiasAnalysis(data.analysis);
@@ -4982,19 +5006,30 @@ resetBtn.addEventListener('click', () => {
             }
 
         } catch (error) {
-            console.error('❌ Error during analysis:', error);
+            console.error('❌ Analysis failed:', error);
+            biasLoading.hidden = true;
+            biasResults.hidden = false;
             biasResults.innerHTML = `
-                <h2>Analysis Error</h2>
-                <p>Unable to complete analysis. Please try again later.</p>
-                <p style="font-size: 0.9em; color: #cbd5e1; margin-top: 10px;">
-                    Error details: ${error.message}
+                <h2>⚠️ Analysis Error</h2>
+                <p>We encountered an error while analyzing your data.</p>
+                <details style="margin: 20px 0; text-align: left;">
+                    <summary style="cursor: pointer; color: #60a5fa; font-weight: 600;">
+                        Show Technical Details ▼
+                    </summary>
+                    <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 0.85em; margin-top: 10px; white-space: pre-wrap;">${error.message}</pre>
+                </details>
+                <p style="font-size: 0.9em; color: #94a3b8; margin-top: 20px;">
+                    Possible solutions:
                 </p>
+                <ul style="text-align: left; margin: 10px 40px; font-size: 0.9em; color: #94a3b8;">
+                    <li>Refresh the page and try again</li>
+                    <li>Log out and log back in</li>
+                    <li>Check that you have at least one performance rating or game score</li>
+                </ul>
                 <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">
                     Close
                 </button>
             `;
-            biasLoading.hidden = true;
-            biasResults.hidden = false;
         }
     });
 
@@ -5002,16 +5037,13 @@ resetBtn.addEventListener('click', () => {
         biasModal.style.display = 'none';
     });
 
-    // Optional: Check login status on page load and show/hide button accordingly
+    // Check auth status on page load (optional - for debugging)
     window.addEventListener('DOMContentLoaded', async () => {
-        const user = await checkAuthentication();
-        if (!user) {
-            console.log('ℹ️ User not logged in on page load');
-            // Optionally disable the button or show a different message
-            // analyzeBtn.disabled = true;
-            // analyzeBtn.textContent = 'Login Required 🔒';
+        const user = await getCurrentUser();
+        if (user) {
+            console.log('✅ Page loaded - User logged in:', user.uid || user._uid);
         } else {
-            console.log('✅ User logged in on page load:', user.uid);
+            console.log('ℹ️ Page loaded - No user logged in');
         }
     });
 </script>

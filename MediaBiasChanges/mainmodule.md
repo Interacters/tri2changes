@@ -5098,19 +5098,21 @@ resetBtn.addEventListener('click', () => {
                     </div>
                 </div>
 
-                <div id="bias-analysis-modal" class="modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="modal-content" style="max-width: 800px; margin: 20px auto; height: calc(100% - 40px); overflow-y: auto; background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 40px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-                        <button id="close-bias-modal" class="modal-close" type="button">&times;</button>
+                <div id="bias-analysis-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 1000; padding: 0; margin: 0;">
+                    <div class="modal-content" style="width: 90%; max-width: 900px; height: 90vh; margin: 5vh auto; background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.4);">
+                        <button id="close-bias-modal" class="modal-close" type="button" style="position: absolute; top: 20px; right: 30px; background: none; border: none; font-size: 36px; color: #333; cursor: pointer; z-index: 10; line-height: 1; padding: 0; width: 40px; height: 40px;">&times;</button>
 
-                        <div id="bias-loading">
-                            <div class="loading" aria-hidden="true"></div>
-                            <h2>Analyzing Your Data...</h2>
-                            <p>Fetching your performance history and session activity...</p>
-                            <p style="font-size: 0.9em; color: #94a3b8;">This may take 10-15 seconds</p>
-                        </div>
+                        <div style="flex: 1; overflow-y: auto; padding: 60px 40px 40px 40px;">
+                            <div id="bias-loading">
+                                <div class="loading" aria-hidden="true"></div>
+                                <h2>Analyzing Your Data...</h2>
+                                <p>Fetching your performance history and session activity...</p>
+                                <p style="font-size: 0.9em; color: #94a3b8;">This may take 10-15 seconds</p>
+                            </div>
 
-                        <div id="bias-results" hidden>
-                            <!-- Results will be inserted here -->
+                            <div id="bias-results" hidden>
+                                <!-- Results will be inserted here -->
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -5098,8 +5098,8 @@ resetBtn.addEventListener('click', () => {
                     </div>
                 </div>
 
-                <div id="bias-analysis-modal" class="modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; z-index: 1000; display: none;">
-                    <div class="modal-content" style="min-height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px 50px 20px; position: relative;">
+                <div id="bias-analysis-modal" class="modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="modal-content" style="max-width: 800px; margin: 20px auto; height: calc(100% - 40px); overflow-y: auto; background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 40px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
                         <button id="close-bias-modal" class="modal-close" type="button">&times;</button>
 
                         <div id="bias-loading">

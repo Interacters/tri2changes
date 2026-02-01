@@ -1381,6 +1381,35 @@ async function submitFinalTime(username, elapsed) {
                 if (incorrectImages.length > 0) {
                     showIncorrectFeedback(incorrectImages);
                     return;
+                    
+                    // ✅ NEW: Track prompts that didn't lead to success
+                    const data = loadData();
+                    const lastAttempt = data.attempts && data.attempts.length > 0 
+                        ? data.attempts[data.attempts.length - 1] 
+                        : null;
+                    
+                    if (lastAttempt && lastAttempt.prompts) {
+                        const outcomes = JSON.parse(localStorage.getItem('prompt_outcomes_v1') || '{}');
+                        
+                        lastAttempt.prompts.forEach(promptText => {
+                            if (!outcomes[promptText]) {
+                                outcomes[promptText] = { 
+                                    successful_uses: 0, 
+                                    total_uses: 0,
+                                    success_rate: 0 
+                                };
+                            }
+                            // Increment total but NOT successful
+                            outcomes[promptText].total_uses++;
+                            outcomes[promptText].success_rate = 
+                                outcomes[promptText].successful_uses / outcomes[promptText].total_uses;
+                        });
+                        
+                        localStorage.setItem('prompt_outcomes_v1', JSON.stringify(outcomes));
+                    }
+                    
+                    return;
+                }
                 }
 
                 // Stop timer and get final time
@@ -1408,7 +1437,39 @@ async function submitFinalTime(username, elapsed) {
                     }
 
                     submitFinalTime(username, elapsed);  // Use fresh value
-                    
+                    // ✅ NEW: Track which prompts led to success
+                    function recordPromptOutcomes() {
+                        const data = loadData();
+                        const lastAttempt = data.attempts && data.attempts.length > 0 
+                            ? data.attempts[data.attempts.length - 1] 
+                            : null;
+                        
+                        if (lastAttempt && lastAttempt.prompts) {
+                            // Get current prompt effectiveness data
+                            const outcomes = JSON.parse(localStorage.getItem('prompt_outcomes_v1') || '{}');
+                            
+                            // Mark all prompts used in this successful attempt
+                            lastAttempt.prompts.forEach(promptText => {
+                                if (!outcomes[promptText]) {
+                                    outcomes[promptText] = { 
+                                        successful_uses: 0, 
+                                        total_uses: 0,
+                                        success_rate: 0 
+                                    };
+                                }
+                                outcomes[promptText].successful_uses++;
+                                outcomes[promptText].total_uses++;
+                                outcomes[promptText].success_rate = 
+                                    outcomes[promptText].successful_uses / outcomes[promptText].total_uses;
+                            });
+                            
+                            localStorage.setItem('prompt_outcomes_v1', JSON.stringify(outcomes));
+                        }
+                    }
+
+                    // Call it before submitting
+                    recordPromptOutcomes();
+                    submitFinalTime(username, elapsed);
                     const minutes = Math.floor(elapsed / 60);
                     const seconds = elapsed % 60;
                     alert(`Completed in ${minutes}:${seconds.toString().padStart(2, '0')}!`);
@@ -1796,9 +1857,15 @@ async function handlePromptClick(prompt, source) {
     aiMessageInput.value = filledPrompt;
 
     try {
+        // ✅ NEW: Send context with click
         const response = await fetch(`${PROMPTS_API_BASE}/api/prompts/${prompt.id}/click`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: window.currentPlayerUid || 'Guest',
+                section: 'media_bias',  // Could be dynamic based on current section
+                // led_to_success will be tracked later when they submit
+            })
         });
         
         if (response.ok) {

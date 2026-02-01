@@ -5189,7 +5189,7 @@ resetBtn.addEventListener('click', () => {
 
             <section>
                 <h3>Unique Insight</h3>
-                <blockquote>${analysis.interesting_observation}</blockquote>
+                <blockquote style="color: #000000;">${analysis.interesting_observation}</blockquote>
             </section>
 
             <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">

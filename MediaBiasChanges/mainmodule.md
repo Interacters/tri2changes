@@ -5248,27 +5248,6 @@ resetBtn.addEventListener('click', () => {
             </section>
 
             <section>
-                <h3>Your Strengths</h3>
-                <ul>
-                    ${analysis.learning_patterns.strengths.map(s => `<li>${s}</li>`).join('')}
-                </ul>
-            </section>
-
-            <section>
-                <h3>Areas to Improve</h3>
-                <ul>
-                    ${analysis.learning_patterns.weaknesses.map(w => `<li>${w}</li>`).join('')}
-                </ul>
-            </section>
-
-            <section>
-                <h3>Personalized Recommendations</h3>
-                <ol>
-                    ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                </ol>
-            </section>
-
-            <section>
                 <h3>Unique Insight</h3>
                 <blockquote style="color: #000000 !important;">${analysis.interesting_observation}</blockquote>
             </section>

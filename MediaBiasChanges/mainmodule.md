@@ -5098,8 +5098,8 @@ resetBtn.addEventListener('click', () => {
                     </div>
                 </div>
 
-                <div id="bias-analysis-modal" class="modal" style="overflow-y: auto;">
-                    <div class="modal-content" style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-bottom: 50px;">
+                <div id="bias-analysis-modal" class="modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; z-index: 1000; display: none;">
+                    <div class="modal-content" style="min-height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px 50px 20px; position: relative;">
                         <button id="close-bias-modal" class="modal-close" type="button">&times;</button>
 
                         <div id="bias-loading">
@@ -5245,6 +5245,27 @@ resetBtn.addEventListener('click', () => {
                     <li><strong>Right Exposure:</strong> ${analysis.personalized_insights.right_leaning_tendencies}/10</li>
                 </ul>
                 <p>${analysis.personalized_insights.explanation}</p>
+            </section>
+
+            <section>
+                <h3>Your Strengths</h3>
+                <ul>
+                    ${analysis.learning_patterns.strengths.map(s => `<li>${s}</li>`).join('')}
+                </ul>
+            </section>
+
+            <section>
+                <h3>Areas to Improve</h3>
+                <ul>
+                    ${analysis.learning_patterns.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                </ul>
+            </section>
+
+            <section>
+                <h3>Personalized Recommendations</h3>
+                <ol>
+                    ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                </ol>
             </section>
 
             <section>

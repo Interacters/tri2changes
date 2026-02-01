@@ -5047,6 +5047,87 @@ resetBtn.addEventListener('click', () => {
     </div>
 
 
+<div class="section-container" id="section-5">
+            <div class="section-header">
+                <h2 class="section-title">Wrap Up</h2>
+                <p class="section-description">
+                    A quick recap of what you completed and the skills you practiced.
+                </p>
+            </div>
+
+            <div class="content-placeholder">
+                <p>Learning highlights from this module:</p>
+                <ul style="margin: 12px 0 20px 22px; color: #cbd5e1; line-height: 1.7;">
+                    <li>Recognize bias and evaluate source credibility.</li>
+                    <li>Compare perspectives and support claims with evidence.</li>
+                    <li>Draft stronger thesis statements and refine your argument.</li>
+                    <li>Generate proper citations in MLA, APA, and Chicago styles.</li>
+                    <li>Reflect on your performance and next steps.</li>
+                </ul>
+
+                <p>Activity recap (auto-filled from your work above):</p>
+                <ul style="margin: 12px 0 0 22px; color: #cbd5e1; line-height: 1.7;">
+                    <li><strong>Media Bias Game:</strong> <span id="wrap-game-summary">No attempts recorded yet.</span></li>
+                    <li><strong>AI Help Chat:</strong> <span id="wrap-chat-summary">No chats yet.</span></li>
+                    <li><strong>Thesis Generator:</strong> <span id="wrap-thesis-summary">No thesis statements yet.</span></li>
+                    <li><strong>Citation Generator:</strong> <span id="wrap-citation-summary">No citations saved yet.</span></li>
+                    <li><strong>Performance Reflection:</strong> <span id="wrap-reflection-summary">No rating submitted yet.</span></li>
+                </ul>
+
+                <!-- Bias Profile -->
+                <div class="bias-profile-cta">
+                    <h3>🔍 Discover Your Bias Profile</h3>
+                    <p>
+                        Based on your activity in this module, our AI will analyze your media literacy skills and potential biases.
+                        Get personalized insights and recommendations!
+                    </p>
+
+                    <button id="analyze-bias-btn" class="nav-btn nav-btn-next">
+                        Analyze My Bias Profile 🧠
+                    </button>
+
+                    <p class="bias-profile-note">
+                        ℹ️ This analysis uses Google Gemini AI and combines your session data with your saved progress
+                    </p>
+
+                    <!-- Login prompt (hidden by default, shown if not logged in) -->
+                    <div id="login-required-message" style="display: none; margin-top: 15px; padding: 15px; background-color: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: 4px;">
+                        <p style="margin: 0; color: #ffc107;">
+                            ⚠️ Please <a href="{{site.baseurl}}/login" style="color: #ffc107; text-decoration: underline;">log in</a> to view your personalized bias profile analysis.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="bias-analysis-modal" class="modal" style="overflow-y: auto;">
+                    <div class="modal-content" style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-bottom: 50px;">
+                        <button id="close-bias-modal" class="modal-close" type="button">&times;</button>
+
+                        <div id="bias-loading">
+                            <div class="loading" aria-hidden="true"></div>
+                            <h2>Analyzing Your Data...</h2>
+                            <p>Fetching your performance history and session activity...</p>
+                            <p style="font-size: 0.9em; color: #94a3b8;">This may take 10-15 seconds</p>
+                        </div>
+
+                        <div id="bias-results" hidden>
+                            <!-- Results will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn nav-btn-prev" onclick="prevSection()">
+                    ← Previous
+                </button>
+                <button class="nav-btn nav-btn-next" disabled>
+                    Complete ✓
+                </button>
+            </div>
+        </div>
+    </div>
+
+
 <!-- Bias Analysis Script - Checks authManager first, then /api/id fallback -->
 <script type="module">
     import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';

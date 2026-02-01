@@ -5151,13 +5151,13 @@ resetBtn.addEventListener('click', () => {
             </section>
 
             <section>
-                <h3>🧠 Media Literacy Knowledge</h3>
+                <h3>Media Literacy Knowledge</h3>
                 <p><strong>Score:</strong> ${analysis.knowledge_score}/10</p>
                 <p>${analysis.knowledge_explanation}</p>
             </section>
 
             <section>
-                <h3>🎯 Political Awareness Analysis</h3>
+                <h3>Political Awareness Analysis</h3>
                 <ul>
                     <li><strong>Left Exposure:</strong> ${analysis.personalized_insights.left_leaning_tendencies}/10</li>
                     <li><strong>Center Preference:</strong> ${analysis.personalized_insights.center_preference}/10</li>
@@ -5167,28 +5167,28 @@ resetBtn.addEventListener('click', () => {
             </section>
 
             <section>
-                <h3>✅ Your Strengths</h3>
+                <h3>Your Strengths</h3>
                 <ul>
                     ${analysis.learning_patterns.strengths.map(s => `<li>${s}</li>`).join('')}
                 </ul>
             </section>
 
             <section>
-                <h3>⚠️ Areas to Improve</h3>
+                <h3>Areas to Improve</h3>
                 <ul>
                     ${analysis.learning_patterns.weaknesses.map(w => `<li>${w}</li>`).join('')}
                 </ul>
             </section>
 
             <section>
-                <h3>💡 Personalized Recommendations</h3>
+                <h3>Personalized Recommendations</h3>
                 <ol>
                     ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
                 </ol>
             </section>
 
             <section>
-                <h3>🌟 Unique Insight</h3>
+                <h3>Unique Insight</h3>
                 <blockquote>${analysis.interesting_observation}</blockquote>
             </section>
 

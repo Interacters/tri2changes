@@ -5017,11 +5017,11 @@ resetBtn.addEventListener('click', () => {
                     </div>
                 </div>
 
-<div id="bias-analysis-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 1000; overflow: hidden;">
-                    <div class="modal-content" style="width: 90%; max-width: 900px; height: 90vh; margin: 5vh auto; background: transparent; border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.4); position: relative;">
-                        <button id="close-bias-modal" class="modal-close" type="button" style="position: absolute; top: 20px; right: 30px; background: none; border: none; font-size: 36px; color: #fff; cursor: pointer; z-index: 10; line-height: 1; padding: 0; width: 40px; height: 40px;">&times;</button>
+<div id="bias-analysis-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; overflow: hidden; backdrop-filter: blur(4px);">
+                    <div class="modal-content" style="width: 90%; max-width: 700px; max-height: 85vh; margin: 7.5vh auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative;">
+                        <button id="close-bias-modal" class="modal-close" type="button" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.2); border: none; font-size: 28px; color: #fff; cursor: pointer; z-index: 10; line-height: 1; padding: 5px; width: 35px; height: 35px; border-radius: 50%; transition: background 0.2s;">&times;</button>
 
-                        <div style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 60px 40px 40px 40px;">
+                        <div style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 50px 35px 35px 35px;">
                             <div id="bias-loading">
                                 <div class="loading" aria-hidden="true"></div>
                                 <h2>Analyzing Your Data...</h2>

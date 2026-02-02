@@ -2462,7 +2462,7 @@ loadPromptClicks()
             thesisOutput.appendChild(card);
         });
 
-        // Add event listeners to "Use This Thesis" buttons
+        // Add event yes listeners to "Use This Thesis" buttons
         document.querySelectorAll('.thesis-btn-use').forEach(btn => {
             btn.addEventListener('click', function() {
                 const statement = this.getAttribute('data-statement');

@@ -3957,7 +3957,7 @@ resetBtn.addEventListener('click', () => {
             </div>
 
             <div class="content-placeholder">
-                <p>
+                
 <style>
         * {
             margin: 0;

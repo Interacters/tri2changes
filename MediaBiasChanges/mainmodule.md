@@ -5276,9 +5276,6 @@ resetBtn.addEventListener('click', () => {
                 updateProgress();
             }
         };
-
-
-        // Allow direct navigation by clicking steps
         document.querySelectorAll('.step').forEach((step) => {
             step.addEventListener('click', function() {
                 const targetStep = parseInt(this.dataset.step);

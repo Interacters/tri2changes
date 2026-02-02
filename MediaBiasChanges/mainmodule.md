@@ -4705,7 +4705,7 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </script>
-</p>
+
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
             </div>

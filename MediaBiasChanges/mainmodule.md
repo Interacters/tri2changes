@@ -4918,7 +4918,7 @@ resetBtn.addEventListener('click', () => {
                 <span>Submit Rating</span>
             </button>
         </form>
-    </div>
+
 
     <div id="results-modal" class="modal">
         <div class="modal-content">
@@ -5094,7 +5094,7 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </script>
-</p>
+
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
             </div>
@@ -5665,9 +5665,6 @@ resetBtn.addEventListener('click', () => {
                 updateProgress();
             }
         };
-
-
-        // Allow direct navigation by clicking steps
         document.querySelectorAll('.step').forEach((step) => {
             step.addEventListener('click', function() {
                 const targetStep = parseInt(this.dataset.step);

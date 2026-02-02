@@ -4719,7 +4719,7 @@ resetBtn.addEventListener('click', () => {
                     Next Section →
                 </button>
             </div>
-        </div>
+        
         
    
 <!-- Section 5: Wrap Up -->

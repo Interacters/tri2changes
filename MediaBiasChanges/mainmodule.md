@@ -4482,8 +4482,8 @@ resetBtn.addEventListener('click', () => {
 <body>
     <div class="survey-container">
         <div class="survey-header">
-            <h2>Performance Reflection</h2>
-            <p>Rate your understanding and performance on the English skill building activities of media bias, thesis writing, and understanding citations. Let's see how your peers felt, and how you can improve next time.</p>
+            <h2>Likert Scale</h2>
+            <p>Rate how you feel about media bias, using sources, adding citiations, and making thesis statements on a scale of 1-5.</p>
         </div>
 
         <form id="survey-form">
@@ -4560,7 +4560,7 @@ resetBtn.addEventListener('click', () => {
         </div>
     </div>
 
-    <script type="module">
+<script type="module">
         import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
         const API_BASE = `${pythonURI}/api`;
 

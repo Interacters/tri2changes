@@ -5149,15 +5149,6 @@ resetBtn.addEventListener('click', () => {
                     <li>Reflect on your performance and next steps.</li>
                 </ul>
 
-                <p>Activity recap (auto-filled from your work above):</p>
-                <ul style="margin: 12px 0 0 22px; color: #cbd5e1; line-height: 1.7;">
-                    <li><strong>Media Bias Game:</strong> <span id="wrap-game-summary">No attempts recorded yet.</span></li>
-                    <li><strong>AI Help Chat:</strong> <span id="wrap-chat-summary">No chats yet.</span></li>
-                    <li><strong>Thesis Generator:</strong> <span id="wrap-thesis-summary">No thesis statements yet.</span></li>
-                    <li><strong>Citation Generator:</strong> <span id="wrap-citation-summary">No citations saved yet.</span></li>
-                    <li><strong>Performance Reflection:</strong> <span id="wrap-reflection-summary">No rating submitted yet.</span></li>
-                </ul>
-
                 <!-- Bias Profile -->
                 <div class="bias-profile-cta">
                     <h3>🔍 Discover Your Bias Profile</h3>

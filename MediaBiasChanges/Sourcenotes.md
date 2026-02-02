@@ -1,3 +1,15 @@
+       <!-- Section 3: Citation Generator -->
+        <div class="section-container" id="section-3">
+            <div class="section-header">
+                <h2 class="section-title">Citation Generator</h2>
+                <p class="section-description">
+                    It's important to include correct citations for your work. 
+                    There are many formats including MLA, APA, and Chicago. 
+                    This tool helps you create proper citations for your sources.
+                </p>
+            </div>
+            <div class="content-placeholder">
+                <p>
 <style>
   /* Import modern, readable font matching thesis generator */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -241,8 +253,9 @@
 
   /* Source Notes Panel - FIXED WIDTH */
   .notes-panel {
-    position: fixed;
-    right: -320px;
+  position: fixed;
+  right: 0;
+  transform: translateX(100%);
     top: 0;
     width: 300px;
     max-width: 90vw;
@@ -257,9 +270,9 @@
     font-family: 'Inter', sans-serif;
   }
   
-  .notes-panel.open { 
-    right: 0; 
-  }
+  .notes-panel.open {
+  transform: translateX(0);
+}
   
   .notes-header {
     display: flex;
@@ -471,6 +484,12 @@
     font-style: italic;
     font-size: 0.85rem;
   }
+
+  /* Keep Notes button clickable even when panel is open */
+#cite-notes-toggle {
+  position: relative;
+  z-index: 10001; /* higher than notes panel */
+}
 </style>
 
 <div class="cite-card" id="citation-tool">
@@ -543,7 +562,6 @@
 <div id="notes-panel" class="notes-panel">
   <div class="notes-header">
     <h3>📝 Source Notes</h3>
-    <button id="notes-close" class="notes-close-btn">Close</button>
   </div>
   
   <div class="notes-intro">
@@ -650,7 +668,6 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
   const worksCitedList = document.getElementById('works-cited-list');
   const notesToggleBtn = document.getElementById('cite-notes-toggle');
   const notesPanel = document.getElementById('notes-panel');
-  const notesCloseBtn = document.getElementById('notes-close');
   const noteSourceSelect = document.getElementById('note-source-select');
   const noteCategorySelect = document.getElementById('note-category-select');
   const noteTextarea = document.getElementById('note-textarea');
@@ -1208,28 +1225,14 @@ if (parentheticalEl) {
   });
 
   // Notes panel toggle
-  notesToggleBtn.addEventListener('click', () => {
-    notesPanel.classList.toggle('open');
-    if (notesPanel.classList.contains('open')) {
-      updateNotesSourceSelect();
-      loadNotes();
-    }
-  });
+notesToggleBtn.addEventListener('click', () => {
+  notesPanel.classList.toggle('open');
 
-  notesCloseBtn.addEventListener('click', () => {
-    notesPanel.classList.remove('open');
-  });
-
-  // Close panel when clicking outside
-  document.addEventListener('click', (e) => {
-    if (notesPanel.classList.contains('open') && 
-        !notesPanel.contains(e.target) && 
-        e.target !== notesToggleBtn &&
-        !notesToggleBtn.contains(e.target) &&
-        !e.target.classList.contains('citation-note-btn')) {
-      notesPanel.classList.remove('open');
-    }
-  });
+  if (notesPanel.classList.contains('open')) {
+    updateNotesSourceSelect();
+    loadNotes();
+  }
+});
 
   // INPUT: Fetch data from online source (URL)
   async function tryFetchHtml(url) {

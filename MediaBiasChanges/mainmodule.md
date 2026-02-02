@@ -5131,72 +5131,90 @@ resetBtn.addEventListener('click', () => {
     </div>
 
 
-<div class="section-container" id="section-5">
-    <div class="section-header">
-        <h2 class="section-title">Wrap Up</h2>
-        <p class="section-description">
-            A quick recap of what you completed and the skills you practiced.
-        </p>
-    </div>
+div class="section-container" id="section-5">
+            <div class="section-header">
+                <h2 class="section-title">Wrap Up</h2>
+                <p class="section-description">
+                    A quick recap of what you completed and the skills you practiced.
+                </p>
+            </div>
 
-    <div class="content-placeholder">
-        <p>Learning highlights from this module:</p>
-        <ul style="margin: 12px 0 20px 22px; color: #cbd5e1; line-height: 1.7;">
-            <li>Recognize bias and evaluate source credibility.</li>
-            <li>Compare perspectives and support claims with evidence.</li>
-            <li>Draft stronger thesis statements and refine your argument.</li>
-            <li>Generate proper citations in MLA, APA, and Chicago styles.</li>
-            <li>Reflect on your performance and next steps.</li>
-        </ul>
+            <div class="content-placeholder">
+                <p>Learning highlights from this module:</p>
+                <ul style="margin: 12px 0 20px 22px; color: #cbd5e1; line-height: 1.7;">
+                    <li>Recognize bias and evaluate source credibility.</li>
+                    <li>Compare perspectives and support claims with evidence.</li>
+                    <li>Draft stronger thesis statements and refine your argument.</li>
+                    <li>Generate proper citations in MLA, APA, and Chicago styles.</li>
+                    <li>Reflect on your performance and next steps.</li>
+                </ul>
 
-        <!-- Bias Profile -->
-        <div class="bias-profile-cta">
-            <h3>🔍 Discover Your Bias Profile</h3>
-            <p>
-                Based on your activity in this module, our AI will analyze your media literacy skills and potential biases.
-                Get personalized insights and recommendations!
-            </p>
+                <p>Activity recap (auto-filled from your work above):</p>
+                <ul style="margin: 12px 0 0 22px; color: #cbd5e1; line-height: 1.7;">
+                    <li><strong>Media Bias Game:</strong> <span id="wrap-game-summary">No attempts recorded yet.</span></li>
+                    <li><strong>AI Help Chat:</strong> <span id="wrap-chat-summary">No chats yet.</span></li>
+                    <li><strong>Thesis Generator:</strong> <span id="wrap-thesis-summary">No thesis statements yet.</span></li>
+                    <li><strong>Citation Generator:</strong> <span id="wrap-citation-summary">No citations saved yet.</span></li>
+                    <li><strong>Performance Reflection:</strong> <span id="wrap-reflection-summary">No rating submitted yet.</span></li>
+                </ul>
 
-            <button id="analyze-bias-btn" class="nav-btn nav-btn-next">
-                Analyze My Bias Profile 🧠
-            </button>
+                <!-- Bias Profile -->
+                <div class="bias-profile-cta">
+                    <h3>🔍 Discover Your Bias Profile</h3>
+                    <p>
+                        Based on your activity in this module, our AI will analyze your media literacy skills and potential biases.
+                        Get personalized insights and recommendations!
+                    </p>
 
-            <p class="bias-profile-note">
-                ℹ️ This analysis uses Google Gemini AI and combines your session data with your saved progress
-            </p>
-        </div>
+                    <button id="analyze-bias-btn" class="nav-btn nav-btn-next">
+                        Analyze My Bias Profile 🧠
+                    </button>
 
-        <div id="bias-analysis-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; overflow: hidden; backdrop-filter: blur(4px);">
-            <div class="modal-content" style="width: 90%; max-width: 700px; max-height: 85vh; margin: 7.5vh auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative;">
-                <button id="close-bias-modal" class="modal-close" type="button" style="position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.2); border: none; font-size: 28px; color: #fff; cursor: pointer; z-index: 10; line-height: 1; padding: 5px; width: 35px; height: 35px; border-radius: 50%; transition: background 0.2s;">&times;</button>
+                    <p class="bias-profile-note">
+                        ℹ️ This analysis uses Google Gemini AI and combines your session data with your saved progress
+                    </p>
 
-                <div style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 50px 35px 35px 35px;">
-                    <div id="bias-loading">
-                        <div class="loading" aria-hidden="true"></div>
-                        <h2>Analyzing Your Data...</h2>
-                        <p>Fetching your performance history and session activity...</p>
-                        <p style="font-size: 0.9em; color: #94a3b8;">This may take 10-15 seconds</p>
-                    </div>
-
-                    <div id="bias-results" hidden>
-                        <!-- Results will be inserted here -->
+                    <!-- Login prompt (hidden by default, shown if not logged in) -->
+                    <div id="login-required-message" style="display: none; margin-top: 15px; padding: 15px; background-color: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: 4px;">
+                        <p style="margin: 0; color: #ffc107;">
+                            ⚠️ Please <a href="{{site.baseurl}}/login" style="color: #ffc107; text-decoration: underline;">log in</a> to view your personalized bias profile analysis.
+                        </p>
                     </div>
                 </div>
+
+                <div id="bias-analysis-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 1000; padding: 0; margin: 0;">
+                    <div class="modal-content" style="width: 90%; max-width: 900px; height: 90vh; margin: 5vh auto; background: white; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.4);">
+                        <button id="close-bias-modal" class="modal-close" type="button" style="position: absolute; top: 20px; right: 30px; background: none; border: none; font-size: 36px; color: #333; cursor: pointer; z-index: 10; line-height: 1; padding: 0; width: 40px; height: 40px;">&times;</button>
+
+                        <div style="flex: 1; overflow-y: auto; padding: 60px 40px 40px 40px;">
+                            <div id="bias-loading">
+                                <div class="loading" aria-hidden="true"></div>
+                                <h2>Analyzing Your Data...</h2>
+                                <p>Fetching your performance history and session activity...</p>
+                                <p style="font-size: 0.9em; color: #94a3b8;">This may take 10-15 seconds</p>
+                            </div>
+
+                            <div id="bias-results" hidden>
+                                <!-- Results will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn nav-btn-prev" onclick="prevSection()">
+                    ← Previous
+                </button>
+                <button class="nav-btn nav-btn-next" disabled>
+                    Complete ✓
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="navigation-buttons">
-        <button class="nav-btn nav-btn-prev" onclick="prevSection()">
-            ← Previous
-        </button>
-        <button class="nav-btn nav-btn-next" disabled>
-            Complete ✓
-        </button>
-    </div>
-</div>
 
-<!-- Bias Analysis Script -->
+<!-- Bias Analysis Script - Checks authManager first, then /api/id fallback -->
 <script type="module">
     import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
 
@@ -5206,30 +5224,46 @@ resetBtn.addEventListener('click', () => {
     const biasLoading = document.getElementById('bias-loading');
     const biasResults = document.getElementById('bias-results');
 
+    /**
+     * Get current user - tries authManager first, then /api/id
+     */
     async function getCurrentUser() {
+        // Method 1: Try authManager first
         if (window.authManager && typeof window.authManager.getCurrentUser === 'function') {
             try {
                 const user = window.authManager.getCurrentUser();
                 if (user && user.uid && user.uid !== 'guest') {
+                    console.log('✅ User from authManager:', user.uid);
                     return user;
                 }
             } catch (e) {
-                console.log('⚠️ authManager failed:', e);
+                console.log('⚠️ authManager.getCurrentUser() failed:', e);
             }
         }
 
+        // Method 2: Fall back to /api/id
         try {
+            console.log('🔍 authManager not available, trying /api/id...');
             const response = await fetch(`${pythonURI}/api/id`, {
                 method: 'GET',
                 credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
+
             if (response.ok) {
-                return await response.json();
+                const userData = await response.json();
+                console.log('✅ User from /api/id:', userData.uid || userData._uid);
+                return userData;
+            } else {
+                console.log('❌ /api/id returned:', response.status);
             }
         } catch (e) {
-            console.error('❌ Error fetching user:', e);
+            console.error('❌ Error fetching from /api/id:', e);
         }
+
+        console.log('❌ No authenticated user found');
         return null;
     }
 
@@ -5237,7 +5271,8 @@ resetBtn.addEventListener('click', () => {
         const gameData = JSON.parse(localStorage.getItem('biasGameData_v1') || '{}');
         const attempts = gameData.attempts || [];
         const gamePrompts = attempts.length > 0 && attempts[attempts.length - 1].prompts
-            ? attempts[attempts.length - 1].prompts : [];
+            ? attempts[attempts.length - 1].prompts
+            : [];
 
         const citations = JSON.parse(localStorage.getItem('biasGame_citations_v1') || '[]');
         const citationFormats = citations.reduce((acc, cite) => {
@@ -5333,18 +5368,30 @@ resetBtn.addEventListener('click', () => {
     }
 
     analyzeBtn.addEventListener('click', async () => {
+        console.log('🔍 Analyze My Bias Profile clicked');
+
+        // Show loading immediately
         biasModal.style.display = 'block';
         biasLoading.hidden = false;
         biasResults.hidden = true;
 
+        // Get current user (tries authManager first, then /api/id)
         const currentUser = await getCurrentUser();
         
         if (!currentUser) {
+            console.error('❌ User not authenticated');
             biasLoading.hidden = true;
             biasResults.hidden = false;
             biasResults.innerHTML = `
                 <h2>🔒 Login Required</h2>
                 <p style="margin: 20px 0;">You must be logged in to view your personalized bias profile analysis.</p>
+                <p style="margin: 20px 0;">Your analysis will include:</p>
+                <ul style="text-align: left; margin: 20px 40px; line-height: 1.8;">
+                    <li>Historical performance data from all your sessions</li>
+                    <li>Media bias game scores and completion times</li>
+                    <li>Citation patterns and research skills</li>
+                    <li>Personalized insights and recommendations</li>
+                </ul>
                 <a href="{{site.baseurl}}/login" class="modal-btn" style="display: inline-block; margin: 10px; text-decoration: none;">
                     Go to Login Page
                 </a>
@@ -5355,30 +5402,51 @@ resetBtn.addEventListener('click', () => {
             return;
         }
 
+        // Extract user ID (could be uid or _uid)
         const userId = currentUser.uid || currentUser._uid;
+        console.log('✅ Authenticated user:', userId);
+
+        // Collect frontend session data
         const frontendData = collectUserData();
+        console.log('📊 Session data collected:', {
+            citations: frontendData.citation_count,
+            thesis: frontendData.thesis_count,
+            chat: frontendData.chat_messages
+        });
 
         try {
-            const response = await fetch(`${pythonURI}/api/analyze-bias/${userId}`, {
+            const apiUrl = `${pythonURI}/api/analyze-bias/${userId}`;
+            console.log('🚀 Calling API:', apiUrl);
+            
+            const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',  // Important: sends JWT cookie
                 body: JSON.stringify(frontendData)
             });
+
+            console.log('📡 Response status:', response.status);
 
             if (!response.ok) {
                 let errorMessage = `Server error (${response.status})`;
                 try {
                     const errorData = await response.json();
-                    errorMessage = errorData.details || errorData.error || errorMessage;
+                    errorMessage = errorData.details || errorData.error || errorData.message || errorMessage;
+                    console.error('❌ Server error details:', errorData);
                 } catch (e) {
                     const errorText = await response.text();
+                    console.error('❌ Server error text:', errorText);
                     if (errorText) errorMessage = errorText;
                 }
+                
                 throw new Error(errorMessage);
             }
 
             const data = await response.json();
+            console.log('✅ Analysis received successfully');
+            
             if (data.analysis) {
                 displayBiasAnalysis(data.analysis);
             } else {
@@ -5393,10 +5461,22 @@ resetBtn.addEventListener('click', () => {
                 <h2>⚠️ Analysis Error</h2>
                 <p>We encountered an error while analyzing your data.</p>
                 <details style="margin: 20px 0; text-align: left;">
-                    <summary style="cursor: pointer; color: #60a5fa; font-weight: 600;">Show Technical Details ▼</summary>
+                    <summary style="cursor: pointer; color: #60a5fa; font-weight: 600;">
+                        Show Technical Details ▼
+                    </summary>
                     <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 0.85em; margin-top: 10px; white-space: pre-wrap;">${error.message}</pre>
                 </details>
-                <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">Close</button>
+                <p style="font-size: 0.9em; color: #94a3b8; margin-top: 20px;">
+                    Possible solutions:
+                </p>
+                <ul style="text-align: left; margin: 10px 40px; font-size: 0.9em; color: #94a3b8;">
+                    <li>Refresh the page and try again</li>
+                    <li>Log out and log back in</li>
+                    <li>Check that you have at least one performance rating or game score</li>
+                </ul>
+                <button class="modal-btn" onclick="document.getElementById('bias-analysis-modal').style.display='none'">
+                    Close
+                </button>
             `;
         }
     });
@@ -5404,193 +5484,229 @@ resetBtn.addEventListener('click', () => {
     closeBiasModal.addEventListener('click', () => {
         biasModal.style.display = 'none';
     });
+
+    // Check auth status on page load (optional - for debugging)
+    window.addEventListener('DOMContentLoaded', async () => {
+        const user = await getCurrentUser();
+        if (user) {
+            console.log('✅ Page loaded - User logged in:', user.uid || user._uid);
+        } else {
+            console.log('ℹ️ Page loaded - No user logged in');
+        }
+    });
 </script>
 
-<!-- Wrap-Up Summary Script with Backend Integration -->
 <script type="module">
-    import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
+        let currentSection = 0;
+        const totalSections = document.querySelectorAll('.section-container').length;
 
-    async function getCurrentUser() {
-        try {
-            const response = await fetch(`${pythonURI}/api/id`, {
-                method: 'GET',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            if (response.ok) return await response.json();
-        } catch (error) {
-            console.log('No authenticated user:', error);
-        }
-        return null;
-    }
-
-    function formatDuration(totalSeconds) {
-        if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return null;
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = Math.round(totalSeconds % 60);
-        return `${minutes}:${String(seconds).padStart(2, '0')}`;
-    }
-
-    function truncateText(text, maxLen) {
-        const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
-        if (!cleaned) return '';
-        if (cleaned.length <= maxLen) return cleaned;
-        return cleaned.slice(0, Math.max(0, maxLen - 3)) + '...';
-    }
-
-    function setSummaryText(id, text) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-    }
-
-    async function fetchGameScores(userId) {
-        try {
-            const response = await fetch(`${pythonURI}/api/media/leaderboard?username=${userId}`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-            if (response.ok) {
-                const data = await response.json();
-                return Array.isArray(data) ? data.filter(s => s.username === userId) : [];
-            }
-        } catch (error) {
-            console.error('Failed to fetch game scores:', error);
-        }
-        return [];
-    }
-
-    async function refreshWrapUpSummary() {
-        console.log('🔄 Refreshing wrap-up summary...');
-        
-        if (!document.getElementById('section-5')) return;
-
-        const currentUser = await getCurrentUser();
-        const userId = currentUser ? (currentUser.uid || currentUser._uid) : null;
-
-        // 1. MEDIA BIAS GAME
-        let gameSummary = 'No attempts recorded yet.';
-        
-        if (userId) {
-            try {
-                const backendScores = await fetchGameScores(userId);
-                if (backendScores.length > 0) {
-                    const times = backendScores.map(s => s.time).filter(t => t > 0);
-                    const best = times.length ? Math.min(...times) : null;
-                    const latest = backendScores[backendScores.length - 1];
-                    
-                    gameSummary = `Attempts: ${backendScores.length}`;
-                    if (best) gameSummary += `, best time ${formatDuration(best)}`;
-                    if (latest && latest.time) gameSummary += `, last time ${formatDuration(latest.time)}`;
-                    gameSummary += '.';
+        window.addEventListener('DOMContentLoaded', () => {
+        const savedSection = localStorage.getItem('english_module_section');
+        if (savedSection !== null) {
+            let sectionNum = parseInt(savedSection, 10);
+            if (!isNaN(sectionNum)) {
+                if (!document.getElementById('section-0') && sectionNum > 0) {
+                    sectionNum -= 1;
                 }
-            } catch (error) {
-                console.error('Error fetching game scores:', error);
+                if (sectionNum >= 0 && sectionNum < totalSections) {
+                    currentSection = sectionNum;
+                }
             }
         }
+        updateProgress();
+    });
+
+        function formatDuration(totalSeconds) {
+            if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) return null;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.round(totalSeconds % 60);
+            return `${minutes}:${String(seconds).padStart(2, '0')}`;
+        }
         
-        // Fallback to localStorage
-        if (gameSummary === 'No attempts recorded yet.') {
+
+        function truncateText(text, maxLen) {
+            const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
+            if (!cleaned) return '';
+            if (cleaned.length <= maxLen) return cleaned;
+            return cleaned.slice(0, Math.max(0, maxLen - 3)) + '...';
+        }
+
+        function setSummaryText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
+        function refreshWrapUpSummary() {
+            if (!document.getElementById('section-5')) return;
+
+            let gameSummary = 'No attempts recorded yet.';
             try {
-                const localData = JSON.parse(localStorage.getItem('biasGameData_v1') || '{}');
-                const attempts = Array.isArray(localData.attempts) ? localData.attempts : [];
-                
-                if (attempts.length > 0) {
-                    const times = attempts.map(a => Number(a.time)).filter(t => Number.isFinite(t) && t > 0);
-                    const best = times.length ? Math.min(...times) : null;
-                    const last = attempts[attempts.length - 1];
-                    
-                    gameSummary = `Attempts: ${attempts.length}`;
-                    if (best) gameSummary += `, best time ${formatDuration(best)}`;
-                    if (last && last.time) gameSummary += `, last time ${formatDuration(last.time)}`;
-                    gameSummary += userId ? '.' : '. (Login to save permanently)';
+                const raw = localStorage.getItem('biasGameData_v1');
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    const attempts = Array.isArray(data.attempts) ? data.attempts : [];
+                    if (attempts.length) {
+                        const times = attempts
+                            .map(attempt => Number(attempt.time))
+                            .filter(time => Number.isFinite(time) && time > 0);
+                        const best = times.length ? Math.min(...times) : null;
+                        const lastAttempt = attempts[attempts.length - 1] || null;
+                        const lastTime = lastAttempt ? Number(lastAttempt.time) : null;
+                        const bestText = best ? formatDuration(best) : null;
+                        const lastText = Number.isFinite(lastTime) ? formatDuration(lastTime) : null;
+
+                        gameSummary = `Attempts: ${attempts.length}`;
+                        if (bestText) gameSummary += `, best time ${bestText}`;
+                        if (lastText) gameSummary += `, last time ${lastText}`;
+                        gameSummary += '.';
+
+                        const prompts = lastAttempt && Array.isArray(lastAttempt.prompts)
+                            ? lastAttempt.prompts.filter(Boolean)
+                            : [];
+                        if (prompts.length) {
+                            const shown = prompts.slice(0, 3).join('; ');
+                            const suffix = prompts.length > 3 ? '...' : '';
+                            gameSummary += ` Prompts used: ${shown}${suffix}`;
+                        }
+                    }
                 }
             } catch (err) {
-                console.error('Error reading localStorage:', err);
+                // ignore storage errors
             }
-        }
-        setSummaryText('wrap-game-summary', gameSummary);
+            setSummaryText('wrap-game-summary', gameSummary);
 
-        // 2. AI CHAT
-        let chatSummary = 'No chats yet.';
-        const chatLog = document.getElementById('ai-chat-log');
-        if (chatLog) {
-            const userMessages = chatLog.querySelectorAll('.chat-bubble.user');
-            const aiMessages = chatLog.querySelectorAll('.chat-bubble.ai');
-            const total = userMessages.length + aiMessages.length;
-            
-            if (total > 0) {
-                chatSummary = `Messages: ${total} (${userMessages.length} you, ${aiMessages.length} AI).`;
-            }
-        }
-        setSummaryText('wrap-chat-summary', chatSummary);
-
-        // 3. THESIS GENERATOR
-        let thesisSummary = 'No thesis statements yet.';
-        const thesisOutput = document.getElementById('thesis-output');
-        if (thesisOutput) {
-            const statements = thesisOutput.querySelectorAll('.thesis-statement');
-            if (statements.length) {
-                thesisSummary = `Statements generated: ${statements.length}.`;
-            }
-        }
-        setSummaryText('wrap-thesis-summary', thesisSummary);
-
-        // 4. CITATIONS
-        let citationSummary = 'No citations saved yet.';
-        try {
-            const saved = JSON.parse(localStorage.getItem('biasGame_citations_v1') || '[]');
-            if (Array.isArray(saved) && saved.length) {
-                const counts = saved.reduce((acc, item) => {
-                    const style = item && item.style ? String(item.style).toLowerCase() : '';
-                    if (style === 'apa') acc.apa += 1;
-                    else if (style === 'mla') acc.mla += 1;
-                    else if (style === 'chicago') acc.chicago += 1;
-                    return acc;
-                }, { apa: 0, mla: 0, chicago: 0 });
-                citationSummary = `Saved: ${saved.length} (APA: ${counts.apa}, MLA: ${counts.mla}, Chicago: ${counts.chicago}).`;
-            }
-        } catch (err) {
-            console.error('Error reading citations:', err);
-        }
-        setSummaryText('wrap-citation-summary', citationSummary);
-
-        // 5. PERFORMANCE REFLECTION
-        let reflectionSummary = 'No rating submitted yet.';
-        const selectedRating = document.querySelector('input[name="rating"]:checked');
-        if (selectedRating && selectedRating.value) {
-            reflectionSummary = `Your rating: ${selectedRating.value}/5.`;
-        } else {
-            const ratingEl = document.getElementById('your-rating');
-            if (ratingEl) {
-                const ratingText = (ratingEl.textContent || '').trim();
-                if (ratingText && ratingText !== '-') {
-                    reflectionSummary = `Your rating: ${ratingText}/5.`;
+            let chatSummary = 'No chats yet.';
+            const chatLog = document.getElementById('ai-chat-log');
+            if (chatLog) {
+                const userMessages = chatLog.querySelectorAll('.chat-bubble.user');
+                const aiMessages = chatLog.querySelectorAll('.chat-bubble.ai');
+                const total = userMessages.length + aiMessages.length;
+                if (total > 0) {
+                    chatSummary = `Messages: ${total} (${userMessages.length} you, ${aiMessages.length} AI)`;
+                    const lastUser = userMessages[userMessages.length - 1];
+                    if (lastUser && lastUser.textContent) {
+                        const lastQuestion = lastUser.textContent.replace(/^You:\s*/, '');
+                        const snippet = truncateText(lastQuestion, 120);
+                        if (snippet) {
+                            chatSummary += `; last question: "${snippet}"`;
+                        }
+                    }
+                    chatSummary += '.';
                 }
             }
-        }
-        setSummaryText('wrap-reflection-summary', reflectionSummary);
-        
-        console.log('✅ Wrap-up summary complete!');
-    }
+            setSummaryText('wrap-chat-summary', chatSummary);
 
-    window.refreshWrapUpSummary = refreshWrapUpSummary;
-
-    // Auto-refresh when section becomes active
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const section5 = document.getElementById('section-5');
-                if (section5 && section5.classList.contains('active')) {
-                    setTimeout(refreshWrapUpSummary, 100);
+            let thesisSummary = 'No thesis statements yet.';
+            const thesisOutput = document.getElementById('thesis-output');
+            if (thesisOutput) {
+                const statements = thesisOutput.querySelectorAll('.thesis-statement');
+                if (statements.length) {
+                    const lastStatement = statements[statements.length - 1].textContent || '';
+                    thesisSummary = `Statements generated: ${statements.length}`;
+                    const snippet = truncateText(lastStatement, 160);
+                    if (snippet) {
+                        thesisSummary += `; latest: "${snippet}"`;
+                    }
+                    thesisSummary += '.';
                 }
             }
+            setSummaryText('wrap-thesis-summary', thesisSummary);
+
+            let citationSummary = 'No citations saved yet.';
+            try {
+                const saved = JSON.parse(localStorage.getItem('biasGame_citations_v1') || '[]');
+                if (Array.isArray(saved) && saved.length) {
+                    const counts = saved.reduce((acc, item) => {
+                        const style = item && item.style ? String(item.style).toLowerCase() : '';
+                        if (Object.prototype.hasOwnProperty.call(acc, style)) acc[style] += 1;
+                        return acc;
+                    }, { apa: 0, mla: 0, chicago: 0 });
+                    citationSummary = `Saved citations: ${saved.length} (APA: ${counts.apa}, MLA: ${counts.mla}, Chicago: ${counts.chicago}).`;
+                }
+            } catch (err) {
+                // ignore storage errors
+            }
+            setSummaryText('wrap-citation-summary', citationSummary);
+
+            let reflectionSummary = 'No rating submitted yet.';
+            const selectedRating = document.querySelector('input[name="rating"]:checked');
+            if (selectedRating && selectedRating.value) {
+                reflectionSummary = `Your rating: ${selectedRating.value}/5.`;
+            } else {
+                const ratingEl = document.getElementById('your-rating');
+                if (ratingEl) {
+                    const ratingText = (ratingEl.textContent || '').trim();
+                    if (ratingText && ratingText !== '-') {
+                        reflectionSummary = `Your rating: ${ratingText}/5.`;
+                    }
+                }
+            }
+            setSummaryText('wrap-reflection-summary', reflectionSummary);
+        }
+
+        function updateProgress() {
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((step, index) => {
+                const stepNum = Number.parseInt(step.dataset.step, 10);
+                step.classList.remove('active', 'completed');
+                
+                if (stepNum < currentSection) {
+                    step.classList.add('completed');
+                } else if (stepNum === currentSection) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Update progress line
+            const progressPercent = totalSections > 1
+                ? (currentSection / (totalSections - 1)) * 100
+                : 0;
+            document.getElementById('progress-fill').style.width = progressPercent + '%';
+
+            // Show/hide sections
+            document.querySelectorAll('.section-container').forEach((section, index) => {
+                section.classList.remove('active');
+                if (index === currentSection) {
+                    section.classList.add('active');
+                }
+            });
+
+            if (currentSection === totalSections - 1) {
+                refreshWrapUpSummary();
+            }
+
+            // Scroll to top smoothly
+            localStorage.setItem('english_module_section', currentSection);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.nextSection = function() {
+            if (currentSection < totalSections - 1) {
+                currentSection++;
+                updateProgress();
+            }
+        };
+
+        window.prevSection = function() {
+            if (currentSection > 0) {
+                currentSection--;
+                updateProgress();
+            }
+        };
+
+
+        // Allow direct navigation by clicking steps
+        document.querySelectorAll('.step').forEach((step) => {
+            step.addEventListener('click', function() {
+                const targetStep = parseInt(this.dataset.step);
+                // Only allow going to completed or current step
+                if (targetStep <= currentSection) {
+                    currentSection = targetStep;
+                    updateProgress();
+                }
+            });
         });
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const section5 = document.getElementById('section-5');
-        if (section5) {
-            observer.observe(section5, { attributes: true });
-        }
-    });
-</script>
+    </script>
+</body>
+</html>

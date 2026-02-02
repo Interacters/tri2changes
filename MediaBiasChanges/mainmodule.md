@@ -4529,7 +4529,7 @@ resetBtn.addEventListener('click', () => {
                 <span>Submit Rating</span>
             </button>
         </form>
-    </div>
+
 
     <div id="results-modal" class="modal">
         <div class="modal-content">

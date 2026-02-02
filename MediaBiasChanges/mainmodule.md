@@ -1671,6 +1671,187 @@ async function submitFinalTime(username, elapsed) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- ADD THIS TO YOUR CHATBOX SECTION -->
+<style>
+/* Voice Button Styles */
+.voice-btn {
+    position: relative;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.voice-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.voice-btn.listening {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.voice-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.voice-btn.listening .voice-indicator {
+    animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Voice Modal */
+.voice-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.voice-modal.active {
+    display: flex;
+}
+
+.voice-modal-content {
+    background: linear-gradient(145deg, #667eea, #764ba2);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    color: white;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.voice-animation {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
+.voice-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: ripple 1.5s ease-out infinite;
+}
+
+.voice-circle:nth-child(2) { animation-delay: 0.5s; }
+.voice-circle:nth-child(3) { animation-delay: 1s; }
+
+@keyframes ripple {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.voice-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+}
+
+.transcript-preview {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    min-height: 60px;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.voice-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.voice-control-btn {
+    padding: 10px 20px;
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.voice-control-btn:hover {
+    background: white;
+    color: #667eea;
+}
+
+.language-select {
+    margin: 15px 0;
+    padding: 8px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.9rem;
+}
+
+.language-select option {
+    background: #667eea;
+    color: white;
+}
+
+.voice-tip {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 15px;
+}
+
+.browser-support-warning {
+    background: rgba(248, 113, 113, 0.2);
+    border: 2px solid rgba(248, 113, 113, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+</style>
+
 <div class="ai-card">
     <h3>Source Intel Chat</h3>
     <p>Get help analyzing news sources with AI-powered suggestions</p>
@@ -1696,11 +1877,219 @@ async function submitFinalTime(username, elapsed) {
     <div class="ai-controls">
         <button type="button" class="ai-btn primary" id="ai-send-btn">Send</button>
         <button type="button" class="ai-btn ghost" id="ai-clear-btn">Clear</button>
+        
+        <!-- NEW VOICE BUTTON -->
+        <button type="button" class="voice-btn" id="voice-btn">
+            🎤 Voice Input
+        </button>
     </div>
     
     <div class="ai-status" id="ai-status"></div>
     <div class="ai-chat-log" id="ai-chat-log" style="display: none;"></div>
 </div>
+
+<!-- VOICE MODAL -->
+<div id="voice-modal" class="voice-modal">
+    <div class="voice-modal-content">
+        <h3 style="margin-bottom: 20px;">🎤 Voice Input</h3>
+        
+        <div class="voice-animation" id="voice-animation">
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+            <div class="voice-icon">🎙️</div>
+        </div>
+        
+        <p id="voice-status">Click "Start" to begin speaking...</p>
+        
+        <select class="language-select" id="voice-language">
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="fr-FR">French</option>
+            <option value="de-DE">German</option>
+            <option value="it-IT">Italian</option>
+            <option value="pt-BR">Portuguese (Brazil)</option>
+            <option value="zh-CN">Chinese (Mandarin)</option>
+            <option value="ja-JP">Japanese</option>
+            <option value="ko-KR">Korean</option>
+        </select>
+        
+        <div class="transcript-preview" id="transcript-preview">
+            Your speech will appear here...
+        </div>
+        
+        <div class="voice-controls">
+            <button class="voice-control-btn" id="start-recording">Start</button>
+            <button class="voice-control-btn" id="stop-recording" style="display: none;">Stop</button>
+            <button class="voice-control-btn" id="cancel-recording">Cancel</button>
+        </div>
+        
+        <p class="voice-tip">💡 Speak clearly and pause briefly between sentences</p>
+    </div>
+</div>
+
+<script>
+(function() {
+    const voiceBtn = document.getElementById('voice-btn');
+    const voiceModal = document.getElementById('voice-modal');
+    const startBtn = document.getElementById('start-recording');
+    const stopBtn = document.getElementById('stop-recording');
+    const cancelBtn = document.getElementById('cancel-recording');
+    const voiceStatus = document.getElementById('voice-status');
+    const transcriptPreview = document.getElementById('transcript-preview');
+    const languageSelect = document.getElementById('voice-language');
+    const aiMessageInput = document.getElementById('ai-message');
+    const voiceAnimation = document.getElementById('voice-animation');
+    
+    let recognition = null;
+    let finalTranscript = '';
+    let isRecording = false;
+
+    // Check browser support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+        voiceBtn.disabled = true;
+        voiceBtn.innerHTML = '🎤 Not Supported';
+        voiceBtn.title = 'Voice input is not supported in this browser. Try Chrome, Edge, or Safari.';
+        return;
+    }
+
+    // Initialize Speech Recognition
+    function initRecognition() {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true; // Keep listening
+        recognition.interimResults = true; // Show results as you speak
+        recognition.lang = languageSelect.value;
+
+        recognition.onstart = () => {
+            isRecording = true;
+            voiceBtn.classList.add('listening');
+            voiceStatus.textContent = '🎤 Listening... Speak now!';
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
+            voiceAnimation.style.display = 'block';
+        };
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+            
+            // Show interim results in gray, final in white
+            transcriptPreview.innerHTML = 
+                `<span style="color: white;">${finalTranscript}</span>` +
+                `<span style="color: rgba(255,255,255,0.6);">${interimTranscript}</span>`;
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            
+            let errorMessage = 'Error: ';
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage += 'No speech detected. Please try again.';
+                    break;
+                case 'audio-capture':
+                    errorMessage += 'Microphone not found or not accessible.';
+                    break;
+                case 'not-allowed':
+                    errorMessage += 'Microphone permission denied.';
+                    break;
+                case 'network':
+                    errorMessage += 'Network error. Check your connection.';
+                    break;
+                default:
+                    errorMessage += event.error;
+            }
+            
+            voiceStatus.textContent = errorMessage;
+            stopRecording();
+        };
+
+        recognition.onend = () => {
+            if (isRecording) {
+                // Automatically restart if still recording
+                recognition.start();
+            }
+        };
+    }
+
+    // Open voice modal
+    voiceBtn.addEventListener('click', () => {
+        voiceModal.classList.add('active');
+        finalTranscript = '';
+        transcriptPreview.innerHTML = 'Your speech will appear here...';
+        voiceStatus.textContent = 'Click "Start" to begin speaking...';
+    });
+
+    // Start recording
+    startBtn.addEventListener('click', () => {
+        if (!recognition) initRecognition();
+        
+        finalTranscript = '';
+        recognition.lang = languageSelect.value; // Update language
+        recognition.start();
+    });
+
+    // Stop recording
+    stopBtn.addEventListener('click', () => {
+        stopRecording();
+        
+        // Insert transcript into chat input
+        if (finalTranscript.trim()) {
+            aiMessageInput.value = finalTranscript.trim();
+            voiceModal.classList.remove('active');
+        } else {
+            voiceStatus.textContent = '⚠️ No speech detected. Try again?';
+        }
+    });
+
+    // Cancel recording
+    cancelBtn.addEventListener('click', () => {
+        stopRecording();
+        voiceModal.classList.remove('active');
+    });
+
+    // Close modal on outside click
+    voiceModal.addEventListener('click', (e) => {
+        if (e.target === voiceModal) {
+            stopRecording();
+            voiceModal.classList.remove('active');
+        }
+    });
+
+    function stopRecording() {
+        if (recognition && isRecording) {
+            isRecording = false;
+            recognition.stop();
+            voiceBtn.classList.remove('listening');
+            startBtn.style.display = 'block';
+            stopBtn.style.display = 'none';
+            voiceStatus.textContent = finalTranscript.trim() 
+                ? '✅ Recording complete!' 
+                : 'Click "Start" to try again...';
+        }
+    }
+
+    // Update language on change
+    languageSelect.addEventListener('change', () => {
+        if (recognition && isRecording) {
+            stopRecording();
+            voiceStatus.textContent = 'Language changed. Click "Start" to continue.';
+        }
+    });
+})();
+</script>
 
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';

@@ -5534,5 +5534,3 @@ resetBtn.addEventListener('click', () => {
             });
         });
     </script>
-</body>
-</html>

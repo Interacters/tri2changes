@@ -291,8 +291,7 @@ date: 2025-12-12
             }
         }
     </style>
-</head>
-<body>
+
     <div class="container">
         <!-- Progress Tracker -->
         <div class="progress-tracker">
@@ -1671,6 +1670,187 @@ async function submitFinalTime(username, elapsed) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- ADD THIS TO YOUR CHATBOX SECTION -->
+<style>
+/* Voice Button Styles */
+.voice-btn {
+    position: relative;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.voice-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.voice-btn.listening {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.voice-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.voice-btn.listening .voice-indicator {
+    animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Voice Modal */
+.voice-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.voice-modal.active {
+    display: flex;
+}
+
+.voice-modal-content {
+    background: linear-gradient(145deg, #667eea, #764ba2);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    color: white;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.voice-animation {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
+.voice-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: ripple 1.5s ease-out infinite;
+}
+
+.voice-circle:nth-child(2) { animation-delay: 0.5s; }
+.voice-circle:nth-child(3) { animation-delay: 1s; }
+
+@keyframes ripple {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.voice-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+}
+
+.transcript-preview {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    min-height: 60px;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+.voice-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.voice-control-btn {
+    padding: 10px 20px;
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.voice-control-btn:hover {
+    background: white;
+    color: #667eea;
+}
+
+.language-select {
+    margin: 15px 0;
+    padding: 8px;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.9rem;
+}
+
+.language-select option {
+    background: #667eea;
+    color: white;
+}
+
+.voice-tip {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 15px;
+}
+
+.browser-support-warning {
+    background: rgba(248, 113, 113, 0.2);
+    border: 2px solid rgba(248, 113, 113, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+</style>
+
 <div class="ai-card">
     <h3>Source Intel Chat</h3>
     <p>Get help analyzing news sources with AI-powered suggestions</p>
@@ -1696,11 +1876,219 @@ async function submitFinalTime(username, elapsed) {
     <div class="ai-controls">
         <button type="button" class="ai-btn primary" id="ai-send-btn">Send</button>
         <button type="button" class="ai-btn ghost" id="ai-clear-btn">Clear</button>
+        
+        <!-- NEW VOICE BUTTON -->
+        <button type="button" class="voice-btn" id="voice-btn">
+            🎤 Voice Input
+        </button>
     </div>
     
     <div class="ai-status" id="ai-status"></div>
     <div class="ai-chat-log" id="ai-chat-log" style="display: none;"></div>
 </div>
+
+<!-- VOICE MODAL -->
+<div id="voice-modal" class="voice-modal">
+    <div class="voice-modal-content">
+        <h3 style="margin-bottom: 20px;">🎤 Voice Input</h3>
+        
+        <div class="voice-animation" id="voice-animation">
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+            <div class="voice-circle"></div>
+            <div class="voice-icon">🎙️</div>
+        </div>
+        
+        <p id="voice-status">Click "Start" to begin speaking...</p>
+        
+        <select class="language-select" id="voice-language">
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="fr-FR">French</option>
+            <option value="de-DE">German</option>
+            <option value="it-IT">Italian</option>
+            <option value="pt-BR">Portuguese (Brazil)</option>
+            <option value="zh-CN">Chinese (Mandarin)</option>
+            <option value="ja-JP">Japanese</option>
+            <option value="ko-KR">Korean</option>
+        </select>
+        
+        <div class="transcript-preview" id="transcript-preview">
+            Your speech will appear here...
+        </div>
+        
+        <div class="voice-controls">
+            <button class="voice-control-btn" id="start-recording">Start</button>
+            <button class="voice-control-btn" id="stop-recording" style="display: none;">Stop</button>
+            <button class="voice-control-btn" id="cancel-recording">Cancel</button>
+        </div>
+        
+        <p class="voice-tip">💡 Speak clearly and pause briefly between sentences</p>
+    </div>
+</div>
+
+<script>
+(function() {
+    const voiceBtn = document.getElementById('voice-btn');
+    const voiceModal = document.getElementById('voice-modal');
+    const startBtn = document.getElementById('start-recording');
+    const stopBtn = document.getElementById('stop-recording');
+    const cancelBtn = document.getElementById('cancel-recording');
+    const voiceStatus = document.getElementById('voice-status');
+    const transcriptPreview = document.getElementById('transcript-preview');
+    const languageSelect = document.getElementById('voice-language');
+    const aiMessageInput = document.getElementById('ai-message');
+    const voiceAnimation = document.getElementById('voice-animation');
+    
+    let recognition = null;
+    let finalTranscript = '';
+    let isRecording = false;
+
+    // Check browser support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+        voiceBtn.disabled = true;
+        voiceBtn.innerHTML = '🎤 Not Supported';
+        voiceBtn.title = 'Voice input is not supported in this browser. Try Chrome, Edge, or Safari.';
+        return;
+    }
+
+    // Initialize Speech Recognition
+    function initRecognition() {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true; // Keep listening
+        recognition.interimResults = true; // Show results as you speak
+        recognition.lang = languageSelect.value;
+
+        recognition.onstart = () => {
+            isRecording = true;
+            voiceBtn.classList.add('listening');
+            voiceStatus.textContent = '🎤 Listening... Speak now!';
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
+            voiceAnimation.style.display = 'block';
+        };
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+            
+            // Show interim results in gray, final in white
+            transcriptPreview.innerHTML = 
+                `<span style="color: white;">${finalTranscript}</span>` +
+                `<span style="color: rgba(255,255,255,0.6);">${interimTranscript}</span>`;
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            
+            let errorMessage = 'Error: ';
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage += 'No speech detected. Please try again.';
+                    break;
+                case 'audio-capture':
+                    errorMessage += 'Microphone not found or not accessible.';
+                    break;
+                case 'not-allowed':
+                    errorMessage += 'Microphone permission denied.';
+                    break;
+                case 'network':
+                    errorMessage += 'Network error. Check your connection.';
+                    break;
+                default:
+                    errorMessage += event.error;
+            }
+            
+            voiceStatus.textContent = errorMessage;
+            stopRecording();
+        };
+
+        recognition.onend = () => {
+            if (isRecording) {
+                // Automatically restart if still recording
+                recognition.start();
+            }
+        };
+    }
+
+    // Open voice modal
+    voiceBtn.addEventListener('click', () => {
+        voiceModal.classList.add('active');
+        finalTranscript = '';
+        transcriptPreview.innerHTML = 'Your speech will appear here...';
+        voiceStatus.textContent = 'Click "Start" to begin speaking...';
+    });
+
+    // Start recording
+    startBtn.addEventListener('click', () => {
+        if (!recognition) initRecognition();
+        
+        finalTranscript = '';
+        recognition.lang = languageSelect.value; // Update language
+        recognition.start();
+    });
+
+    // Stop recording
+    stopBtn.addEventListener('click', () => {
+        stopRecording();
+        
+        // Insert transcript into chat input
+        if (finalTranscript.trim()) {
+            aiMessageInput.value = finalTranscript.trim();
+            voiceModal.classList.remove('active');
+        } else {
+            voiceStatus.textContent = '⚠️ No speech detected. Try again?';
+        }
+    });
+
+    // Cancel recording
+    cancelBtn.addEventListener('click', () => {
+        stopRecording();
+        voiceModal.classList.remove('active');
+    });
+
+    // Close modal on outside click
+    voiceModal.addEventListener('click', (e) => {
+        if (e.target === voiceModal) {
+            stopRecording();
+            voiceModal.classList.remove('active');
+        }
+    });
+
+    function stopRecording() {
+        if (recognition && isRecording) {
+            isRecording = false;
+            recognition.stop();
+            voiceBtn.classList.remove('listening');
+            startBtn.style.display = 'block';
+            stopBtn.style.display = 'none';
+            voiceStatus.textContent = finalTranscript.trim() 
+                ? '✅ Recording complete!' 
+                : 'Click "Start" to try again...';
+        }
+    }
+
+    // Update language on change
+    languageSelect.addEventListener('change', () => {
+        if (recognition && isRecording) {
+            stopRecording();
+            voiceStatus.textContent = 'Language changed. Click "Start" to continue.';
+        }
+    });
+})();
+</script>
 
 <script type="module">
 import { pythonURI } from '{{site.baseurl}}/assets/js/api/config.js';
@@ -2709,6 +3097,35 @@ loadPromptClicks()
     line-height: 1.45;
     font-family: 'Inter', sans-serif;
   }
+  
+  .quality-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+    background: rgba(122, 210, 249, 0.2);
+    color: #7ad2f9;
+    border: 1px solid rgba(122, 210, 249, 0.3);
+  }
+
+  .quality-high {
+    /* Uses default badge style */
+  }
+
+  .quality-medium {
+    /* Uses default badge style */
+  }
+
+  .quality-low {
+    /* Uses default badge style */
+  }
+
+  .quality-loading {
+    opacity: 0.6;
+  }
 
   .citation-actions {
     position: absolute;
@@ -3018,7 +3435,6 @@ loadPromptClicks()
   z-index: 10001; /* higher than notes panel */
 }
 </style>
-
 <div class="cite-card" id="citation-tool">
   <div class="cite-row">
     <div class="cite-label">Style</div>
@@ -3089,6 +3505,7 @@ loadPromptClicks()
 <div id="notes-panel" class="notes-panel">
   <div class="notes-header">
     <h3>📝 Source Notes</h3>
+    <button id="notes-close" class="notes-close-btn">Close</button>
   </div>
   
   <div class="notes-intro">
@@ -3195,6 +3612,7 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
   const worksCitedList = document.getElementById('works-cited-list');
   const notesToggleBtn = document.getElementById('cite-notes-toggle');
   const notesPanel = document.getElementById('notes-panel');
+  const notesCloseBtn = document.getElementById('notes-close');
   const noteSourceSelect = document.getElementById('note-source-select');
   const noteCategorySelect = document.getElementById('note-category-select');
   const noteTextarea = document.getElementById('note-textarea');
@@ -3223,6 +3641,27 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
     // Fallback: take first 60 chars
     const plainText = citationText.replace(/<[^>]*>/g, '');
     return plainText.substring(0, 60) + (plainText.length > 60 ? '...' : '');
+  }
+
+  // Check citation quality using backend API
+  async function checkCitationQuality(url, author, date, source) {
+    try {
+      const response = await fetch(`${pythonURI}/api/media/check_quality`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, author, date, source })
+      });
+      
+      if (!response.ok) {
+        console.warn('Quality check failed:', response.status);
+        return null;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking quality:', error);
+      return null;
+    }
   }
 
   // ===== CROSS-CHECK FORMATTING =====
@@ -3575,7 +4014,9 @@ if (parentheticalEl) {
       at: Date.now(),
       source: safe(sourceEl.value),
       title: safe(titleEl.value),
-      url: safe(urlEl.value)
+      url: safe(urlEl.value),
+      author: safe(authorEl.value),
+      date: safe(dateEl.value)
     };
     saved.push(newCitation);
     localStorage.setItem(KEY, JSON.stringify(saved));
@@ -3587,7 +4028,7 @@ if (parentheticalEl) {
 
   // PROCEDURE CALL: Use student-developed procedure to process citations
   // OUTPUT: Display filtered and processed citations
-  function loadWorksCited() {
+  async function loadWorksCited() {
     // Get list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     
@@ -3604,13 +4045,18 @@ if (parentheticalEl) {
     worksCitedList.innerHTML = '';
 
     // ITERATION: Display each citation
-    result.citations.forEach((item, index) => {
+    for (let index = 0; index < result.citations.length; index++) {
+      const item = result.citations[index];
+      
       const citationDiv = document.createElement('div');
       citationDiv.className = 'citation-item';
       
       const textDiv = document.createElement('div');
       textDiv.className = 'citation-text';
-      textDiv.innerHTML = item.citation;
+      
+      // Add loading badge initially
+      const loadingBadge = '<span class="quality-badge quality-loading">⏳</span>';
+      textDiv.innerHTML = item.citation + loadingBadge;
       
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'citation-actions';
@@ -3632,7 +4078,25 @@ if (parentheticalEl) {
       citationDiv.appendChild(textDiv);
       citationDiv.appendChild(actionsDiv);
       worksCitedList.appendChild(citationDiv);
-    });
+
+      // Check quality asynchronously
+      const quality = await checkCitationQuality(
+        item.url || '',
+        saved[index].author || '',
+        saved[index].date || '',
+        item.source || ''
+      );
+
+      // Update badge with quality score
+      if (quality) {
+        const qualityClass = `quality-${quality.quality}`;
+        const badge = `<span class="quality-badge ${qualityClass}" title="${quality.message}">${quality.score}/10</span>`;
+        textDiv.innerHTML = item.citation + badge;
+      } else {
+        // Remove loading badge if quality check failed
+        textDiv.innerHTML = item.citation;
+      }
+    }
 
     worksCitedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -3752,14 +4216,28 @@ if (parentheticalEl) {
   });
 
   // Notes panel toggle
-notesToggleBtn.addEventListener('click', () => {
-  notesPanel.classList.toggle('open');
+  notesToggleBtn.addEventListener('click', () => {
+    notesPanel.classList.toggle('open');
+    if (notesPanel.classList.contains('open')) {
+      updateNotesSourceSelect();
+      loadNotes();
+    }
+  });
 
-  if (notesPanel.classList.contains('open')) {
-    updateNotesSourceSelect();
-    loadNotes();
-  }
-});
+  notesCloseBtn.addEventListener('click', () => {
+    notesPanel.classList.remove('open');
+  });
+
+  // Close panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (notesPanel.classList.contains('open') && 
+        !notesPanel.contains(e.target) && 
+        e.target !== notesToggleBtn &&
+        !notesToggleBtn.contains(e.target) &&
+        !e.target.classList.contains('citation-note-btn')) {
+      notesPanel.classList.remove('open');
+    }
+  });
 
   // INPUT: Fetch data from online source (URL)
   async function tryFetchHtml(url) {
@@ -3956,8 +4434,7 @@ resetBtn.addEventListener('click', () => {
                 </p>
             </div>
 
-            <div class="content-placeholder">
-                
+            <div class="content-placeholder">           
 <style>
         * {
             margin: 0;
@@ -4479,7 +4956,7 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </style>
-<body>
+
     <div class="survey-container">
         <div class="survey-header">
             <h2>Performance Evaluation</h2>
@@ -4705,10 +5182,10 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </script>
-
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
             </div>
+        </div>
 
             <div class="navigation-buttons">
                 <button class="nav-btn nav-btn-prev" onclick="prevSection()">
@@ -4719,9 +5196,8 @@ resetBtn.addEventListener('click', () => {
                     Next Section →
                 </button>
             </div>
-        
-        
-   
+        </div>
+            
 <!-- Section 5: Wrap Up -->
         <div class="section-container" id="section-5">
             <div class="section-header">
@@ -4743,18 +5219,18 @@ resetBtn.addEventListener('click', () => {
 
                 <!-- Bias Profile -->
                 <div class="bias-profile-cta">
-                    <h3>🔍 Discover Your Bias Profile</h3>
+                    <h3>Discover Your Bias Profile</h3>
                     <p>
                         Based on your activity in this module, our AI will analyze your media literacy skills and potential biases.
                         Get personalized insights and recommendations!
                     </p>
 
                     <button id="analyze-bias-btn" class="nav-btn nav-btn-next">
-                        Analyze My Bias Profile 🧠
+                        Analyze My Bias Profile
                     </button>
 
                     <p class="bias-profile-note">
-                        ℹ️ This analysis uses Google Gemini AI and combines your session data with your saved progress
+                        This analysis uses Google Gemini AI and combines your session data with your saved progress
                     </p>
 
                     <!-- Login prompt (hidden by default, shown if not logged in) -->
@@ -4783,6 +5259,7 @@ resetBtn.addEventListener('click', () => {
                         </div>
                     </div>
                 </div>
+            </div>
 
             <div class="navigation-buttons">
                 <button class="nav-btn nav-btn-prev" onclick="prevSection()">
@@ -4794,7 +5271,6 @@ resetBtn.addEventListener('click', () => {
             </div>
         </div>
     </div>
-
 
 <!-- Bias Analysis Script - Checks authManager first, then /api/id fallback -->
 <script type="module">
@@ -4891,20 +5367,17 @@ resetBtn.addEventListener('click', () => {
         biasResults.hidden = false;
 
         const resultsHTML = `
-            <h1>🎯 Your Bias Profile</h1>
-
+            <h1>Your Bias Profile</h1>
             <section>
-                <h3>📊 Bias Awareness Score</h3>
+                <h3>Bias Awareness Score</h3>
                 <p><strong>Score:</strong> ${analysis.bias_likelihood}/10</p>
                 <p>${analysis.bias_explanation}</p>
             </section>
-
             <section>
                 <h3>Media Literacy Knowledge</h3>
                 <p><strong>Score:</strong> ${analysis.knowledge_score}/10</p>
                 <p>${analysis.knowledge_explanation}</p>
             </section>
-
             <section>
                 <h3>Political Awareness Analysis</h3>
                 <ul>
@@ -4914,28 +5387,24 @@ resetBtn.addEventListener('click', () => {
                 </ul>
                 <p>${analysis.personalized_insights.explanation}</p>
             </section>
-
             <section>
                 <h3>Your Strengths</h3>
                 <ul>
                     ${analysis.learning_patterns.strengths.map(s => `<li>${s}</li>`).join('')}
                 </ul>
             </section>
-
             <section>
                 <h3>Areas to Improve</h3>
                 <ul>
                     ${analysis.learning_patterns.weaknesses.map(w => `<li>${w}</li>`).join('')}
                 </ul>
             </section>
-
             <section>
                 <h3>Personalized Recommendations</h3>
                 <ol>
                     ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
                 </ol>
             </section>
-
             <section>
                 <h3>Unique Insight</h3>
                 <blockquote style="color: #000000 !important;">${analysis.interesting_observation}</blockquote>

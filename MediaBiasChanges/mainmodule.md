@@ -4893,7 +4893,6 @@ resetBtn.addEventListener('click', () => {
 
         #bias-results section {
             background: rgba(102, 126, 234, 0.1);
-            padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
         }

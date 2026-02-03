@@ -4482,7 +4482,7 @@ resetBtn.addEventListener('click', () => {
 <body>
     <div class="survey-container">
         <div class="survey-header">
-            <h2>Likert Scale</h2>
+            <h2>Performance Evaluation</h2>
             <p>Rate how you feel about media bias, using sources, adding citiations, and making thesis statements on a scale of 1-5.</p>
         </div>
 

@@ -291,8 +291,7 @@ date: 2025-12-12
             }
         }
     </style>
-</head>
-<body>
+
     <div class="container">
         <!-- Progress Tracker -->
         <div class="progress-tracker">
@@ -4435,8 +4434,7 @@ resetBtn.addEventListener('click', () => {
                 </p>
             </div>
 
-            <div class="content-placeholder">
-<p>               
+            <div class="content-placeholder">           
 <style>
         * {
             margin: 0;
@@ -4958,7 +4956,7 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </style>
-<body>
+
     <div class="survey-container">
         <div class="survey-header">
             <h2>Likert Scale</h2>
@@ -5184,10 +5182,10 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </script>
-</p>
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
             </div>
+        </div>
 
             <div class="navigation-buttons">
                 <button class="nav-btn nav-btn-prev" onclick="prevSection()">
@@ -5198,7 +5196,6 @@ resetBtn.addEventListener('click', () => {
                     Next Section →
                 </button>
             </div>
-        </div> 
             
 <!-- Section 5: Wrap Up -->
         <div class="section-container" id="section-5">
@@ -5261,6 +5258,7 @@ resetBtn.addEventListener('click', () => {
                         </div>
                     </div>
                 </div>
+            </div>
 
             <div class="navigation-buttons">
                 <button class="nav-btn nav-btn-prev" onclick="prevSection()">

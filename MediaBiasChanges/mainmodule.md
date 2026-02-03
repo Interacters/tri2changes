@@ -3505,7 +3505,6 @@ loadPromptClicks()
 <div id="notes-panel" class="notes-panel">
   <div class="notes-header">
     <h3>📝 Source Notes</h3>
-    <button id="notes-close" class="notes-close-btn">Close</button>
   </div>
   
   <div class="notes-intro">
@@ -4222,10 +4221,6 @@ if (parentheticalEl) {
       updateNotesSourceSelect();
       loadNotes();
     }
-  });
-
-  notesCloseBtn.addEventListener('click', () => {
-    notesPanel.classList.remove('open');
   });
 
   // Close panel when clicking outside

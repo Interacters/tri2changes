@@ -5196,6 +5196,7 @@ resetBtn.addEventListener('click', () => {
                     Next Section →
                 </button>
             </div>
+        </div>
             
 <!-- Section 5: Wrap Up -->
         <div class="section-container" id="section-5">

@@ -5219,18 +5219,18 @@ resetBtn.addEventListener('click', () => {
 
                 <!-- Bias Profile -->
                 <div class="bias-profile-cta">
-                    <h3>🔍 Discover Your Bias Profile</h3>
+                    <h3>Discover Your Bias Profile</h3>
                     <p>
                         Based on your activity in this module, our AI will analyze your media literacy skills and potential biases.
                         Get personalized insights and recommendations!
                     </p>
 
                     <button id="analyze-bias-btn" class="nav-btn nav-btn-next">
-                        Analyze My Bias Profile 🧠
+                        Analyze My Bias Profile
                     </button>
 
                     <p class="bias-profile-note">
-                        ℹ️ This analysis uses Google Gemini AI and combines your session data with your saved progress
+                        This analysis uses Google Gemini AI and combines your session data with your saved progress
                     </p>
 
                     <!-- Login prompt (hidden by default, shown if not logged in) -->

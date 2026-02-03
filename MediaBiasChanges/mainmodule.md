@@ -4436,7 +4436,7 @@ resetBtn.addEventListener('click', () => {
             </div>
 
             <div class="content-placeholder">
-                
+<p>               
 <style>
         * {
             margin: 0;
@@ -5184,7 +5184,7 @@ resetBtn.addEventListener('click', () => {
             }
         }
     </script>
-
+</p>
                 <p style="margin-top: 20px; font-size: 0.9rem;">
                 </p>
             </div>
@@ -5198,9 +5198,8 @@ resetBtn.addEventListener('click', () => {
                     Next Section →
                 </button>
             </div>
-        
-        
-    
+        </div> 
+            
 <!-- Section 5: Wrap Up -->
         <div class="section-container" id="section-5">
             <div class="section-header">
@@ -5273,7 +5272,6 @@ resetBtn.addEventListener('click', () => {
             </div>
         </div>
     </div>
-
 
 <!-- Bias Analysis Script - Checks authManager first, then /api/id fallback -->
 <script type="module">

@@ -3265,11 +3265,6 @@ loadPromptClicks()
         <div class="section-container" id="section-3">
             <div class="section-header">
                 <h2 class="section-title">Citation Generator</h2>
-                <p class="section-description">
-                    It's important to include correct citations for your work. 
-                    There are many formats including MLA, APA, and Chicago. 
-                    This tool helps you create proper citations for your sources.
-                </p>
             </div>
             <div class="content-placeholder">
                 <p>
@@ -3794,6 +3789,14 @@ loadPromptClicks()
   </div>
 
   <div class="cite-row">
+    <div class="cite-label">URL</div>
+    <input id="cite-url" class="cite-input" placeholder="https://..." />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Generate citation from URL" style="margin-left:8px;min-width:160px;">
+      Generate from URL
+    </button>
+  </div>
+  
+  <div class="cite-row">
     <div class="cite-label">Author(s)</div>
     <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />
   </div>
@@ -3811,14 +3814,6 @@ loadPromptClicks()
   <div class="cite-row">
     <div class="cite-label">Source</div>
     <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="https://..." />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Generate citation from URL" style="margin-left:8px;min-width:160px;">
-      Generate from URL
-    </button>
   </div>
 
   <div class="cite-actions">

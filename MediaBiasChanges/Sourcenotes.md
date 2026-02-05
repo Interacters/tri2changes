@@ -182,6 +182,35 @@
     line-height: 1.45;
     font-family: 'Inter', sans-serif;
   }
+  
+  .quality-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+    background: rgba(122, 210, 249, 0.2);
+    color: #7ad2f9;
+    border: 1px solid rgba(122, 210, 249, 0.3);
+  }
+
+  .quality-high {
+    /* Uses default badge style */
+  }
+
+  .quality-medium {
+    /* Uses default badge style */
+  }
+
+  .quality-low {
+    /* Uses default badge style */
+  }
+
+  .quality-loading {
+    opacity: 0.6;
+  }
 
   .citation-actions {
     position: absolute;
@@ -491,7 +520,6 @@
   z-index: 10001; /* higher than notes panel */
 }
 </style>
-
 <div class="cite-card" id="citation-tool">
   <div class="cite-row">
     <div class="cite-label">Style</div>
@@ -668,6 +696,7 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
   const worksCitedList = document.getElementById('works-cited-list');
   const notesToggleBtn = document.getElementById('cite-notes-toggle');
   const notesPanel = document.getElementById('notes-panel');
+  const notesCloseBtn = document.getElementById('notes-close');
   const noteSourceSelect = document.getElementById('note-source-select');
   const noteCategorySelect = document.getElementById('note-category-select');
   const noteTextarea = document.getElementById('note-textarea');
@@ -696,6 +725,27 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
     // Fallback: take first 60 chars
     const plainText = citationText.replace(/<[^>]*>/g, '');
     return plainText.substring(0, 60) + (plainText.length > 60 ? '...' : '');
+  }
+
+  // Check citation quality using backend API
+  async function checkCitationQuality(url, author, date, source) {
+    try {
+      const response = await fetch(`${pythonURI}/api/media/check_quality`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, author, date, source })
+      });
+      
+      if (!response.ok) {
+        console.warn('Quality check failed:', response.status);
+        return null;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking quality:', error);
+      return null;
+    }
   }
 
   // ===== CROSS-CHECK FORMATTING =====
@@ -1048,7 +1098,9 @@ if (parentheticalEl) {
       at: Date.now(),
       source: safe(sourceEl.value),
       title: safe(titleEl.value),
-      url: safe(urlEl.value)
+      url: safe(urlEl.value),
+      author: safe(authorEl.value),
+      date: safe(dateEl.value)
     };
     saved.push(newCitation);
     localStorage.setItem(KEY, JSON.stringify(saved));
@@ -1060,7 +1112,7 @@ if (parentheticalEl) {
 
   // PROCEDURE CALL: Use student-developed procedure to process citations
   // OUTPUT: Display filtered and processed citations
-  function loadWorksCited() {
+  async function loadWorksCited() {
     // Get list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     
@@ -1077,13 +1129,18 @@ if (parentheticalEl) {
     worksCitedList.innerHTML = '';
 
     // ITERATION: Display each citation
-    result.citations.forEach((item, index) => {
+    for (let index = 0; index < result.citations.length; index++) {
+      const item = result.citations[index];
+      
       const citationDiv = document.createElement('div');
       citationDiv.className = 'citation-item';
       
       const textDiv = document.createElement('div');
       textDiv.className = 'citation-text';
-      textDiv.innerHTML = item.citation;
+      
+      // Add loading badge initially
+      const loadingBadge = '<span class="quality-badge quality-loading">⏳</span>';
+      textDiv.innerHTML = item.citation + loadingBadge;
       
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'citation-actions';
@@ -1105,7 +1162,25 @@ if (parentheticalEl) {
       citationDiv.appendChild(textDiv);
       citationDiv.appendChild(actionsDiv);
       worksCitedList.appendChild(citationDiv);
-    });
+
+      // Check quality asynchronously
+      const quality = await checkCitationQuality(
+        item.url || '',
+        saved[index].author || '',
+        saved[index].date || '',
+        item.source || ''
+      );
+
+      // Update badge with quality score
+      if (quality) {
+        const qualityClass = `quality-${quality.quality}`;
+        const badge = `<span class="quality-badge ${qualityClass}" title="${quality.message}">${quality.score}/10</span>`;
+        textDiv.innerHTML = item.citation + badge;
+      } else {
+        // Remove loading badge if quality check failed
+        textDiv.innerHTML = item.citation;
+      }
+    }
 
     worksCitedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -1225,14 +1300,24 @@ if (parentheticalEl) {
   });
 
   // Notes panel toggle
-notesToggleBtn.addEventListener('click', () => {
-  notesPanel.classList.toggle('open');
+  notesToggleBtn.addEventListener('click', () => {
+    notesPanel.classList.toggle('open');
+    if (notesPanel.classList.contains('open')) {
+      updateNotesSourceSelect();
+      loadNotes();
+    }
+  });
 
-  if (notesPanel.classList.contains('open')) {
-    updateNotesSourceSelect();
-    loadNotes();
-  }
-});
+  // Close panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (notesPanel.classList.contains('open') && 
+        !notesPanel.contains(e.target) && 
+        e.target !== notesToggleBtn &&
+        !notesToggleBtn.contains(e.target) &&
+        !e.target.classList.contains('citation-note-btn')) {
+      notesPanel.classList.remove('open');
+    }
+  });
 
   // INPUT: Fetch data from online source (URL)
   async function tryFetchHtml(url) {

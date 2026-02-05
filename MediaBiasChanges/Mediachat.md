@@ -1,133 +1,202 @@
-            <style>
-                .media-spectrum-intro {
-                    margin-bottom: 30px;
-                }
-                
-                .spectrum-bar {
-                    height: 12px;
-                    background: linear-gradient(to right, #3b82f6, #94a3b8, #ef4444);
-                    border-radius: 10px;
-                    margin: 20px 0;
-                }
-            </style>
+<style>
+    .media-spectrum-intro {
+        margin-bottom: 30px;
+    }
+    
+    .spectrum-bar {
+        height: 12px;
+        background: linear-gradient(to right, #3b82f6, #94a3b8, #ef4444);
+        border-radius: 10px;
+        margin: 20px 0;
+    }
 
-        <div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 30px; min-height: 200px; transition: all 0.3s;">
+    /* Collapsible toggle button */
+    .spectrum-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 20px;
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid #94a3b8;
+        border-radius: 16px;
+        color: #afb3e8;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        user-select: none;
+    }
 
-            <div class="media-spectrum-intro">
-                <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>
-                <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
-                    Media bias is how stories get framed. Drag the slider to explore different perspectives!
-                </p>
+    .spectrum-toggle-btn:hover {
+        background: rgba(15, 23, 42, 0.95);
+        border-color: #60a5fa;
+    }
 
-                <div style="position: relative; padding: 40px 20px;">
-                    <div class="spectrum-bar"></div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                        <span style="color: #3b82f6; font-weight: 700; font-size: 0.9rem;">LEFT</span>
-                        <span style="color: #94a3b8; font-weight: 700; font-size: 0.9rem;">CENTER</span>
-                        <span style="color: #ef4444; font-weight: 700; font-size: 0.9rem;">RIGHT</span>
-                    </div>
-                    
-                    <div style="position: relative; margin: 30px 0;">
-                        <input type="range" min="0" max="100" value="50" 
-                               id="bias-slider" 
-                               style="width: 100%; height: 8px; border-radius: 5px; background: rgba(148, 163, 184, 0.3); outline: none; cursor: pointer;">
-                    </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">𓍝</div>
-                            <h4 style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 15px;" id="bias-title">Center/Neutral</h4>
-                            <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8;" id="bias-description">
-                                Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
-                            </p>
-                            <div style="margin-top: 20px; padding: 15px; background: rgba(148, 163, 184, 0.1); border-radius: 10px;">
-                                <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;" id="bias-key">Key Characteristics:</p>
-                                <p style="color: #e2e8f0; font-size: 0.9rem;" id="bias-traits">
-                                    ✓ Fact-based headlines<br>
-                                    ✓ Multiple perspectives<br>
-                                    ✓ Minimal opinion language
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    .spectrum-collapse-icon {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
 
-                <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
-                    <h4 style="color: #a78bfa; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5rem;"></span> Pro Tip
-                    </h4>
-                    <p style="color: #e2e8f0; line-height: 1.6;">
-                        <strong>No source is 100% unbiased.</strong> Don't strive for perfection. Just consider the value each source brings. Smart readers consume multiple viewpoints to have a well rounded opinon.
+    .spectrum-collapse-icon.collapsed {
+        transform: rotate(-90deg);
+    }
+
+    /* The collapsible box */
+    #bias-info-box {
+        max-height: 2000px;
+        overflow: hidden;
+        transition: max-height 0.5s ease, opacity 0.4s ease, margin 0.3s ease;
+        opacity: 1;
+        margin-bottom: 30px;
+    }
+
+    #bias-info-box.collapsed {
+        max-height: 0;
+        opacity: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+</style>
+
+<!-- Toggle Button (OUTSIDE the box) -->
+<div class="spectrum-toggle-btn" id="spectrum-toggle">
+    <span>Click Here to See Spectrum of Bias</span>
+    <span class="spectrum-collapse-icon" id="spectrum-icon">▼</span>
+</div>
+
+<!-- The collapsible dark blue box -->
+<div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 10px; transition: all 0.3s;">
+
+    <div class="media-spectrum-intro">
+        <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>
+        <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
+            Media bias is how stories get framed. Drag the slider to explore different perspectives!
+        </p>
+
+        <div style="position: relative; padding: 40px 20px;">
+            <div class="spectrum-bar"></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <span style="color: #3b82f6; font-weight: 700; font-size: 0.9rem;">LEFT</span>
+                <span style="color: #94a3b8; font-weight: 700; font-size: 0.9rem;">CENTER</span>
+                <span style="color: #ef4444; font-weight: 700; font-size: 0.9rem;">RIGHT</span>
+            </div>
+            
+            <div style="position: relative; margin: 30px 0;">
+                <input type="range" min="0" max="100" value="50" 
+                       id="bias-slider" 
+                       style="width: 100%; height: 8px; border-radius: 5px; background: rgba(148, 163, 184, 0.3); outline: none; cursor: pointer;">
+            </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">𓍝</div>
+                    <h4 style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 15px;" id="bias-title">Center/Neutral</h4>
+                    <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8;" id="bias-description">
+                        Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
                     </p>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(148, 163, 184, 0.1); border-radius: 10px;">
+                        <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;" id="bias-key">Key Characteristics:</p>
+                        <p style="color: #e2e8f0; font-size: 0.9rem;" id="bias-traits">
+                            ✓ Fact-based headlines<br>
+                            ✓ Multiple perspectives<br>
+                            ✓ Minimal opinion language
+                        </p>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <script>
-                (function() {
-                    const biasSlider = document.getElementById('bias-slider');
-                    const biasData = {
-                        0: {
-                            emoji: '︎⚠︎',
-                            title: 'Far Left',
-                            color: '#1e40af',
-                            description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
-                            traits: '✓ Advocacy journalism<br>✓ Social justice focus<br>✓ Bold reform proposals'
-                        },
-                        25: {
-                            emoji: '🗣',
-                            title: 'Left-Leaning',
-                            color: '#3b82f6',
-                            description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
-                            traits: '✓ Progressive values<br>✓ Government solutions<br>✓ Social equity emphasis'
-                        },
-                        50: {
-                            emoji: '𓍝',
-                            title: 'Center/Neutral',
-                            color: '#94a3b8',
-                            description: 'Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints. Prioritizes verifiable information over interpretation.',
-                            traits: '✓ Fact-based headlines<br>✓ Multiple perspectives<br>✓ Minimal opinion language'
-                        },
-                        75: {
-                            emoji: '🎤︎',
-                            title: 'Right-Leaning',
-                            color: '#ef4444',
-                            description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
-                            traits: '✓ Conservative values<br>✓ Market solutions<br>✓ Traditional institutions'
-                        },
-                        100: {
-                            emoji: '⚠︎',
-                            title: 'Far Right',
-                            color: '#a01414',
-                            description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
-                            traits: '✓ Advocacy journalism<br>✓ Nationalist focus<br>✓ Traditional values defense'
+        <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
+            <h4 style="color: #a78bfa; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;"></span> Pro Tip
+            </h4>
+            <p style="color: #e2e8f0; line-height: 1.6;">
+                <strong>No source is 100% unbiased.</strong> Don't strive for perfection. Just consider the value each source brings. Smart readers consume multiple viewpoints to have a well rounded opinion.
+            </p>
+        </div>
+    </div>
+
+<script>
+        (function() {
+            const biasSlider = document.getElementById('bias-slider');
+            const biasData = {
+                0: {
+                    emoji: '︎⚠︎',
+                    title: 'Far Left',
+                    color: '#1e40af',
+                    description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
+                    traits: '✓ Advocacy journalism<br>✓ Social justice focus<br>✓ Bold reform proposals'
+                },
+                25: {
+                    emoji: '🗣',
+                    title: 'Left-Leaning',
+                    color: '#3b82f6',
+                    description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
+                    traits: '✓ Progressive values<br>✓ Government solutions<br>✓ Social equity emphasis'
+                },
+                50: {
+                    emoji: '𓍝',
+                    title: 'Center/Neutral',
+                    color: '#94a3b8',
+                    description: 'Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints. Prioritizes verifiable information over interpretation.',
+                    traits: '✓ Fact-based headlines<br>✓ Multiple perspectives<br>✓ Minimal opinion language'
+                },
+                75: {
+                    emoji: '🎤︎',
+                    title: 'Right-Leaning',
+                    color: '#ef4444',
+                    description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
+                    traits: '✓ Conservative values<br>✓ Market solutions<br>✓ Traditional institutions'
+                },
+                100: {
+                    emoji: '⚠︎',
+                    title: 'Far Right',
+                    color: '#a01414',
+                    description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
+                    traits: '✓ Advocacy journalism<br>✓ Nationalist focus<br>✓ Traditional values defense'
+                }
+            };
+
+            if (biasSlider) {
+                biasSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value, 10);
+                    let closestKey = 50;
+                    let minDiff = Math.abs(value - 50);
+                    
+                    Object.keys(biasData).forEach(key => {
+                        const diff = Math.abs(value - parseInt(key, 10));
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closestKey = key;
                         }
-                    };
+                    });
+                    
+                    const data = biasData[closestKey];
+                    const infoBox = document.getElementById('bias-info-box');
+                    
+                    document.getElementById('bias-emoji').textContent = data.emoji;
+                    document.getElementById('bias-title').textContent = data.title;
+                    document.getElementById('bias-title').style.color = data.color;
+                    document.getElementById('bias-description').textContent = data.description;
+                    document.getElementById('bias-traits').innerHTML = data.traits;
+                    infoBox.style.borderColor = data.color;
+                });
+            }
 
-                    if (biasSlider) {
-                        biasSlider.addEventListener('input', function() {
-                            const value = parseInt(this.value, 10);
-                            let closestKey = 50;
-                            let minDiff = Math.abs(value - 50);
-                            
-                            Object.keys(biasData).forEach(key => {
-                                const diff = Math.abs(value - parseInt(key, 10));
-                                if (diff < minDiff) {
-                                    minDiff = diff;
-                                    closestKey = key;
-                                }
-                            });
-                            
-                            const data = biasData[closestKey];
-                            const infoBox = document.getElementById('bias-info-box');
-                            
-                            document.getElementById('bias-emoji').textContent = data.emoji;
-                            document.getElementById('bias-title').textContent = data.title;
-                            document.getElementById('bias-title').style.color = data.color;
-                            document.getElementById('bias-description').textContent = data.description;
-                            document.getElementById('bias-traits').innerHTML = data.traits;
-                            infoBox.style.borderColor = data.color;
-                        });
-                    }
-                })();
-            </script>
+            // Collapse the ENTIRE dark blue box
+            const toggleBtn = document.getElementById('spectrum-toggle');
+            const box = document.getElementById('bias-info-box');
+            const icon = document.getElementById('spectrum-icon');
+
+            if (toggleBtn && box && icon) {
+                toggleBtn.addEventListener('click', function() {
+                    box.classList.toggle('collapsed');
+                    icon.classList.toggle('collapsed');
+                });
+            }
+        })();
+    </script>
 
             <div class="content-placeholder">
                 <p>

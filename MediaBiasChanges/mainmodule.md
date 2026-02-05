@@ -3790,12 +3790,12 @@ loadPromptClicks()
 
   <div class="cite-row">
     <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="https://..." />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Generate citation from URL" style="margin-left:8px;min-width:160px;">
-      Generate from URL
+    <input id="cite-url" class="cite-input" placeholder="Paste source URL for instant citation" />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Create citation from URL" style="margin-left:8px;min-width:160px;">
+      Create Citation
     </button>
   </div>
-  
+
   <div class="cite-row">
     <div class="cite-label">Author(s)</div>
     <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />

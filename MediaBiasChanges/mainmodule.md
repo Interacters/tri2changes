@@ -1849,6 +1849,95 @@ async function submitFinalTime(username, elapsed) {
     border-radius: 10px;
     margin: 10px 0;
 }
+
+/* Source Credibility Display Styles */
+.source-credibility-display {
+    display: none;
+    margin-top: 12px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+    border-radius: 12px;
+    border: 2px solid rgba(122, 210, 249, 0.3);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.source-credibility-display.show {
+    display: block;
+}
+
+.source-info-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.source-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background: white;
+    padding: 5px;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.source-details {
+    flex: 1;
+}
+
+.source-name {
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.credibility-score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.score-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.score-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    min-width: 60px;
+    text-align: right;
+}
+
+.credibility-note {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.7);
+}
 </style>
 
 <div class="ai-card">
@@ -1857,6 +1946,24 @@ async function submitFinalTime(username, elapsed) {
     
     <label>News Source (Optional)</label>
     <textarea id="news-source" placeholder="Type a news source like 'Fox News', 'CNN', 'NBC'..." style="min-height: 60px;"></textarea>
+
+    <!-- Source Credibility Display -->
+    <div id="source-credibility-display" class="source-credibility-display">
+        <div class="source-info-container">
+            <img id="source-logo" class="source-logo" src="" alt="">
+            <div class="source-details">
+                <h4 id="source-name" class="source-name"></h4>
+                <div class="credibility-score">
+                    <span style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">Credibility (Ad Fontes):</span>
+                    <div class="score-bar">
+                        <div id="score-fill" class="score-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="score-text" class="score-text">-/10</span>
+                </div>
+                <div class="credibility-note">Credibility is based on Ad Fontes scores.</div>
+            </div>
+        </div>
+    </div>
     
     <!-- Smart Prompts -->
     <div id="smart-prompts-section" style="display: none;">
@@ -2086,6 +2193,247 @@ async function submitFinalTime(username, elapsed) {
             stopRecording();
             voiceStatus.textContent = 'Language changed. Click "Start" to continue.';
         }
+    });
+})();
+</script>
+
+<script>
+(function() {
+    const SOURCE_DATABASE = {
+        'atlantic': {
+            name: 'The Atlantic',
+            logo: '{{site.baseurl}}/media/assets/atlanticL.png',
+            credibility: 8
+        },
+        'buzzfeed': {
+            name: 'BuzzFeed',
+            logo: '{{site.baseurl}}/media/assets/buzzfeedL.png',
+            credibility: 6
+        },
+        'cnn': {
+            name: 'CNN',
+            logo: '{{site.baseurl}}/media/assets/cnnL.png',
+            credibility: 7
+        },
+        'epoch times': {
+            name: 'Epoch Times',
+            logo: '{{site.baseurl}}/media/assets/epochR.png',
+            credibility: 5
+        },
+        'forbes': {
+            name: 'Forbes',
+            logo: '{{site.baseurl}}/media/assets/forbesC.png',
+            credibility: 7
+        },
+        'the hill': {
+            name: 'The Hill',
+            logo: '{{site.baseurl}}/media/assets/hillC.png',
+            credibility: 7
+        },
+        'nbc': {
+            name: 'NBC',
+            logo: '{{site.baseurl}}/media/assets/nbcL.png',
+            credibility: 7
+        },
+        'newsweek': {
+            name: 'Newsweek',
+            logo: '{{site.baseurl}}/media/assets/newsweekC.png',
+            credibility: 6
+        },
+        'new york times': {
+            name: 'NY Times',
+            logo: '{{site.baseurl}}/media/assets/nytL.png',
+            credibility: 8
+        },
+        'nyt': {
+            name: 'NY Times',
+            logo: '{{site.baseurl}}/media/assets/nytL.png',
+            credibility: 8
+        },
+        'vox': {
+            name: 'Vox',
+            logo: '{{site.baseurl}}/media/assets/voxL.png',
+            credibility: 7
+        },
+        'washington times': {
+            name: 'Washington Times',
+            logo: '{{site.baseurl}}/media/assets/wtR.png',
+            credibility: 6
+        },
+        'bbc': {
+            name: 'BBC',
+            logo: '{{site.baseurl}}/media/assets/bbcC.png',
+            credibility: 9
+        },
+        'daily caller': {
+            name: 'The Daily Caller',
+            logo: '{{site.baseurl}}/media/assets/callerR.png',
+            credibility: 5
+        },
+        'daily wire': {
+            name: 'Daily Wire',
+            logo: '{{site.baseurl}}/media/assets/dailywireR.png',
+            credibility: 5
+        },
+        'federalist': {
+            name: 'The Federalist',
+            logo: '{{site.baseurl}}/media/assets/federalistR.png',
+            credibility: 5
+        },
+        'fox news': {
+            name: 'Fox News',
+            logo: '{{site.baseurl}}/media/assets/foxR.png',
+            credibility: 6
+        },
+        'fox': {
+            name: 'Fox News',
+            logo: '{{site.baseurl}}/media/assets/foxR.png',
+            credibility: 6
+        },
+        'marketwatch': {
+            name: 'MarketWatch',
+            logo: '{{site.baseurl}}/media/assets/marketwatchC.png',
+            credibility: 7
+        },
+        'newsmax': {
+            name: 'Newsmax',
+            logo: '{{site.baseurl}}/media/assets/newsmaxR.png',
+            credibility: 4
+        },
+        'npr': {
+            name: 'NPR',
+            logo: '{{site.baseurl}}/media/assets/nprL.png',
+            credibility: 8
+        },
+        'reuters': {
+            name: 'Reuters',
+            logo: '{{site.baseurl}}/media/assets/reutersC.png',
+            credibility: 9
+        },
+        'wall street journal': {
+            name: 'Wall Street Journal',
+            logo: '{{site.baseurl}}/media/assets/wsjC.png',
+            credibility: 8
+        },
+        'wsj': {
+            name: 'Wall Street Journal',
+            logo: '{{site.baseurl}}/media/assets/wsjC.png',
+            credibility: 8
+        },
+        'abc': {
+            name: 'ABC',
+            logo: '{{site.baseurl}}/media/assets/abcL.png',
+            credibility: 7
+        },
+        'time': {
+            name: 'Time',
+            logo: '{{site.baseurl}}/media/assets/timeL.png',
+            credibility: 7
+        },
+        'yahoo news': {
+            name: 'Yahoo News',
+            logo: '{{site.baseurl}}/media/assets/yahooL.png',
+            credibility: 6
+        },
+        'news nation': {
+            name: 'NewsNation',
+            logo: '{{site.baseurl}}/media/assets/newsnationC.png',
+            credibility: 7
+        },
+        'reason': {
+            name: 'Reason',
+            logo: '{{site.baseurl}}/media/assets/reasonC.png',
+            credibility: 7
+        },
+        'san': {
+            name: 'SAN News',
+            logo: '{{site.baseurl}}/media/assets/sanC.png',
+            credibility: 6
+        },
+        'new york post': {
+            name: 'New York Post',
+            logo: '{{site.baseurl}}/media/assets/nypR.png',
+            credibility: 5
+        },
+        'nyp': {
+            name: 'New York Post',
+            logo: '{{site.baseurl}}/media/assets/nypR.png',
+            credibility: 5
+        },
+        'upward': {
+            name: 'Upward News',
+            logo: '{{site.baseurl}}/media/assets/upwardR.png',
+            credibility: 5
+        },
+        'cbn': {
+            name: 'CBN',
+            logo: '{{site.baseurl}}/media/assets/cbnR.png',
+            credibility: 5
+        }
+    };
+
+    const newsSourceInput = document.getElementById('news-source');
+    const credibilityDisplay = document.getElementById('source-credibility-display');
+    const sourceLogo = document.getElementById('source-logo');
+    const sourceName = document.getElementById('source-name');
+    const scoreFill = document.getElementById('score-fill');
+    const scoreText = document.getElementById('score-text');
+
+    if (!newsSourceInput || !credibilityDisplay) return;
+
+    let debounceTimer;
+
+    function normalizeSourceName(input) {
+        return input.toLowerCase().trim();
+    }
+
+    function displaySourceInfo(sourceKey) {
+        const sourceData = SOURCE_DATABASE[sourceKey];
+        
+        if (!sourceData) {
+            credibilityDisplay.classList.remove('show');
+            return;
+        }
+
+        sourceLogo.src = sourceData.logo;
+        sourceLogo.alt = sourceData.name;
+        sourceName.textContent = sourceData.name;
+
+        const scorePercent = (sourceData.credibility / 10) * 100;
+        scoreFill.style.width = scorePercent + '%';
+        scoreText.textContent = sourceData.credibility + '/10';
+
+        credibilityDisplay.classList.add('show');
+    }
+
+    newsSourceInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        
+        const inputValue = this.value.trim();
+        
+        if (inputValue.length < 2) {
+            credibilityDisplay.classList.remove('show');
+            return;
+        }
+
+        debounceTimer = setTimeout(() => {
+            const normalized = normalizeSourceName(inputValue);
+            
+            if (SOURCE_DATABASE[normalized]) {
+                displaySourceInfo(normalized);
+                return;
+            }
+
+            const partialMatch = Object.keys(SOURCE_DATABASE).find(key => 
+                key.includes(normalized) || normalized.includes(key)
+            );
+
+            if (partialMatch) {
+                displaySourceInfo(partialMatch);
+            } else {
+                credibilityDisplay.classList.remove('show');
+            }
+        }, 300);
     });
 })();
 </script>
@@ -2917,11 +3265,6 @@ loadPromptClicks()
         <div class="section-container" id="section-3">
             <div class="section-header">
                 <h2 class="section-title">Citation Generator</h2>
-                <p class="section-description">
-                    It's important to include correct citations for your work. 
-                    There are many formats including MLA, APA, and Chicago. 
-                    This tool helps you create proper citations for your sources.
-                </p>
             </div>
             <div class="content-placeholder">
                 <p>
@@ -3446,6 +3789,14 @@ loadPromptClicks()
   </div>
 
   <div class="cite-row">
+    <div class="cite-label">URL</div>
+    <input id="cite-url" class="cite-input" placeholder="Paste source URL for instant citation" />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Create citation from URL" style="margin-left:8px;min-width:160px;">
+      Create Citation
+    </button>
+  </div>
+
+  <div class="cite-row">
     <div class="cite-label">Author(s)</div>
     <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />
   </div>
@@ -3463,14 +3814,6 @@ loadPromptClicks()
   <div class="cite-row">
     <div class="cite-label">Source</div>
     <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="https://..." />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Generate citation from URL" style="margin-left:8px;min-width:160px;">
-      Generate from URL
-    </button>
   </div>
 
   <div class="cite-actions">
@@ -3505,7 +3848,6 @@ loadPromptClicks()
 <div id="notes-panel" class="notes-panel">
   <div class="notes-header">
     <h3>📝 Source Notes</h3>
-    <button id="notes-close" class="notes-close-btn">Close</button>
   </div>
   
   <div class="notes-intro">
@@ -4224,10 +4566,6 @@ if (parentheticalEl) {
     }
   });
 
-  notesCloseBtn.addEventListener('click', () => {
-    notesPanel.classList.remove('open');
-  });
-
   // Close panel when clicking outside
   document.addEventListener('click', (e) => {
     if (notesPanel.classList.contains('open') && 
@@ -4898,7 +5236,6 @@ resetBtn.addEventListener('click', () => {
 
         #bias-results section {
             background: rgba(102, 126, 234, 0.1);
-            padding: 20px;
             border-radius: 12px;
             margin-bottom: 20px;
         }
@@ -4959,7 +5296,7 @@ resetBtn.addEventListener('click', () => {
 
     <div class="survey-container">
         <div class="survey-header">
-            <h2>Likert Scale</h2>
+            <h2>Performance Evaluation</h2>
             <p>Rate how you feel about media bias, using sources, adding citiations, and making thesis statements on a scale of 1-5.</p>
         </div>
 
@@ -5219,18 +5556,18 @@ resetBtn.addEventListener('click', () => {
 
                 <!-- Bias Profile -->
                 <div class="bias-profile-cta">
-                    <h3>🔍 Discover Your Bias Profile</h3>
+                    <h3>Discover Your Bias Profile</h3>
                     <p>
                         Based on your activity in this module, our AI will analyze your media literacy skills and potential biases.
                         Get personalized insights and recommendations!
                     </p>
 
                     <button id="analyze-bias-btn" class="nav-btn nav-btn-next">
-                        Analyze My Bias Profile 🧠
+                        Analyze My Bias Profile
                     </button>
 
                     <p class="bias-profile-note">
-                        ℹ️ This analysis uses Google Gemini AI and combines your session data with your saved progress
+                        This analysis uses Google Gemini AI and combines your session data with your saved progress
                     </p>
 
                     <!-- Login prompt (hidden by default, shown if not logged in) -->
@@ -5367,20 +5704,17 @@ resetBtn.addEventListener('click', () => {
         biasResults.hidden = false;
 
         const resultsHTML = `
-            <h1>🎯 Your Bias Profile</h1>
-
+            <h1>Your Bias Profile</h1>
             <section>
-                <h3>📊 Bias Awareness Score</h3>
+                <h3>Bias Awareness Score</h3>
                 <p><strong>Score:</strong> ${analysis.bias_likelihood}/10</p>
                 <p>${analysis.bias_explanation}</p>
             </section>
-
             <section>
                 <h3>Media Literacy Knowledge</h3>
                 <p><strong>Score:</strong> ${analysis.knowledge_score}/10</p>
                 <p>${analysis.knowledge_explanation}</p>
             </section>
-
             <section>
                 <h3>Political Awareness Analysis</h3>
                 <ul>
@@ -5390,28 +5724,24 @@ resetBtn.addEventListener('click', () => {
                 </ul>
                 <p>${analysis.personalized_insights.explanation}</p>
             </section>
-
             <section>
                 <h3>Your Strengths</h3>
                 <ul>
                     ${analysis.learning_patterns.strengths.map(s => `<li>${s}</li>`).join('')}
                 </ul>
             </section>
-
             <section>
                 <h3>Areas to Improve</h3>
                 <ul>
                     ${analysis.learning_patterns.weaknesses.map(w => `<li>${w}</li>`).join('')}
                 </ul>
             </section>
-
             <section>
                 <h3>Personalized Recommendations</h3>
                 <ol>
                     ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
                 </ol>
             </section>
-
             <section>
                 <h3>Unique Insight</h3>
                 <blockquote style="color: #000000 !important;">${analysis.interesting_observation}</blockquote>

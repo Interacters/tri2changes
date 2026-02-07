@@ -1345,8 +1345,7 @@ async function submitFinalTime(username, elapsed) {
         const autofillBtn = document.getElementById('autofill-images');
         if (autofillBtn) {
             autofillBtn.addEventListener('click', () => {
-                console.log("✨ Autofill clicked");
-                autofillImageGame(true);
+                autofillImageGame(false);
             });
         }
 
@@ -1410,7 +1409,6 @@ async function submitFinalTime(username, elapsed) {
                     
                     const minutes = Math.floor(elapsed / 60);
                     const seconds = elapsed % 60;
-                    alert(`Completed in ${minutes}:${seconds.toString().padStart(2, '0')}!`);
                     
                     showCongrats();
                     initGame();

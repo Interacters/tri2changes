@@ -851,6 +851,7 @@ window.addEventListener('DOMContentLoaded', () => {
 window.updateAuthButton = updateAuthButton;
 </script>
   
+
 <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
@@ -913,7 +914,6 @@ function loadData() {
   if (!raw) return JSON.parse(JSON.stringify(DEFAULT_DATA));
   try {
     const parsed = JSON.parse(raw);
-    // Merge with defaults to tolerate older/partial formats
     const merged = Object.assign({}, DEFAULT_DATA, parsed);
     merged.profiles = Object.assign({}, DEFAULT_DATA.profiles, parsed.profiles || {});
     merged.gameState = Object.assign({}, DEFAULT_DATA.gameState, parsed.gameState || {});
@@ -950,6 +950,7 @@ function clearGameStateForIds(ids = []) {
     let placedImages = new Set();
     let timerHandle = null;
     let gameStarted = false;
+    let autofillUsed = false; // NEW: Track if autofill was used
 
     const playerDisplay = document.getElementById('player-name');
     const timerDisplay = document.getElementById('timer');
@@ -983,13 +984,35 @@ function clearGameStateForIds(ids = []) {
         }
     }
 
+    // NEW: Function to lock the timer display
+    function lockTimerDisplay() {
+        if (timerDisplay) {
+            const currentTime = timerDisplay.textContent;
+            timerDisplay.innerHTML = `
+                <span style="position: relative; display: inline-block;">
+                    ${currentTime}
+                    <span style="
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        font-size: 1.2em;
+                        color: #ef4444;
+                        text-shadow: 0 0 3px white;
+                    ">🔒</span>
+                </span>
+            `;
+            timerDisplay.style.opacity = '0.6';
+        }
+    }
+
     function updateDisplays() {
         playerDisplay.textContent = `Player: ${currentPlayer}`;
     }
 
     function slugify(text) {
-  return 'img-' + String(text).toLowerCase().replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '');
-}
+        return 'img-' + String(text).toLowerCase().replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '');
+    }
 
     function createImageCard(file, index) {
         const img = document.createElement('img');
@@ -1002,8 +1025,8 @@ function clearGameStateForIds(ids = []) {
         img.dataset.id = slugify(file.company);
 
         img.addEventListener('dragstart', (e) => {
-            // Start timer on first interaction
-            if (!gameStarted) {
+            // Start timer on first interaction (only if not autofilled)
+            if (!gameStarted && !autofillUsed) {
                 gameStarted = true;
                 timerHandle = startTimer();
                 console.log("⏱️ Timer started!");
@@ -1025,6 +1048,7 @@ function clearGameStateForIds(ids = []) {
         document.querySelectorAll('.bin-content').forEach(el => el.innerHTML = '');
         placedImages.clear();
         gameStarted = false;
+        autofillUsed = false; // NEW: Reset autofill flag
         
         // Stop any existing timer
         if (timerHandle) {
@@ -1035,6 +1059,7 @@ function clearGameStateForIds(ids = []) {
         // Reset timer display
         if (timerDisplay) {
             timerDisplay.textContent = 'Time: 0:00';
+            timerDisplay.style.opacity = '1';
         }
 
         const getRandomSubset = (arr, count) => {
@@ -1047,13 +1072,11 @@ function clearGameStateForIds(ids = []) {
         const centerImages = imageFiles.filter(img => img.bin === "Center");
         const rightImages = imageFiles.filter(img => img.bin === "Right");
 
-        // Load storage and try to reuse previous round's image set (by stable ids)
         const data = loadData();
         data.meta = data.meta || {};
 
         let selectedImages = null;
         if (Array.isArray(data.meta.roundImages) && data.meta.roundImages.length === 21) {
-            // map saved ids back to files (ensure all are present)
             const idMap = new Map(imageFiles.map(f => [slugify(f.company), f]));
             const files = data.meta.roundImages.map(id => idMap.get(id)).filter(Boolean);
             if (files.length === 21) {
@@ -1061,7 +1084,6 @@ function clearGameStateForIds(ids = []) {
             }
         }
 
-        // If no valid saved round, pick a new random set and persist its ids
         if (!selectedImages) {
             selectedImages = [
                 ...getRandomSubset(leftImages, 7),
@@ -1073,33 +1095,39 @@ function clearGameStateForIds(ids = []) {
             saveData(data);
         }
 
-        // create and append cards for the selectedImages
         selectedImages.forEach((file) => {
             const card = createImageCard(file);
             imagesArea.appendChild(card);
         });
 
-    // ===== restore saved placements for images shown =====
-    document.querySelectorAll('img.image').forEach(img => {
-        const id = img.dataset.id;
-        const zone = data.gameState && data.gameState[id];
-        if (zone) {
-            const bin = document.querySelector(`.bin[data-bin="${zone}"]`);
-            if (bin) {
-                bin.querySelector('.bin-content').appendChild(img);
-                placedImages.add(id);
-                img.style.opacity = '1';
-                img.style.cursor = 'grab';
+        document.querySelectorAll('img.image').forEach(img => {
+            const id = img.dataset.id;
+            const zone = data.gameState && data.gameState[id];
+            if (zone) {
+                const bin = document.querySelector(`.bin[data-bin="${zone}"]`);
+                if (bin) {
+                    bin.querySelector('.bin-content').appendChild(img);
+                    placedImages.add(id);
+                    img.style.opacity = '1';
+                    img.style.cursor = 'grab';
+                }
             }
-        }
-    });
-    // ensure lastModule meta
-    data.meta.lastModule = 'sortingGame';
-    saveData(data);
+        });
+        
+        data.meta.lastModule = 'sortingGame';
+        saveData(data);
     }
 
-    // Autofill helper
+    // MODIFIED: Autofill helper with timer stop and lock
     function autofillImageGame(showAlert = false) {
+        // NEW: Stop timer and mark as autofill used
+        if (timerHandle) {
+            timerHandle.stop();
+            timerHandle = null;
+        }
+        autofillUsed = true;
+        lockTimerDisplay();
+        
         document.querySelectorAll('.bin-content').forEach(el => el.innerHTML = '');
         const imgs = Array.from(document.querySelectorAll('img.image'));
         let correctCount = 0;
@@ -1115,13 +1143,12 @@ function clearGameStateForIds(ids = []) {
                 img.style.opacity = '1';
                 img.style.cursor = 'grab';
                 placedImages.add(id);
-                data.gameState[id] = target; // persist
+                data.gameState[id] = target;
                 correctCount++;
             }
         });
 
         saveData(data);
-        if (showAlert) alert(`Autofill placed ${correctCount} images into their correct bins.`);
     }
 
     bins.forEach(bin => {
@@ -1143,28 +1170,22 @@ function clearGameStateForIds(ids = []) {
             
             if (!img) return;
 
-            // Remove from placedImages if moving to a different bin
             placedImages.delete(id);
             
-            // Place the image in the new bin
             bin.querySelector('.bin-content').appendChild(img);
             placedImages.add(id);
             
-            // Reset opacity to show it's movable
             img.style.opacity = '1';
             img.style.cursor = 'grab';
 
-            // ===== persist placement =====
-    const data = loadData();
-    data.gameState = data.gameState || {};
-    data.gameState[id] = bin.dataset.bin;
-    saveData(data);
-    // ===== end persist =====
+            const data = loadData();
+            data.gameState = data.gameState || {};
+            data.gameState[id] = bin.dataset.bin;
+            saveData(data);
         });
     });
 
 async function fetchUser() {
-    // Use the globally set currentPlayerUid from updateAuthButton
     if (window.currentPlayerUid) {
         currentPlayer = window.currentPlayerUid;
     } else {
@@ -1200,7 +1221,6 @@ async function postScore(username, finalTime) {
             const row = tbody.insertRow();
             row.insertCell().textContent = entry.rank || (index + 1);
             row.insertCell().textContent = entry.username || 'Unknown';
-            // Use 'time' instead of 'score' and format it
             const timeInSeconds = entry.time || 0;
             const minutes = Math.floor(timeInSeconds / 60);
             const seconds = timeInSeconds % 60;
@@ -1212,8 +1232,8 @@ async function postScore(username, finalTime) {
     }
 }
 
-    function showCongrats() {
-        // create overlay
+    // NEW: Show autofill warning modal
+    function showAutofillWarning() {
         const msg = document.createElement('div');
         msg.style.position = 'fixed';
         msg.style.top = '0';
@@ -1226,12 +1246,56 @@ async function postScore(username, finalTime) {
         msg.style.justifyContent = 'center';
         msg.style.zIndex = '9999';
 
-        // modal content (no links, neutral message)
+        msg.innerHTML = `
+          <div style="background: #6a75c8ff;padding:28px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.2);text-align:center;max-width:420px;">
+            <h2 style="color: #ff6b6b;margin-bottom:12px;">!!Autofill Used!!</h2>
+            <p style="color: #e6f0ff;margin:0 0 18px;font-size:1.05rem;">
+              You used autofill! While you've completed the puzzle, your time won't be added to the leaderboard.
+            </p>
+            <p style="color: #e6f0ff;margin:0 0 18px;font-size:1rem;">
+              Please try to attempt the bias game yourself when you can to compete for the top scores!
+            </p>
+            <button id="return-to-game-autofill" style="padding:10px 18px;border-radius:8px;background:#4299e1;color:white;border:none;cursor:pointer;font-weight:700;">
+              Got It!
+            </button>
+          </div>
+        `;
+
+        document.body.appendChild(msg);
+
+        const btn = document.getElementById('return-to-game-autofill');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            msg.remove();
+          });
+        }
+    }
+
+    function showCongrats(elapsedSeconds) {
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = elapsedSeconds % 60;
+        const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        const msg = document.createElement('div');
+        msg.style.position = 'fixed';
+        msg.style.top = '0';
+        msg.style.left = '0';
+        msg.style.width = '100vw';
+        msg.style.height = '100vh';
+        msg.style.background = 'rgba(0,0,0,0.55)';
+        msg.style.display = 'flex';
+        msg.style.alignItems = 'center';
+        msg.style.justifyContent = 'center';
+        msg.style.zIndex = '9999';
+
         msg.innerHTML = `
           <div style="background: #6a75c8ff;padding:28px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.2);text-align:center;max-width:420px;">
             <h2 style="color: #546dbeff;margin-bottom:8px;">Congratulations!</h2>
-            <p style="color: #e6f0ff;margin:0 0 18px;font-size:1.05rem;">
+            <p style="color: #e6f0ff;margin:0 0 12px;font-size:1.05rem;">
               Congratulations on mastering media bias.
+            </p>
+            <p style="color: #4ade80;margin:0 0 18px;font-size:1.3rem;font-weight:700;font-family:'Courier New',monospace;">
+              Completed in ${timeString}
             </p>
             <button id="return-to-game" style="padding:10px 18px;border-radius:8px;background:#4299e1;color:white;border:none;cursor:pointer;font-weight:700;">
               Return to Game
@@ -1241,7 +1305,6 @@ async function postScore(username, finalTime) {
 
         document.body.appendChild(msg);
 
-        // close modal on button click
         const btn = document.getElementById('return-to-game');
         if (btn) {
           btn.addEventListener('click', () => {
@@ -1294,13 +1357,13 @@ async function postScore(username, finalTime) {
             modal.remove();
         });
         
-        // Also close on background click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
             }
         });
     }
+
 async function submitFinalTime(username, elapsed) {
     try {
         const response = await fetch(`${pythonURI}/api/media/score/${encodeURIComponent(username)}/${elapsed}`, {
@@ -1327,11 +1390,9 @@ async function submitFinalTime(username, elapsed) {
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
                 console.log("🔁 Reset clicked");
-                // clear saved placements only for images currently on the board
                 const ids = Array.from(document.querySelectorAll('img.image')).map(i => i.dataset.id);
                 clearGameStateForIds(ids);
 
-                // also clear the persisted round selection so a fresh random set is chosen
                 const data = loadData();
                 if (data.meta && data.meta.roundImages) {
                     delete data.meta.roundImages;
@@ -1345,7 +1406,8 @@ async function submitFinalTime(username, elapsed) {
         const autofillBtn = document.getElementById('autofill-images');
         if (autofillBtn) {
             autofillBtn.addEventListener('click', () => {
-                autofillImageGame(false);
+                console.log("✨ Autofill clicked");
+                autofillImageGame(true);
             });
         }
 
@@ -1381,36 +1443,37 @@ async function submitFinalTime(username, elapsed) {
                     return;
                 }
 
-                // Stop timer and get final time
+                // NEW: Check if autofill was used
+                if (autofillUsed) {
+                    showAutofillWarning();
+                    initGame(); // Reset game
+                    return;
+                }
+
+                // Stop timer and get final time (only if autofill wasn't used)
                 if (timerHandle) {
                     const elapsed = timerHandle.stop();
-
-                    // ALWAYS get fresh username value
                     const username = window.currentPlayerUid || 'Guest';
 
-                    // Persist prompts + attempt locally
                     try {
-                    const d = loadData();
-                    d.attempts = d.attempts || [];
-                    const prompts = (d.meta && d.meta.currentChatPrompts) ? d.meta.currentChatPrompts.slice() : [];
-                    d.attempts.push({ 
-                        username: username,  // Use fresh value here too
-                        time: Number(elapsed) || 0, 
-                        at: Date.now(), 
-                        prompts 
-                    });
-                    if (d.meta) delete d.meta.currentChatPrompts;
-                    saveData(d);
+                        const d = loadData();
+                        d.attempts = d.attempts || [];
+                        const prompts = (d.meta && d.meta.currentChatPrompts) ? d.meta.currentChatPrompts.slice() : [];
+                        d.attempts.push({ 
+                            username: username,
+                            time: Number(elapsed) || 0, 
+                            at: Date.now(), 
+                            prompts 
+                        });
+                        if (d.meta) delete d.meta.currentChatPrompts;
+                        saveData(d);
                     } catch (err) {
-                    console.warn('save attempt with prompts failed', err);
+                        console.warn('save attempt with prompts failed', err);
                     }
 
-                    submitFinalTime(username, elapsed);  // Use fresh value
+                    submitFinalTime(username, elapsed);
                     
-                    const minutes = Math.floor(elapsed / 60);
-                    const seconds = elapsed % 60;
-                    
-                    showCongrats();
+                    showCongrats(elapsed);
                     initGame();
                 } else {
                     alert("Timer not started. Please play the game first!");

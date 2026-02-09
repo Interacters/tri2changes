@@ -1024,7 +1024,19 @@ function clearGameStateForIds(ids = []) {
         img.dataset.company = file.company;
         img.dataset.id = slugify(file.company);
 
+        const autofillNewsSource = () => {
+            const newsSourceInput = document.getElementById('news-source');
+            if (!newsSourceInput) return;
+            newsSourceInput.value = file.company;
+            newsSourceInput.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        img.addEventListener('click', () => {
+            autofillNewsSource();
+        });
+
         img.addEventListener('dragstart', (e) => {
+            autofillNewsSource();
             // Start timer on first interaction (only if not autofilled)
             if (!gameStarted && !autofillUsed) {
                 gameStarted = true;
@@ -2303,6 +2315,11 @@ async function submitFinalTime(username, elapsed) {
             credibility: 6
         },
         'new york times': {
+            name: 'NY Times',
+            logo: '{{site.baseurl}}/media/assets/nytL.png',
+            credibility: 8
+        },
+        'ny times': {
             name: 'NY Times',
             logo: '{{site.baseurl}}/media/assets/nytL.png',
             credibility: 8

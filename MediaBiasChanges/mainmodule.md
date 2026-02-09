@@ -3340,13 +3340,29 @@ loadPromptClicks()
             </div>
         </div>
 
-       <!-- Section 3: Citation Generator -->
-        <div class="section-container" id="section-3">
-            <div class="section-header">
-                <h2 class="section-title">Citation Generator</h2>
-            </div>
-            <div class="content-placeholder">
-                <p>
+<!-- Section 3: Citation Generator -->
+<div class="section-container" id="section-3">
+    <div class="section-header">
+        <h2 class="section-title">
+            Citation Generator
+            <button id="help-toggle-btn" style="display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border-radius: 8px; background: linear-gradient(135deg, #60a5fa, #3b82f6); border: 2px solid rgba(255,255,255,0.3); color: #fff; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-left: 10px; vertical-align: middle; box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3); transition: all 0.2s;">❓ Instructions</button>
+        </h2>
+        
+        <!-- Help Panel (hidden by default) -->
+        <div id="help-panel" style="display: none; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin-top: 15px; font-size: 0.9rem; line-height: 1.6;">
+            <h4 style="color: #7ad2f9; margin-bottom: 10px;">How to Use the Citation Generator</h4>
+            <ul style="margin: 0; padding-left: 20px; color: rgba(255,255,255,0.85);">
+                <li><strong>Autofill from URL:</strong> Paste a source URL to automatically extract citation details.</li>
+                <li><strong>Citation Style:</strong> Choose between APA, MLA (9th ed.), or Chicago (author-date) format.</li>
+                <li><strong>Manual Fields:</strong> Fill in author, date, title, and source if autofill doesn't work.</li>
+                <li><strong>Parenthetical Citation:</strong> Use this shortened version when citing sources within your paper.</li>
+                <li><strong>References:</strong> Save citations to build your reference list. Click the ✏️ button to copy the parenthetical citation for in-text use.</li>
+                <li><strong>Source Notes:</strong> Add notes to your saved sources to organize research findings and track how each source supports your argument.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="content-placeholder">
+        <p>
 <style>
   /* Import modern, readable font matching thesis generator */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -3399,7 +3415,7 @@ loadPromptClicks()
     display:flex; 
     gap:10px; 
     margin-top:12px; 
-    justify-content:flex-end;
+    justify-content:center;
     flex-wrap: wrap;
   }
   
@@ -3454,12 +3470,6 @@ loadPromptClicks()
     font-size: 0.9rem;
   }
   
-  .cite-output:empty::before {
-    content: 'Your citation will appear here...';
-    color: rgba(255, 255, 255, 0.6);
-    font-style: italic;
-  }
-  
   .cite-small { 
     font-size:0.9rem; 
     color:rgba(255, 255, 255, 0.75); 
@@ -3478,6 +3488,21 @@ loadPromptClicks()
     margin-bottom: 12px;
     font-family: 'Inter', sans-serif;
   }
+
+  .style-group {
+    margin-bottom: 20px;
+  }
+
+  .style-group-header {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #7ad2f9;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: rgba(122, 210, 249, 0.15);
+    border-left: 4px solid #7ad2f9;
+    border-radius: 4px;
+  }
   
   .works-cited-list {
     background: rgba(0,0,0,0.2);
@@ -3489,7 +3514,7 @@ loadPromptClicks()
   }
   
   .works-cited-list:empty::before {
-    content: 'No saved citations yet. Click "Save" to add citations to your Works Cited list.';
+    content: 'No saved citations yet. Click "Add Reference" to add citations to your References list.';
     color: rgba(255, 255, 255, 0.7);
     font-style: italic;
     display: block;
@@ -3558,7 +3583,7 @@ loadPromptClicks()
     gap: 4px;
   }
 
-  .citation-note-btn {
+  .citation-parenthetical-btn {
     background: rgba(122, 210, 249, 0.8);
     color: white;
     border: none;
@@ -3575,7 +3600,7 @@ loadPromptClicks()
     font-family: 'Inter', sans-serif;
   }
 
-  .citation-note-btn:hover {
+  .citation-parenthetical-btn:hover {
     background: rgba(122, 210, 249, 1);
     transform: scale(1.1);
   }
@@ -3617,11 +3642,10 @@ loadPromptClicks()
     font-family: 'Inter', sans-serif;
   }
 
-  /* Source Notes Panel - FIXED WIDTH */
+  /* Source Notes Panel - slide out from right */
   .notes-panel {
-  position: fixed;
-  right: 0;
-  transform: translateX(100%);
+    position: fixed;
+    right: -320px;
     top: 0;
     width: 300px;
     max-width: 90vw;
@@ -3630,20 +3654,17 @@ loadPromptClicks()
     color: #fff;
     box-shadow: -8px 0 40px rgba(0,0,0,0.5);
     padding: 20px;
-    transition: right 0.3s ease;
-    z-index: 10000;
+    transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 9999;
     overflow-y: auto;
     font-family: 'Inter', sans-serif;
   }
-  
+
   .notes-panel.open {
-  transform: translateX(0);
-}
+    right: 0;
+  }
   
   .notes-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 2px solid rgba(255,255,255,0.2);
@@ -3653,29 +3674,6 @@ loadPromptClicks()
     margin: 0;
     font-size: 1.2rem;
     color: #fff;
-  }
-
-  .notes-close-btn {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-  }
-
-  .notes-close-btn:hover {
-    background: rgba(255,255,255,0.25);
-  }
-  
-  .notes-intro { 
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.85);
-    margin-bottom: 16px;
-    line-height: 1.5;
   }
   
   .notes-section {
@@ -3851,12 +3849,28 @@ loadPromptClicks()
     font-size: 0.85rem;
   }
 
-  /* Keep Notes button clickable even when panel is open */
-#cite-notes-toggle {
-  position: relative;
-  z-index: 10001; /* higher than notes panel */
-}
+  .citation-output-label {
+    font-weight: 700;
+    color: #7ad2f9;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .references-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  /* Notes toggle button - high z-index to stay clickable */
+  #cite-notes-toggle {
+    position: relative;
+    z-index: 10000;
+  }
 </style>
+
 <div class="cite-card" id="citation-tool">
   <div class="cite-row">
     <div class="cite-label">Style</div>
@@ -3869,9 +3883,9 @@ loadPromptClicks()
 
   <div class="cite-row">
     <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="Paste source URL for instant citation" />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Create citation from URL" style="margin-left:8px;min-width:160px;">
-      Create Citation
+    <input id="cite-url" class="cite-input" placeholder="Add source URL here for instant citation" />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Autofill from URL" style="margin-left:8px;min-width:160px;">
+      Autofill from URL
     </button>
   </div>
 
@@ -3896,41 +3910,36 @@ loadPromptClicks()
   </div>
 
   <div class="cite-actions">
-    <button id="cite-generate" class="cite-btn primary">Generate</button>
-    <button id="cite-reset" class="cite-btn ghost"> Reset <span class="btn-hint">(clear fields)</span> </button>
-    <button id="cite-copy" class="cite-btn ghost">
-      Copy <span class="btn-hint">(to clipboard)</span>
-    </button>
-    <button id="cite-save" class="cite-btn ghost" title="Save locally">
-      Save <span class="btn-hint">(add to Works Cited)</span>
-    </button>
-    <button id="cite-load" class="cite-btn ghost" title="Load last">
-      Load <span class="btn-hint">(view Works Cited)</span>
-    </button>
-    <button id="cite-notes-toggle" class="cite-btn ghost" title="Open notes panel">
-      📝 Notes
-    </button>
+    <button id="cite-generate" class="cite-btn primary">📝 Create Citation</button>
+    <button id="cite-reset" class="cite-btn ghost">🔄 Clear</button>
+    <button id="cite-copy" class="cite-btn ghost">📋 Copy</button>
+    <button id="cite-save" class="cite-btn ghost">💾 Add Reference</button>
+    <button id="cite-notes-toggle" class="cite-btn ghost">📝 Notes</button>
   </div>
 
-  <div id="cite-output" class="cite-output" aria-live="polite"></div>
-  <div id="cite-parenthetical" class="cite-output" style="margin-top:8px;"></div>
+  <div class="cite-output" aria-live="polite">
+    <span class="citation-output-label">Citation:</span>
+    <div id="cite-output-text"></div>
+  </div>
+  <div class="cite-output" style="margin-top:8px;">
+    <div id="cite-parenthetical"></div>
+  </div>
   <div id="cite-warning" class="cite-warning" style="display:none;"></div>
-  <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
 
   <div class="works-cited-section" id="works-cited-section" style="display: none;">
-    <h3>Works Cited</h3>
-    <div id="works-cited-list" class="works-cited-list"></div>
+    <h3>References</h3>
+    <div class="references-actions">
+      <button id="copy-all-references" class="cite-btn ghost">📋 Copy All References</button>
+      <button id="clear-all-references" class="cite-btn ghost">🗑️ Clear All References</button>
+    </div>
+    <div id="works-cited-by-style"></div>
   </div>
 </div>
 
-<!-- Source Notes Panel -->
+<!-- Source Notes Panel - slides in from right, no close button -->
 <div id="notes-panel" class="notes-panel">
   <div class="notes-header">
     <h3>📝 Source Notes</h3>
-  </div>
-  
-  <div class="notes-intro">
-    Add quick notes to your saved citations. Notes are linked to specific sources from your Works Cited list.
   </div>
 
   <div class="notes-section">
@@ -3952,7 +3961,7 @@ loadPromptClicks()
   <div class="notes-section">
     <h4>Your Notes</h4>
     <div id="notes-list" class="notes-list">
-      <div class="empty-state">No notes yet. Add a source to your Works Cited and create a note for it.</div>
+      <div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>
     </div>
   </div>
 </div>
@@ -4023,17 +4032,19 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
   const titleEl = document.getElementById('cite-title');
   const sourceEl = document.getElementById('cite-source');
   const urlEl = document.getElementById('cite-url');
-  const outEl = document.getElementById('cite-output');
+  const outTextEl = document.getElementById('cite-output-text');
   const fetchBtn = document.getElementById('cite-fetch-metadata');
   const generateBtn = document.getElementById('cite-generate');
   const copyBtn = document.getElementById('cite-copy');
   const saveBtn = document.getElementById('cite-save');
-  const loadBtn = document.getElementById('cite-load');
   const worksCitedSection = document.getElementById('works-cited-section');
-  const worksCitedList = document.getElementById('works-cited-list');
+  const worksCitedByStyle = document.getElementById('works-cited-by-style');
+  const copyAllBtn = document.getElementById('copy-all-references');
+  const clearAllBtn = document.getElementById('clear-all-references');
+  const helpToggleBtn = document.getElementById('help-toggle-btn');
+  const helpPanel = document.getElementById('help-panel');
   const notesToggleBtn = document.getElementById('cite-notes-toggle');
   const notesPanel = document.getElementById('notes-panel');
-  const notesCloseBtn = document.getElementById('notes-close');
   const noteSourceSelect = document.getElementById('note-source-select');
   const noteCategorySelect = document.getElementById('note-category-select');
   const noteTextarea = document.getElementById('note-textarea');
@@ -4084,6 +4095,30 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
       return null;
     }
   }
+
+  // Help toggle
+  helpToggleBtn.addEventListener('click', () => {
+    helpPanel.style.display = helpPanel.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // Notes panel toggle
+  notesToggleBtn.addEventListener('click', () => {
+    notesPanel.classList.toggle('open');
+    if (notesPanel.classList.contains('open')) {
+      updateNotesSourceSelect();
+      loadNotes();
+    }
+  });
+
+  // Close notes panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (notesPanel.classList.contains('open') && 
+        !notesPanel.contains(e.target) && 
+        e.target !== notesToggleBtn &&
+        !notesToggleBtn.contains(e.target)) {
+      notesPanel.classList.remove('open');
+    }
+  });
 
   // ===== CROSS-CHECK FORMATTING =====
 function validateCitationFields() {
@@ -4360,7 +4395,7 @@ if (style === 'mla') citation = fmtMLA9(payload);
 else if (style === 'chicago') citation = fmtChicago(payload);
 else citation = fmtAPA(payload);
 
-outEl.innerHTML = citation;
+outTextEl.innerHTML = citation;
 
 // Pass style to buildParenthetical!
 const parentheticalEl = document.getElementById('cite-parenthetical');
@@ -4368,7 +4403,7 @@ const parenthetical = buildParenthetical({ ...payload, style });
 
 if (parentheticalEl) {
   parentheticalEl.innerHTML = parenthetical
-    ? `<b>Parenthetical citation:</b> ${parenthetical}`
+    ? `<span class="citation-output-label">Parenthetical Citation:</span>${parenthetical}`
     : '';
 }
 
@@ -4427,6 +4462,17 @@ if (parentheticalEl) {
       return;
     }
     
+    const payload = {
+      author: safe(authorEl.value),
+      date: safe(dateEl.value),
+      title: safe(titleEl.value),
+      source: safe(sourceEl.value),
+      url: safe(urlEl.value)
+    };
+    
+    const style = styleEl.value;
+    const parenthetical = buildParenthetical({ ...payload, style });
+    
     // Get existing list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     const newCitation = { 
@@ -4437,18 +4483,19 @@ if (parentheticalEl) {
       title: safe(titleEl.value),
       url: safe(urlEl.value),
       author: safe(authorEl.value),
-      date: safe(dateEl.value)
+      date: safe(dateEl.value),
+      parenthetical: parenthetical
     };
     saved.push(newCitation);
     localStorage.setItem(KEY, JSON.stringify(saved));
-    alert('✓ Citation saved to Works Cited!');
+    alert('✓ Citation saved to References!');
     
     loadWorksCited();
     updateNotesSourceSelect();
   }
 
   // PROCEDURE CALL: Use student-developed procedure to process citations
-  // OUTPUT: Display filtered and processed citations
+  // OUTPUT: Display filtered and processed citations organized by style
   async function loadWorksCited() {
     // Get list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
@@ -4458,72 +4505,110 @@ if (parentheticalEl) {
       return;
     }
 
-    // PROCEDURE CALL: Process citation list
-    const result = processCitationList(saved, 'all', 100);
-    
     // Display results
     worksCitedSection.style.display = 'block';
-    worksCitedList.innerHTML = '';
+    worksCitedByStyle.innerHTML = '';
 
-    // ITERATION: Display each citation
-    for (let index = 0; index < result.citations.length; index++) {
-      const item = result.citations[index];
-      
-      const citationDiv = document.createElement('div');
-      citationDiv.className = 'citation-item';
-      
-      const textDiv = document.createElement('div');
-      textDiv.className = 'citation-text';
-      
-      // Add loading badge initially
-      const loadingBadge = '<span class="quality-badge quality-loading">⏳</span>';
-      textDiv.innerHTML = item.citation + loadingBadge;
-      
-      const actionsDiv = document.createElement('div');
-      actionsDiv.className = 'citation-actions';
-      
-      const noteBtn = document.createElement('button');
-      noteBtn.className = 'citation-note-btn';
-      noteBtn.innerHTML = '📝';
-      noteBtn.title = 'Add note to this source';
-      noteBtn.onclick = () => openNotesForSource(index);
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'citation-delete';
-      deleteBtn.innerHTML = '×';
-      deleteBtn.title = 'Delete this citation';
-      deleteBtn.onclick = () => deleteCitation(index);
-      
-      actionsDiv.appendChild(noteBtn);
-      actionsDiv.appendChild(deleteBtn);
-      citationDiv.appendChild(textDiv);
-      citationDiv.appendChild(actionsDiv);
-      worksCitedList.appendChild(citationDiv);
+    // Group citations by style
+    const byStyle = {
+      apa: [],
+      mla: [],
+      chicago: []
+    };
 
-      // Check quality asynchronously
-      const quality = await checkCitationQuality(
-        item.url || '',
-        saved[index].author || '',
-        saved[index].date || '',
-        item.source || ''
-      );
-
-      // Update badge with quality score
-      if (quality) {
-        const qualityClass = `quality-${quality.quality}`;
-        const badge = `<span class="quality-badge ${qualityClass}" title="${quality.message}">${quality.score}/10</span>`;
-        textDiv.innerHTML = item.citation + badge;
-      } else {
-        // Remove loading badge if quality check failed
-        textDiv.innerHTML = item.citation;
+    saved.forEach((item, index) => {
+      if (byStyle[item.style]) {
+        byStyle[item.style].push({ item, index });
       }
-    }
+    });
+
+    // Display each style group
+    const styleLabels = {
+      apa: 'APA',
+      mla: 'MLA (9th ed.)',
+      chicago: 'Chicago (author-date)'
+    };
+
+    ['apa', 'mla', 'chicago'].forEach(style => {
+      if (byStyle[style].length > 0) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'style-group';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'style-group-header';
+        headerDiv.textContent = `${styleLabels[style]} (${byStyle[style].length})`;
+        groupDiv.appendChild(headerDiv);
+
+        const listDiv = document.createElement('div');
+        listDiv.className = 'works-cited-list';
+
+        byStyle[style].forEach(async ({ item, index }) => {
+          const citationDiv = document.createElement('div');
+          citationDiv.className = 'citation-item';
+          
+          const textDiv = document.createElement('div');
+          textDiv.className = 'citation-text';
+          
+          // Add loading badge initially
+          const loadingBadge = '<span class="quality-badge quality-loading">⏳</span>';
+          textDiv.innerHTML = item.citation + loadingBadge;
+          
+          const actionsDiv = document.createElement('div');
+          actionsDiv.className = 'citation-actions';
+          
+          const parentheticalBtn = document.createElement('button');
+          parentheticalBtn.className = 'citation-parenthetical-btn';
+          parentheticalBtn.innerHTML = '✏️';
+          parentheticalBtn.title = item.parenthetical || 'Parenthetical citation';
+          parentheticalBtn.onclick = () => {
+            if (item.parenthetical) {
+              copyToClipboard(item.parenthetical);
+            } else {
+              alert('No parenthetical citation available for this source.');
+            }
+          };
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'citation-delete';
+          deleteBtn.innerHTML = '×';
+          deleteBtn.title = 'Delete this citation';
+          deleteBtn.onclick = () => deleteCitation(index);
+          
+          actionsDiv.appendChild(parentheticalBtn);
+          actionsDiv.appendChild(deleteBtn);
+          citationDiv.appendChild(textDiv);
+          citationDiv.appendChild(actionsDiv);
+          listDiv.appendChild(citationDiv);
+
+          // Check quality asynchronously
+          const quality = await checkCitationQuality(
+            item.url || '',
+            item.author || '',
+            item.date || '',
+            item.source || ''
+          );
+
+          // Update badge with quality score
+          if (quality) {
+            const qualityClass = `quality-${quality.quality}`;
+            const badge = `<span class="quality-badge ${qualityClass}" title="${quality.message}">${quality.score}/10</span>`;
+            textDiv.innerHTML = item.citation + badge;
+          } else {
+            // Remove loading badge if quality check failed
+            textDiv.innerHTML = item.citation;
+          }
+        });
+
+        groupDiv.appendChild(listDiv);
+        worksCitedByStyle.appendChild(groupDiv);
+      }
+    });
 
     worksCitedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function deleteCitation(index) {
-    if (!confirm('Delete this citation from Works Cited?')) return;
+    if (!confirm('Delete this citation from References?')) return;
     
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     saved.splice(index, 1);
@@ -4531,6 +4616,33 @@ if (parentheticalEl) {
     loadWorksCited();
     updateNotesSourceSelect();
   }
+
+  // Copy all references
+  copyAllBtn.addEventListener('click', () => {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (saved.length === 0) {
+      alert('No references to copy.');
+      return;
+    }
+    
+    const allCitations = saved.map(item => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = item.citation;
+      return tempDiv.textContent || tempDiv.innerText || '';
+    }).join('\n\n');
+    
+    copyToClipboard(allCitations);
+  });
+
+  // Clear all references
+  clearAllBtn.addEventListener('click', () => {
+    if (!confirm('Clear all references? This cannot be undone.')) return;
+    
+    localStorage.removeItem(KEY);
+    worksCitedSection.style.display = 'none';
+    updateNotesSourceSelect();
+    alert('All references cleared.');
+  });
 
   // Notes functionality
   function updateNotesSourceSelect() {
@@ -4553,7 +4665,7 @@ if (parentheticalEl) {
     const saved = JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]');
     
     if (notes.length === 0) {
-      notesList.innerHTML = '<div class="empty-state">No notes yet. Add a source to your Works Cited and create a note for it.</div>';
+      notesList.innerHTML = '<div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>';
       return;
     }
 
@@ -4593,12 +4705,6 @@ if (parentheticalEl) {
     loadNotes();
   };
 
-  function openNotesForSource(sourceIndex) {
-    notesPanel.classList.add('open');
-    noteSourceSelect.value = sourceIndex;
-    noteTextarea.focus();
-  }
-
   // Enable add note button when source and text are filled
   noteSourceSelect.addEventListener('change', () => {
     addNoteBtn.disabled = !noteSourceSelect.value || !noteTextarea.value.trim();
@@ -4634,26 +4740,6 @@ if (parentheticalEl) {
     
     loadNotes();
     alert('✓ Note added successfully!');
-  });
-
-  // Notes panel toggle
-  notesToggleBtn.addEventListener('click', () => {
-    notesPanel.classList.toggle('open');
-    if (notesPanel.classList.contains('open')) {
-      updateNotesSourceSelect();
-      loadNotes();
-    }
-  });
-
-  // Close panel when clicking outside
-  document.addEventListener('click', (e) => {
-    if (notesPanel.classList.contains('open') && 
-        !notesPanel.contains(e.target) && 
-        e.target !== notesToggleBtn &&
-        !notesToggleBtn.contains(e.target) &&
-        !e.target.classList.contains('citation-note-btn')) {
-      notesPanel.classList.remove('open');
-    }
   });
 
   // INPUT: Fetch data from online source (URL)
@@ -4782,7 +4868,7 @@ if (parentheticalEl) {
       console.warn(err);
       alert('Error fetching metadata.');
     } finally {
-      fetchBtn.textContent = 'Generate from URL';
+      fetchBtn.textContent = 'Autofill from URL';
       fetchBtn.disabled = false;
     }
   }
@@ -4797,7 +4883,7 @@ resetBtn.addEventListener('click', () => {
   [authorEl, dateEl, titleEl, sourceEl, urlEl].forEach(el => el.value = '');
   
   // Clear outputs
-  outEl.innerHTML = '';
+  outTextEl.innerHTML = '';
   document.getElementById('cite-parenthetical').innerHTML = '';
   document.getElementById('cite-warning').style.display = 'none';
   
@@ -4805,25 +4891,19 @@ resetBtn.addEventListener('click', () => {
   [authorEl, dateEl, titleEl, sourceEl].forEach(el => el.classList.remove('missing'));
 });
   copyBtn.addEventListener('click', () => {
-    const citation = outEl.innerHTML;
-    if (!citation || citation === 'Your citation will appear here...') {
+    const citation = outTextEl.innerHTML;
+    if (!citation || citation === '') {
       alert('Generate a citation first.');
       return;
     }
     copyToClipboard(citation);
   });
   saveBtn.addEventListener('click', saveToWorksCited);
-  loadBtn.addEventListener('click', () => {
-    if (JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]').length === 0) {
-      alert('No saved citations yet. Click "Save" to add citations to your Works Cited list.');
-      return;
-    }
-    loadWorksCited();
-  });
 
   // Initialize
   updateNotesSourceSelect();
   loadWorksCited();
+  loadNotes();
 })();
 </script>
  </p>

@@ -3345,7 +3345,14 @@ loadPromptClicks()
     <div class="section-header">
         <h2 class="section-title">
             Citation Generator
-            <button id="help-toggle-btn" style="display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; border-radius: 8px; background: linear-gradient(135deg, #60a5fa, #3b82f6); border: 2px solid rgba(255,255,255,0.3); color: #fff; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-left: 10px; vertical-align: middle; box-shadow: 0 2px 8px rgba(96, 165, 250, 0.3); transition: all 0.2s;">❓ Instructions</button>
+            <button
+  id="help-toggle-btn"
+  class="help-icon-btn"
+  aria-label="Citation Generator Help"
+  title="How to use the citation generator"
+>
+  ?
+</button>
         </h2>
         
         <!-- Help Panel (hidden by default) -->
@@ -3604,6 +3611,17 @@ loadPromptClicks()
     background: rgba(122, 210, 249, 1);
     transform: scale(1.1);
   }
+
+  .citation-parenthetical {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.25);
+  border-left: 3px solid #7ad2f9;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #ffffff;
+  display: none;
+}
   
   .citation-delete {
     background: rgba(248, 113, 113, 0.8);
@@ -3626,6 +3644,30 @@ loadPromptClicks()
     background: rgba(248, 113, 113, 1);
     transform: scale(1.1);
   }
+
+  .help-icon-btn {
+  width: 28px;
+  height: 28px;
+  margin-left: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(122, 210, 249, 0.8);
+  background: transparent;
+  color: #7ad2f9;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+.help-icon-btn:hover {
+  background: rgba(122, 210, 249, 0.2);
+  transform: scale(1.1);
+}
+
 
   .cite-input.missing {
     border: 2px solid #f87171 !important;
@@ -4556,17 +4598,20 @@ if (parentheticalEl) {
           const actionsDiv = document.createElement('div');
           actionsDiv.className = 'citation-actions';
           
-          const parentheticalBtn = document.createElement('button');
-          parentheticalBtn.className = 'citation-parenthetical-btn';
-          parentheticalBtn.innerHTML = '✏️';
-          parentheticalBtn.title = item.parenthetical || 'Parenthetical citation';
-          parentheticalBtn.onclick = () => {
-            if (item.parenthetical) {
-              copyToClipboard(item.parenthetical);
-            } else {
-              alert('No parenthetical citation available for this source.');
-            }
-          };
+         const parentheticalBtn = document.createElement('button');
+parentheticalBtn.className = 'citation-parenthetical-btn';
+parentheticalBtn.innerHTML = '✏️';
+parentheticalBtn.title = 'Show parenthetical citation';
+
+const parentheticalDiv = document.createElement('div');
+parentheticalDiv.className = 'citation-parenthetical';
+parentheticalDiv.textContent = item.parenthetical || 'No parenthetical citation available.';
+
+parentheticalBtn.onclick = () => {
+  parentheticalDiv.style.display =
+    parentheticalDiv.style.display === 'none' ? 'block' : 'none';
+};
+
           
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'citation-delete';
@@ -4578,6 +4623,7 @@ if (parentheticalEl) {
           actionsDiv.appendChild(deleteBtn);
           citationDiv.appendChild(textDiv);
           citationDiv.appendChild(actionsDiv);
+          citationDiv.appendChild(parentheticalDiv);
           listDiv.appendChild(citationDiv);
 
           // Check quality asynchronously

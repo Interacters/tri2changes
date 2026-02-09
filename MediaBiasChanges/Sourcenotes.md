@@ -1,15 +1,26 @@
-       <!-- Section 3: Citation Generator -->
-        <div class="section-container" id="section-3">
-            <div class="section-header">
-                <h2 class="section-title">Citation Generator</h2>
-                <p class="section-description">
-                    It's important to include correct citations for your work. 
-                    There are many formats including MLA, APA, and Chicago. 
-                    This tool helps you create proper citations for your sources.
-                </p>
-            </div>
-            <div class="content-placeholder">
-                <p>
+<!-- Section 3: Citation Generator -->
+<div class="section-container" id="section-3">
+    <div class="section-header">
+        <h2 class="section-title">
+            Citation Generator
+            <button id="help-toggle-btn" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; margin-left: 10px; vertical-align: middle;">?</button>
+        </h2>
+        
+        <!-- Help Panel (hidden by default) -->
+        <div id="help-panel" style="display: none; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin-top: 15px; font-size: 0.9rem; line-height: 1.6;">
+            <h4 style="color: #7ad2f9; margin-bottom: 10px;">How to Use the Citation Generator</h4>
+            <ul style="margin: 0; padding-left: 20px; color: rgba(255,255,255,0.85);">
+                <li><strong>Autofill from URL:</strong> Paste a source URL to automatically extract citation details.</li>
+                <li><strong>Citation Style:</strong> Choose between APA, MLA (9th ed.), or Chicago (author-date) format.</li>
+                <li><strong>Manual Fields:</strong> Fill in author, date, title, and source if autofill doesn't work.</li>
+                <li><strong>Parenthetical Citation:</strong> Use this shortened version when citing sources within your paper.</li>
+                <li><strong>References:</strong> Save citations to build your reference list. Click the 📋 button to copy the parenthetical citation for in-text use.</li>
+                <li><strong>Source Notes:</strong> Add notes to your saved sources to organize research findings and track how each source supports your argument.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="content-placeholder">
+        <p>
 <style>
   /* Import modern, readable font matching thesis generator */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -62,7 +73,7 @@
     display:flex; 
     gap:10px; 
     margin-top:12px; 
-    justify-content:flex-end;
+    justify-content:center;
     flex-wrap: wrap;
   }
   
@@ -152,7 +163,7 @@
   }
   
   .works-cited-list:empty::before {
-    content: 'No saved citations yet. Click "Save" to add citations to your Works Cited list.';
+    content: 'No saved citations yet. Click "Add Reference" to add citations to your References list.';
     color: rgba(255, 255, 255, 0.7);
     font-style: italic;
     display: block;
@@ -221,7 +232,7 @@
     gap: 4px;
   }
 
-  .citation-note-btn {
+  .citation-parenthetical-btn {
     background: rgba(122, 210, 249, 0.8);
     color: white;
     border: none;
@@ -238,7 +249,7 @@
     font-family: 'Inter', sans-serif;
   }
 
-  .citation-note-btn:hover {
+  .citation-parenthetical-btn:hover {
     background: rgba(122, 210, 249, 1);
     transform: scale(1.1);
   }
@@ -280,33 +291,24 @@
     font-family: 'Inter', sans-serif;
   }
 
-  /* Source Notes Panel - FIXED WIDTH */
+  /* Source Notes Panel - ALWAYS VISIBLE ON SIDE */
   .notes-panel {
-  position: fixed;
-  right: 0;
-  transform: translateX(100%);
+    position: fixed;
+    right: 0;
     top: 0;
     width: 300px;
-    max-width: 90vw;
+    max-width: 25vw;
     height: 100vh;
     background: linear-gradient(160deg, #564ea0ee, #3b3666ee);
     color: #fff;
     box-shadow: -8px 0 40px rgba(0,0,0,0.5);
     padding: 20px;
-    transition: right 0.3s ease;
-    z-index: 10000;
+    z-index: 9999;
     overflow-y: auto;
     font-family: 'Inter', sans-serif;
   }
   
-  .notes-panel.open {
-  transform: translateX(0);
-}
-  
   .notes-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 2px solid rgba(255,255,255,0.2);
@@ -316,29 +318,6 @@
     margin: 0;
     font-size: 1.2rem;
     color: #fff;
-  }
-
-  .notes-close-btn {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-  }
-
-  .notes-close-btn:hover {
-    background: rgba(255,255,255,0.25);
-  }
-  
-  .notes-intro { 
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.85);
-    margin-bottom: 16px;
-    line-height: 1.5;
   }
   
   .notes-section {
@@ -514,108 +493,110 @@
     font-size: 0.85rem;
   }
 
-  /* Keep Notes button clickable even when panel is open */
-#cite-notes-toggle {
-  position: relative;
-  z-index: 10001; /* higher than notes panel */
-}
+  .citation-output-label {
+    font-weight: 700;
+    color: #7ad2f9;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .references-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
 </style>
-<div class="cite-card" id="citation-tool">
-  <div class="cite-row">
-    <div class="cite-label">Style</div>
-    <select id="cite-style" class="cite-select">
-      <option value="apa">APA</option>
-      <option value="mla">MLA (9th ed.)</option>
-      <option value="chicago">Chicago (author-date)</option>
-    </select>
+
+<div style="display: flex; gap: 20px;">
+  <div class="cite-card" id="citation-tool" style="flex: 1;">
+    <div class="cite-row">
+      <div class="cite-label">Style</div>
+      <select id="cite-style" class="cite-select">
+        <option value="apa">APA</option>
+        <option value="mla">MLA (9th ed.)</option>
+        <option value="chicago">Chicago (author-date)</option>
+      </select>
+    </div>
+
+    <div class="cite-row">
+      <div class="cite-label">URL</div>
+      <input id="cite-url" class="cite-input" placeholder="Add source URL here for instant citation" />
+      <button id="cite-fetch-metadata" class="cite-btn ghost" title="Autofill from URL" style="margin-left:8px;min-width:160px;">
+        Autofill from URL
+      </button>
+    </div>
+
+    <div class="cite-row">
+      <div class="cite-label">Author(s)</div>
+      <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />
+    </div>
+
+    <div class="cite-row">
+      <div class="cite-label">Date</div>
+      <input id="cite-date" class="cite-input" placeholder="e.g., 2025, May 10 or 2025" />
+    </div>
+
+    <div class="cite-row">
+      <div class="cite-label">Title</div>
+      <input id="cite-title" class="cite-input" placeholder="Article title" />
+    </div>
+
+    <div class="cite-row">
+      <div class="cite-label">Source</div>
+      <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
+    </div>
+
+    <div class="cite-actions">
+      <button id="cite-generate" class="cite-btn primary">📝 Create Citation</button>
+      <button id="cite-reset" class="cite-btn ghost">🔄 Clear</button>
+      <button id="cite-copy" class="cite-btn ghost">📋 Copy</button>
+      <button id="cite-save" class="cite-btn ghost">💾 Add Reference</button>
+    </div>
+
+    <span class="citation-output-label">Citation:</span>
+    <div id="cite-output" class="cite-output" aria-live="polite"></div>
+    <div id="cite-parenthetical" class="cite-output" style="margin-top:8px;"></div>
+    <div id="cite-warning" class="cite-warning" style="display:none;"></div>
+
+    <div class="works-cited-section" id="works-cited-section" style="display: none;">
+      <h3>References</h3>
+      <div class="references-actions">
+        <button id="copy-all-references" class="cite-btn ghost">📋 Copy All References</button>
+        <button id="clear-all-references" class="cite-btn ghost">🗑️ Clear All References</button>
+      </div>
+      <div id="works-cited-list" class="works-cited-list"></div>
+    </div>
   </div>
 
-  <div class="cite-row">
-    <div class="cite-label">Author(s)</div>
-    <input id="cite-author" class="cite-input" placeholder="e.g., Doe, J.; Last, F." />
-  </div>
+  <!-- Source Notes Panel - ALWAYS VISIBLE -->
+  <div id="notes-panel" class="notes-panel">
+    <div class="notes-header">
+      <h3>📝 Source Notes</h3>
+    </div>
 
-  <div class="cite-row">
-    <div class="cite-label">Date</div>
-    <input id="cite-date" class="cite-input" placeholder="e.g., 2025, May 10 or 2025" />
-  </div>
+    <div class="notes-section">
+      <h4>Add Note</h4>
+      <select id="note-source-select" class="source-select">
+        <option value="">Select a source...</option>
+      </select>
+      <select id="note-category-select" class="note-category-select">
+        <option value="">Category (optional)</option>
+        <option value="supports">Supports</option>
+        <option value="contradicts">Contradicts</option>
+        <option value="background">Background</option>
+        <option value="data">Data</option>
+      </select>
+      <textarea id="note-textarea" class="note-textarea" placeholder="Write your note here..."></textarea>
+      <button id="add-note-btn" class="add-note-btn" disabled>Add Note</button>
+    </div>
 
-  <div class="cite-row">
-    <div class="cite-label">Title</div>
-    <input id="cite-title" class="cite-input" placeholder="Article title" />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">Source</div>
-    <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
-  </div>
-
-  <div class="cite-row">
-    <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="https://..." />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Generate citation from URL" style="margin-left:8px;min-width:160px;">
-      Generate from URL
-    </button>
-  </div>
-
-  <div class="cite-actions">
-    <button id="cite-generate" class="cite-btn primary">Generate</button>
-    <button id="cite-reset" class="cite-btn ghost"> Reset <span class="btn-hint">(clear fields)</span> </button>
-    <button id="cite-copy" class="cite-btn ghost">
-      Copy <span class="btn-hint">(to clipboard)</span>
-    </button>
-    <button id="cite-save" class="cite-btn ghost" title="Save locally">
-      Save <span class="btn-hint">(add to Works Cited)</span>
-    </button>
-    <button id="cite-load" class="cite-btn ghost" title="Load last">
-      Load <span class="btn-hint">(view Works Cited)</span>
-    </button>
-    <button id="cite-notes-toggle" class="cite-btn ghost" title="Open notes panel">
-      📝 Notes
-    </button>
-  </div>
-
-  <div id="cite-output" class="cite-output" aria-live="polite"></div>
-  <div id="cite-parenthetical" class="cite-output" style="margin-top:8px;"></div>
-  <div id="cite-warning" class="cite-warning" style="display:none;"></div>
-  <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
-
-  <div class="works-cited-section" id="works-cited-section" style="display: none;">
-    <h3>Works Cited</h3>
-    <div id="works-cited-list" class="works-cited-list"></div>
-  </div>
-</div>
-
-<!-- Source Notes Panel -->
-<div id="notes-panel" class="notes-panel">
-  <div class="notes-header">
-    <h3>📝 Source Notes</h3>
-  </div>
-  
-  <div class="notes-intro">
-    Add quick notes to your saved citations. Notes are linked to specific sources from your Works Cited list.
-  </div>
-
-  <div class="notes-section">
-    <h4>Add Note</h4>
-    <select id="note-source-select" class="source-select">
-      <option value="">Select a source...</option>
-    </select>
-    <select id="note-category-select" class="note-category-select">
-      <option value="">Category (optional)</option>
-      <option value="supports">Supports</option>
-      <option value="contradicts">Contradicts</option>
-      <option value="background">Background</option>
-      <option value="data">Data</option>
-    </select>
-    <textarea id="note-textarea" class="note-textarea" placeholder="Write your note here..."></textarea>
-    <button id="add-note-btn" class="add-note-btn" disabled>Add Note</button>
-  </div>
-
-  <div class="notes-section">
-    <h4>Your Notes</h4>
-    <div id="notes-list" class="notes-list">
-      <div class="empty-state">No notes yet. Add a source to your Works Cited and create a note for it.</div>
+    <div class="notes-section">
+      <h4>Your Notes</h4>
+      <div id="notes-list" class="notes-list">
+        <div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -691,12 +672,12 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
   const generateBtn = document.getElementById('cite-generate');
   const copyBtn = document.getElementById('cite-copy');
   const saveBtn = document.getElementById('cite-save');
-  const loadBtn = document.getElementById('cite-load');
   const worksCitedSection = document.getElementById('works-cited-section');
   const worksCitedList = document.getElementById('works-cited-list');
-  const notesToggleBtn = document.getElementById('cite-notes-toggle');
-  const notesPanel = document.getElementById('notes-panel');
-  const notesCloseBtn = document.getElementById('notes-close');
+  const copyAllBtn = document.getElementById('copy-all-references');
+  const clearAllBtn = document.getElementById('clear-all-references');
+  const helpToggleBtn = document.getElementById('help-toggle-btn');
+  const helpPanel = document.getElementById('help-panel');
   const noteSourceSelect = document.getElementById('note-source-select');
   const noteCategorySelect = document.getElementById('note-category-select');
   const noteTextarea = document.getElementById('note-textarea');
@@ -747,6 +728,11 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
       return null;
     }
   }
+
+  // Help toggle
+  helpToggleBtn.addEventListener('click', () => {
+    helpPanel.style.display = helpPanel.style.display === 'none' ? 'block' : 'none';
+  });
 
   // ===== CROSS-CHECK FORMATTING =====
 function validateCitationFields() {
@@ -1031,7 +1017,7 @@ const parenthetical = buildParenthetical({ ...payload, style });
 
 if (parentheticalEl) {
   parentheticalEl.innerHTML = parenthetical
-    ? `<b>Parenthetical citation:</b> ${parenthetical}`
+    ? `<span class="citation-output-label">Parenthetical Citation:</span>${parenthetical}`
     : '';
 }
 
@@ -1090,6 +1076,17 @@ if (parentheticalEl) {
       return;
     }
     
+    const payload = {
+      author: safe(authorEl.value),
+      date: safe(dateEl.value),
+      title: safe(titleEl.value),
+      source: safe(sourceEl.value),
+      url: safe(urlEl.value)
+    };
+    
+    const style = styleEl.value;
+    const parenthetical = buildParenthetical({ ...payload, style });
+    
     // Get existing list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     const newCitation = { 
@@ -1100,11 +1097,12 @@ if (parentheticalEl) {
       title: safe(titleEl.value),
       url: safe(urlEl.value),
       author: safe(authorEl.value),
-      date: safe(dateEl.value)
+      date: safe(dateEl.value),
+      parenthetical: parenthetical
     };
     saved.push(newCitation);
     localStorage.setItem(KEY, JSON.stringify(saved));
-    alert('✓ Citation saved to Works Cited!');
+    alert('✓ Citation saved to References!');
     
     loadWorksCited();
     updateNotesSourceSelect();
@@ -1145,11 +1143,17 @@ if (parentheticalEl) {
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'citation-actions';
       
-      const noteBtn = document.createElement('button');
-      noteBtn.className = 'citation-note-btn';
-      noteBtn.innerHTML = '📝';
-      noteBtn.title = 'Add note to this source';
-      noteBtn.onclick = () => openNotesForSource(index);
+      const parentheticalBtn = document.createElement('button');
+      parentheticalBtn.className = 'citation-parenthetical-btn';
+      parentheticalBtn.innerHTML = '📋';
+      parentheticalBtn.title = item.parenthetical || 'Parenthetical citation';
+      parentheticalBtn.onclick = () => {
+        if (item.parenthetical) {
+          copyToClipboard(item.parenthetical);
+        } else {
+          alert('No parenthetical citation available for this source.');
+        }
+      };
       
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'citation-delete';
@@ -1157,7 +1161,7 @@ if (parentheticalEl) {
       deleteBtn.title = 'Delete this citation';
       deleteBtn.onclick = () => deleteCitation(index);
       
-      actionsDiv.appendChild(noteBtn);
+      actionsDiv.appendChild(parentheticalBtn);
       actionsDiv.appendChild(deleteBtn);
       citationDiv.appendChild(textDiv);
       citationDiv.appendChild(actionsDiv);
@@ -1186,7 +1190,7 @@ if (parentheticalEl) {
   }
 
   function deleteCitation(index) {
-    if (!confirm('Delete this citation from Works Cited?')) return;
+    if (!confirm('Delete this citation from References?')) return;
     
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     saved.splice(index, 1);
@@ -1194,6 +1198,33 @@ if (parentheticalEl) {
     loadWorksCited();
     updateNotesSourceSelect();
   }
+
+  // Copy all references
+  copyAllBtn.addEventListener('click', () => {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (saved.length === 0) {
+      alert('No references to copy.');
+      return;
+    }
+    
+    const allCitations = saved.map(item => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = item.citation;
+      return tempDiv.textContent || tempDiv.innerText || '';
+    }).join('\n\n');
+    
+    copyToClipboard(allCitations);
+  });
+
+  // Clear all references
+  clearAllBtn.addEventListener('click', () => {
+    if (!confirm('Clear all references? This cannot be undone.')) return;
+    
+    localStorage.removeItem(KEY);
+    worksCitedSection.style.display = 'none';
+    updateNotesSourceSelect();
+    alert('All references cleared.');
+  });
 
   // Notes functionality
   function updateNotesSourceSelect() {
@@ -1216,7 +1247,7 @@ if (parentheticalEl) {
     const saved = JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]');
     
     if (notes.length === 0) {
-      notesList.innerHTML = '<div class="empty-state">No notes yet. Add a source to your Works Cited and create a note for it.</div>';
+      notesList.innerHTML = '<div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>';
       return;
     }
 
@@ -1256,12 +1287,6 @@ if (parentheticalEl) {
     loadNotes();
   };
 
-  function openNotesForSource(sourceIndex) {
-    notesPanel.classList.add('open');
-    noteSourceSelect.value = sourceIndex;
-    noteTextarea.focus();
-  }
-
   // Enable add note button when source and text are filled
   noteSourceSelect.addEventListener('change', () => {
     addNoteBtn.disabled = !noteSourceSelect.value || !noteTextarea.value.trim();
@@ -1297,26 +1322,6 @@ if (parentheticalEl) {
     
     loadNotes();
     alert('✓ Note added successfully!');
-  });
-
-  // Notes panel toggle
-  notesToggleBtn.addEventListener('click', () => {
-    notesPanel.classList.toggle('open');
-    if (notesPanel.classList.contains('open')) {
-      updateNotesSourceSelect();
-      loadNotes();
-    }
-  });
-
-  // Close panel when clicking outside
-  document.addEventListener('click', (e) => {
-    if (notesPanel.classList.contains('open') && 
-        !notesPanel.contains(e.target) && 
-        e.target !== notesToggleBtn &&
-        !notesToggleBtn.contains(e.target) &&
-        !e.target.classList.contains('citation-note-btn')) {
-      notesPanel.classList.remove('open');
-    }
   });
 
   // INPUT: Fetch data from online source (URL)
@@ -1445,7 +1450,7 @@ if (parentheticalEl) {
       console.warn(err);
       alert('Error fetching metadata.');
     } finally {
-      fetchBtn.textContent = 'Generate from URL';
+      fetchBtn.textContent = 'Autofill from URL';
       fetchBtn.disabled = false;
     }
   }
@@ -1476,16 +1481,10 @@ resetBtn.addEventListener('click', () => {
     copyToClipboard(citation);
   });
   saveBtn.addEventListener('click', saveToWorksCited);
-  loadBtn.addEventListener('click', () => {
-    if (JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]').length === 0) {
-      alert('No saved citations yet. Click "Save" to add citations to your Works Cited list.');
-      return;
-    }
-    loadWorksCited();
-  });
 
   // Initialize
   updateNotesSourceSelect();
   loadWorksCited();
+  loadNotes();
 })();
 </script>

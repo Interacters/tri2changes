@@ -2031,6 +2031,12 @@ async function submitFinalTime(username, elapsed) {
         <p class="chat-hint" style="margin: 8px 0 4px;">💡 Quick Prompts (Most Popular First)</p>
         <div class="ai-prompts" id="smart-prompts-grid"></div>
     </div>
+
+    <div style="margin: 8px 0 12px;">
+        <button type="button" class="voice-btn" id="voice-btn">
+            🎤 Voice
+        </button>
+    </div>
     
     <label>Your Question</label>
     <textarea id="ai-message" placeholder="Ask a question about this news source..." required></textarea>
@@ -2044,11 +2050,6 @@ async function submitFinalTime(username, elapsed) {
     <div class="ai-controls">
         <button type="button" class="ai-btn primary" id="ai-send-btn">Send</button>
         <button type="button" class="ai-btn ghost" id="ai-clear-btn">Clear</button>
-        
-        <!-- NEW VOICE BUTTON -->
-        <button type="button" class="voice-btn" id="voice-btn">
-            🎤 Voice Input
-        </button>
     </div>
     
     <div class="ai-status" id="ai-status"></div>

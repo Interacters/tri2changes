@@ -345,8 +345,10 @@ date: 2025-12-12
 <style>
     /* Help popover near media bias game */
     .help-popover {
-        position: relative;
-        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 100%;
+        width: 280px;
         background: rgba(15, 23, 42, 0.95);
         color: #e2e8f0;
         border: 1px solid rgba(148, 163, 184, 0.35);
@@ -355,7 +357,7 @@ date: 2025-12-12
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.6);
         display: none;
         z-index: 9999;
-        margin: 0;
+        margin-left: 16px;
     }
 
     .help-popover.show {
@@ -419,30 +421,17 @@ date: 2025-12-12
     }
 
     .source-selection {
-        display: flex;
-        gap: 16px;
-        align-items: stretch;
+        position: relative;
+        overflow: visible;
     }
 
-    .source-selection .images-area {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .source-selection .help-popover {
-        flex: 0 0 280px;
-        max-width: 320px;
-        align-self: flex-start;
-    }
-
-    @media (max-width: 900px) {
-        .source-selection {
-            flex-direction: column;
-        }
-
-        .source-selection .help-popover {
-            flex: 1 1 auto;
-            max-width: none;
+    @media (max-width: 1100px) {
+        .help-popover {
+            position: relative;
+            left: auto;
+            top: auto;
+            width: 100%;
+            margin: 12px 0 0;
         }
     }
 
@@ -6208,7 +6197,7 @@ resetBtn.addEventListener('click', () => {
         const helpPopover = document.getElementById('help-popover');
         const helpGoBtn = document.getElementById('help-popover-go');
         const helpDismissBtn = document.getElementById('help-popover-dismiss');
-        const HELP_POPOVER_KEY = 'english_help_popover_dismissed_v1';
+        let helpPopoverDismissed = false;
         let helpPopoverTimer = null;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -6432,12 +6421,12 @@ resetBtn.addEventListener('click', () => {
                 hideHelpPopover();
                 return;
             }
-            if (localStorage.getItem(HELP_POPOVER_KEY) === '1') return;
+            if (helpPopoverDismissed) return;
             if (helpPopover.classList.contains('show')) return;
             if (helpPopoverTimer) return;
 
             helpPopoverTimer = window.setTimeout(() => {
-                if (currentSection === 0 && localStorage.getItem(HELP_POPOVER_KEY) !== '1') {
+                if (currentSection === 0 && !helpPopoverDismissed) {
                     helpPopover.classList.add('show');
                 }
                 helpPopoverTimer = null;
@@ -6445,7 +6434,7 @@ resetBtn.addEventListener('click', () => {
         }
 
         function dismissHelpPopover() {
-            localStorage.setItem(HELP_POPOVER_KEY, '1');
+            helpPopoverDismissed = true;
             hideHelpPopover();
         }
 

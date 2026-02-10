@@ -343,6 +343,109 @@ date: 2025-12-12
             </div>
 
 <style>
+    /* Help popover near media bias game */
+    .help-popover {
+        position: relative;
+        width: 100%;
+        background: rgba(15, 23, 42, 0.95);
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.6);
+        display: none;
+        z-index: 9999;
+        margin: 0;
+    }
+
+    .help-popover.show {
+        display: block;
+        animation: popIn 0.25s ease;
+    }
+
+    @keyframes popIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .help-popover-title {
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+
+    .help-popover-text {
+        font-size: 0.9rem;
+        color: #cbd5e1;
+        margin: 0 0 12px;
+    }
+
+    .help-popover-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .help-popover-btn {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .help-popover-btn.primary {
+        background: #60a5fa;
+        color: #0f172a;
+        box-shadow: 0 8px 18px rgba(96, 165, 250, 0.35);
+    }
+
+    .help-popover-btn.ghost {
+        background: transparent;
+        color: #e2e8f0;
+        border-color: rgba(148, 163, 184, 0.4);
+    }
+
+    .help-popover-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .source-selection {
+        display: flex;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .source-selection .images-area {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .source-selection .help-popover {
+        flex: 0 0 280px;
+        max-width: 320px;
+        align-self: flex-start;
+    }
+
+    @media (max-width: 900px) {
+        .source-selection {
+            flex-direction: column;
+        }
+
+        .source-selection .help-popover {
+            flex: 1 1 auto;
+            max-width: none;
+        }
+    }
+
     .media-spectrum-intro {
         margin-bottom: 30px;
     }
@@ -757,7 +860,17 @@ body {
         </div>
     </div>
 
-    <div class="images-area" id="images"></div>
+    <div class="source-selection">
+        <div class="images-area" id="images"></div>
+        <div class="help-popover" id="help-popover" role="dialog" aria-live="polite" aria-label="Need help with media bias?">
+            <div class="help-popover-title">Need help?</div>
+            <p class="help-popover-text">Jump to Source Intel Chat for quick tips on bias and sources.</p>
+            <div class="help-popover-actions">
+                <button type="button" class="help-popover-btn primary" id="help-popover-go">Go to Chat</button>
+                <button type="button" class="help-popover-btn ghost" id="help-popover-dismiss">Not now</button>
+            </div>
+        </div>
+    </div>
 
     <div class="controls">
     <button class="btn btn-ghost" id="reset-btn">Reset</button>
@@ -2013,7 +2126,7 @@ async function submitFinalTime(username, elapsed) {
 }
 </style>
 
-<div class="ai-card">
+<div class="ai-card" id="intel-source-chat">
     <h3>Source Intel Chat</h3>
     <p>Get help analyzing news sources with AI-powered suggestions</p>
     
@@ -6092,6 +6205,11 @@ resetBtn.addEventListener('click', () => {
 <script type="module">
         let currentSection = 0;
         const totalSections = document.querySelectorAll('.section-container').length;
+        const helpPopover = document.getElementById('help-popover');
+        const helpGoBtn = document.getElementById('help-popover-go');
+        const helpDismissBtn = document.getElementById('help-popover-dismiss');
+        const HELP_POPOVER_KEY = 'english_help_popover_dismissed_v1';
+        let helpPopoverTimer = null;
 
         window.addEventListener('DOMContentLoaded', () => {
         const savedSection = localStorage.getItem('english_module_section');
@@ -6271,6 +6389,7 @@ resetBtn.addEventListener('click', () => {
             // Scroll to top smoothly
             localStorage.setItem('english_module_section', currentSection);
 
+            scheduleHelpPopover();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -6297,4 +6416,52 @@ resetBtn.addEventListener('click', () => {
                 }
             });
         });
+
+        function hideHelpPopover() {
+            if (!helpPopover) return;
+            helpPopover.classList.remove('show');
+            if (helpPopoverTimer) {
+                window.clearTimeout(helpPopoverTimer);
+                helpPopoverTimer = null;
+            }
+        }
+
+        function scheduleHelpPopover() {
+            if (!helpPopover) return;
+            if (currentSection !== 0) {
+                hideHelpPopover();
+                return;
+            }
+            if (localStorage.getItem(HELP_POPOVER_KEY) === '1') return;
+            if (helpPopover.classList.contains('show')) return;
+            if (helpPopoverTimer) return;
+
+            helpPopoverTimer = window.setTimeout(() => {
+                if (currentSection === 0 && localStorage.getItem(HELP_POPOVER_KEY) !== '1') {
+                    helpPopover.classList.add('show');
+                }
+                helpPopoverTimer = null;
+            }, 1600);
+        }
+
+        function dismissHelpPopover() {
+            localStorage.setItem(HELP_POPOVER_KEY, '1');
+            hideHelpPopover();
+        }
+
+        if (helpGoBtn) {
+            helpGoBtn.addEventListener('click', () => {
+                const target = document.getElementById('intel-source-chat');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                dismissHelpPopover();
+            });
+        }
+
+        if (helpDismissBtn) {
+            helpDismissBtn.addEventListener('click', () => {
+                dismissHelpPopover();
+            });
+        }
     </script>

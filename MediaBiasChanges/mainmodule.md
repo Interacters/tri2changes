@@ -420,6 +420,18 @@ date: 2025-12-12
         transform: translateY(-1px);
     }
 
+    .help-popover.chat {
+        left: auto;
+        right: 100%;
+        margin-left: 0;
+        margin-right: 16px;
+    }
+
+    .ai-card {
+        position: relative;
+        overflow: visible;
+    }
+
     .source-selection {
         position: relative;
         overflow: visible;
@@ -825,7 +837,7 @@ body {
 }
 
 </style>
-<div class="game-container">
+<div class="game-container" id="media-bias-game">
     <div class="game-header">
         <div class="player-info">
             <div class="info-pill" id="player-name">Player: Guest</div>
@@ -2116,6 +2128,14 @@ async function submitFinalTime(username, elapsed) {
 </style>
 
 <div class="ai-card" id="intel-source-chat">
+    <div class="help-popover chat" id="back-to-game-popover" role="dialog" aria-live="polite" aria-label="Return to Media Bias Game">
+        <div class="help-popover-title">Back to the game?</div>
+        <p class="help-popover-text">Head back to the Media Bias Sorting Game anytime.</p>
+        <div class="help-popover-actions">
+            <button type="button" class="help-popover-btn primary" id="back-to-game-go">Back to Game</button>
+            <button type="button" class="help-popover-btn ghost" id="back-to-game-dismiss">Not now</button>
+        </div>
+    </div>
     <h3>Source Intel Chat</h3>
     <p>Get help analyzing news sources with AI-powered suggestions</p>
     
@@ -6197,8 +6217,14 @@ resetBtn.addEventListener('click', () => {
         const helpPopover = document.getElementById('help-popover');
         const helpGoBtn = document.getElementById('help-popover-go');
         const helpDismissBtn = document.getElementById('help-popover-dismiss');
+        const backPopover = document.getElementById('back-to-game-popover');
+        const backGoBtn = document.getElementById('back-to-game-go');
+        const backDismissBtn = document.getElementById('back-to-game-dismiss');
         let helpPopoverDismissed = false;
         let helpPopoverTimer = null;
+        let backPopoverDismissed = false;
+        let backPopoverTimer = null;
+        let chatObserver = null;
 
         window.addEventListener('DOMContentLoaded', () => {
         const savedSection = localStorage.getItem('english_module_section');
@@ -6214,6 +6240,7 @@ resetBtn.addEventListener('click', () => {
             }
         }
         updateProgress();
+        initChatObserver();
     });
 
         function formatDuration(totalSeconds) {
@@ -6379,6 +6406,9 @@ resetBtn.addEventListener('click', () => {
             localStorage.setItem('english_module_section', currentSection);
 
             scheduleHelpPopover();
+            if (currentSection !== 0) {
+                hideBackPopover();
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -6451,6 +6481,73 @@ resetBtn.addEventListener('click', () => {
         if (helpDismissBtn) {
             helpDismissBtn.addEventListener('click', () => {
                 dismissHelpPopover();
+            });
+        }
+
+        function hideBackPopover() {
+            if (!backPopover) return;
+            backPopover.classList.remove('show');
+            if (backPopoverTimer) {
+                window.clearTimeout(backPopoverTimer);
+                backPopoverTimer = null;
+            }
+        }
+
+        function scheduleBackPopover() {
+            if (!backPopover) return;
+            if (currentSection !== 0) {
+                hideBackPopover();
+                return;
+            }
+            if (backPopoverDismissed) return;
+            if (backPopover.classList.contains('show')) return;
+            if (backPopoverTimer) return;
+
+            backPopoverTimer = window.setTimeout(() => {
+                if (currentSection === 0 && !backPopoverDismissed) {
+                    backPopover.classList.add('show');
+                }
+                backPopoverTimer = null;
+            }, 800);
+        }
+
+        function dismissBackPopover() {
+            backPopoverDismissed = true;
+            hideBackPopover();
+        }
+
+        function initChatObserver() {
+            if (!backPopover) return;
+            const chatTarget = document.getElementById('intel-source-chat');
+            if (!chatTarget || !('IntersectionObserver' in window)) {
+                return;
+            }
+
+            chatObserver = new IntersectionObserver((entries) => {
+                const entry = entries[0];
+                if (entry && entry.isIntersecting) {
+                    scheduleBackPopover();
+                } else {
+                    hideBackPopover();
+                }
+            }, { threshold: 0.35 });
+
+            chatObserver.observe(chatTarget);
+        }
+
+        if (backGoBtn) {
+            backGoBtn.addEventListener('click', () => {
+                const target = document.getElementById('media-bias-game');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                dismissBackPopover();
+            });
+        }
+
+        if (backDismissBtn) {
+            backDismissBtn.addEventListener('click', () => {
+                dismissBackPopover();
             });
         }
     </script>

@@ -344,6 +344,110 @@ date: 2025-12-12
             </div>
 
 <style>
+    /* Help popover near media bias game */
+    .help-popover {
+        position: absolute;
+        top: 0;
+        left: 100%;
+        width: 280px;
+        background: rgba(15, 23, 42, 0.95);
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.6);
+        display: none;
+        z-index: 9999;
+        margin-left: 16px;
+    }
+
+    .help-popover.show {
+        display: block;
+        animation: popIn 0.25s ease;
+    }
+
+    @keyframes popIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .help-popover-title {
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+
+    .help-popover-text {
+        font-size: 0.9rem;
+        color: #cbd5e1;
+        margin: 0 0 12px;
+    }
+
+    .help-popover-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .help-popover-btn {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .help-popover-btn.primary {
+        background: #60a5fa;
+        color: #0f172a;
+        box-shadow: 0 8px 18px rgba(96, 165, 250, 0.35);
+    }
+
+    .help-popover-btn.ghost {
+        background: transparent;
+        color: #e2e8f0;
+        border-color: rgba(148, 163, 184, 0.4);
+    }
+
+    .help-popover-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .help-popover.chat {
+        left: auto;
+        right: 100%;
+        margin-left: 0;
+        margin-right: 16px;
+    }
+
+    .ai-card {
+        position: relative;
+        overflow: visible;
+    }
+
+    .source-selection {
+        position: relative;
+        overflow: visible;
+    }
+
+    @media (max-width: 1100px) {
+        .help-popover {
+            position: relative;
+            left: auto;
+            top: auto;
+            width: 100%;
+            margin: 12px 0 0;
+        }
+    }
+
     .media-spectrum-intro {
         margin-bottom: 30px;
     }
@@ -734,7 +838,7 @@ body {
 }
 
 </style>
-<div class="game-container">
+<div class="game-container" id="media-bias-game">
     <div class="game-header">
         <div class="player-info">
             <div class="info-pill" id="player-name">Player: Guest</div>
@@ -758,7 +862,17 @@ body {
         </div>
     </div>
 
-    <div class="images-area" id="images"></div>
+    <div class="source-selection">
+        <div class="images-area" id="images"></div>
+        <div class="help-popover" id="help-popover" role="dialog" aria-live="polite" aria-label="Need help with media bias?">
+            <div class="help-popover-title">Need help?</div>
+            <p class="help-popover-text">Jump to Source Intel Chat for quick tips on bias and sources.</p>
+            <div class="help-popover-actions">
+                <button type="button" class="help-popover-btn primary" id="help-popover-go">Go to Chat</button>
+                <button type="button" class="help-popover-btn ghost" id="help-popover-dismiss">Not now</button>
+            </div>
+        </div>
+    </div>
 
     <div class="controls">
     <button class="btn btn-ghost" id="reset-btn">Reset</button>
@@ -1025,7 +1139,19 @@ function clearGameStateForIds(ids = []) {
         img.dataset.company = file.company;
         img.dataset.id = slugify(file.company);
 
+        const autofillNewsSource = () => {
+            const newsSourceInput = document.getElementById('news-source');
+            if (!newsSourceInput) return;
+            newsSourceInput.value = file.company;
+            newsSourceInput.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        img.addEventListener('click', () => {
+            autofillNewsSource();
+        });
+
         img.addEventListener('dragstart', (e) => {
+            autofillNewsSource();
             // Start timer on first interaction (only if not autofilled)
             if (!gameStarted && !autofillUsed) {
                 gameStarted = true;
@@ -2002,7 +2128,15 @@ async function submitFinalTime(username, elapsed) {
 }
 </style>
 
-<div class="ai-card">
+<div class="ai-card" id="intel-source-chat">
+    <div class="help-popover chat" id="back-to-game-popover" role="dialog" aria-live="polite" aria-label="Return to Media Bias Game">
+        <div class="help-popover-title">Back to the game?</div>
+        <p class="help-popover-text">Head back to the Media Bias Sorting Game anytime.</p>
+        <div class="help-popover-actions">
+            <button type="button" class="help-popover-btn primary" id="back-to-game-go">Back to Game</button>
+            <button type="button" class="help-popover-btn ghost" id="back-to-game-dismiss">Not now</button>
+        </div>
+    </div>
     <h3>Source Intel Chat</h3>
     <p>Get help analyzing news sources with AI-powered suggestions</p>
     
@@ -2032,6 +2166,12 @@ async function submitFinalTime(username, elapsed) {
         <p class="chat-hint" style="margin: 8px 0 4px;">💡 Quick Prompts (Most Popular First)</p>
         <div class="ai-prompts" id="smart-prompts-grid"></div>
     </div>
+
+    <div style="margin: 8px 0 12px;">
+        <button type="button" class="voice-btn" id="voice-btn">
+            🎤 Voice
+        </button>
+    </div>
     
     <label>Your Question</label>
     <textarea id="ai-message" placeholder="Ask a question about this news source..." required></textarea>
@@ -2045,11 +2185,6 @@ async function submitFinalTime(username, elapsed) {
     <div class="ai-controls">
         <button type="button" class="ai-btn primary" id="ai-send-btn">Send</button>
         <button type="button" class="ai-btn ghost" id="ai-clear-btn">Clear</button>
-        
-        <!-- NEW VOICE BUTTON -->
-        <button type="button" class="voice-btn" id="voice-btn">
-            🎤 Voice Input
-        </button>
     </div>
     
     <div class="ai-status" id="ai-status"></div>
@@ -2303,6 +2438,11 @@ async function submitFinalTime(username, elapsed) {
             credibility: 6
         },
         'new york times': {
+            name: 'NY Times',
+            logo: '{{site.baseurl}}/media/assets/nytL.png',
+            credibility: 8
+        },
+        'ny times': {
             name: 'NY Times',
             logo: '{{site.baseurl}}/media/assets/nytL.png',
             credibility: 8
@@ -3323,13 +3463,36 @@ loadPromptClicks()
             </div>
         </div>
 
-       <!-- Section 3: Citation Generator -->
-        <div class="section-container" id="section-3">
-            <div class="section-header">
-                <h2 class="section-title">Citation Generator</h2>
-            </div>
-            <div class="content-placeholder">
-                <p>
+<!-- Section 3: Citation Generator -->
+<div class="section-container" id="section-3">
+    <div class="section-header">
+        <h2 class="section-title">
+            Citation Generator
+            <button
+  id="help-toggle-btn"
+  class="help-icon-btn"
+  aria-label="Citation Generator Help"
+  title="How to use the citation generator"
+>
+  ?
+</button>
+        </h2>
+        
+        <!-- Help Panel (hidden by default) -->
+        <div id="help-panel" style="display: none; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin-top: 15px; font-size: 0.9rem; line-height: 1.6;">
+            <h4 style="color: #7ad2f9; margin-bottom: 10px;">How to Use the Citation Generator</h4>
+            <ul style="margin: 0; padding-left: 20px; color: rgba(255,255,255,0.85);">
+                <li><strong>Autofill from URL:</strong> Paste a source URL to automatically extract citation details.</li>
+                <li><strong>Citation Style:</strong> Choose between APA, MLA (9th ed.), or Chicago (author-date) format.</li>
+                <li><strong>Manual Fields:</strong> Fill in author, date, title, and source if autofill doesn't work.</li>
+                <li><strong>Parenthetical Citation:</strong> Use this shortened version when citing sources within your paper.</li>
+                <li><strong>References:</strong> Save citations to build your reference list. Click the ✏️ button to copy the parenthetical citation for in-text use.</li>
+                <li><strong>Source Notes:</strong> Add notes to your saved sources to organize research findings and track how each source supports your argument.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="content-placeholder">
+        <p>
 <style>
   /* Import modern, readable font matching thesis generator */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -3382,7 +3545,7 @@ loadPromptClicks()
     display:flex; 
     gap:10px; 
     margin-top:12px; 
-    justify-content:flex-end;
+    justify-content:center;
     flex-wrap: wrap;
   }
   
@@ -3437,12 +3600,6 @@ loadPromptClicks()
     font-size: 0.9rem;
   }
   
-  .cite-output:empty::before {
-    content: 'Your citation will appear here...';
-    color: rgba(255, 255, 255, 0.6);
-    font-style: italic;
-  }
-  
   .cite-small { 
     font-size:0.9rem; 
     color:rgba(255, 255, 255, 0.75); 
@@ -3461,6 +3618,21 @@ loadPromptClicks()
     margin-bottom: 12px;
     font-family: 'Inter', sans-serif;
   }
+
+  .style-group {
+    margin-bottom: 20px;
+  }
+
+  .style-group-header {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #7ad2f9;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: rgba(122, 210, 249, 0.15);
+    border-left: 4px solid #7ad2f9;
+    border-radius: 4px;
+  }
   
   .works-cited-list {
     background: rgba(0,0,0,0.2);
@@ -3472,7 +3644,7 @@ loadPromptClicks()
   }
   
   .works-cited-list:empty::before {
-    content: 'No saved citations yet. Click "Save" to add citations to your Works Cited list.';
+    content: 'No saved citations yet. Click "Add Reference" to add citations to your References list.';
     color: rgba(255, 255, 255, 0.7);
     font-style: italic;
     display: block;
@@ -3541,7 +3713,7 @@ loadPromptClicks()
     gap: 4px;
   }
 
-  .citation-note-btn {
+  .citation-parenthetical-btn {
     background: rgba(122, 210, 249, 0.8);
     color: white;
     border: none;
@@ -3558,10 +3730,21 @@ loadPromptClicks()
     font-family: 'Inter', sans-serif;
   }
 
-  .citation-note-btn:hover {
+  .citation-parenthetical-btn:hover {
     background: rgba(122, 210, 249, 1);
     transform: scale(1.1);
   }
+
+  .citation-parenthetical {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.25);
+  border-left: 3px solid #7ad2f9;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #ffffff;
+  display: none;
+}
   
   .citation-delete {
     background: rgba(248, 113, 113, 0.8);
@@ -3585,6 +3768,30 @@ loadPromptClicks()
     transform: scale(1.1);
   }
 
+  .help-icon-btn {
+  width: 28px;
+  height: 28px;
+  margin-left: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(122, 210, 249, 0.8);
+  background: transparent;
+  color: #7ad2f9;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+.help-icon-btn:hover {
+  background: rgba(122, 210, 249, 0.2);
+  transform: scale(1.1);
+}
+
+
   .cite-input.missing {
     border: 2px solid #f87171 !important;
     background: rgba(248, 113, 113, 0.2) !important;
@@ -3600,11 +3807,10 @@ loadPromptClicks()
     font-family: 'Inter', sans-serif;
   }
 
-  /* Source Notes Panel - FIXED WIDTH */
+  /* Source Notes Panel - slide out from right */
   .notes-panel {
-  position: fixed;
-  right: 0;
-  transform: translateX(100%);
+    position: fixed;
+    right: -320px;
     top: 0;
     width: 300px;
     max-width: 90vw;
@@ -3613,20 +3819,17 @@ loadPromptClicks()
     color: #fff;
     box-shadow: -8px 0 40px rgba(0,0,0,0.5);
     padding: 20px;
-    transition: right 0.3s ease;
-    z-index: 10000;
+    transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 9999;
     overflow-y: auto;
     font-family: 'Inter', sans-serif;
   }
-  
+
   .notes-panel.open {
-  transform: translateX(0);
-}
+    right: 0;
+  }
   
   .notes-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 2px solid rgba(255,255,255,0.2);
@@ -3636,29 +3839,6 @@ loadPromptClicks()
     margin: 0;
     font-size: 1.2rem;
     color: #fff;
-  }
-
-  .notes-close-btn {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-  }
-
-  .notes-close-btn:hover {
-    background: rgba(255,255,255,0.25);
-  }
-  
-  .notes-intro { 
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.85);
-    margin-bottom: 16px;
-    line-height: 1.5;
   }
   
   .notes-section {
@@ -3834,12 +4014,28 @@ loadPromptClicks()
     font-size: 0.85rem;
   }
 
-  /* Keep Notes button clickable even when panel is open */
-#cite-notes-toggle {
-  position: relative;
-  z-index: 10001; /* higher than notes panel */
-}
+  .citation-output-label {
+    font-weight: 700;
+    color: #7ad2f9;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .references-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  /* Notes toggle button - high z-index to stay clickable */
+  #cite-notes-toggle {
+    position: relative;
+    z-index: 10000;
+  }
 </style>
+
 <div class="cite-card" id="citation-tool">
   <div class="cite-row">
     <div class="cite-label">Style</div>
@@ -3852,9 +4048,9 @@ loadPromptClicks()
 
   <div class="cite-row">
     <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="Paste source URL for instant citation" />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Create citation from URL" style="margin-left:8px;min-width:160px;">
-      Create Citation
+    <input id="cite-url" class="cite-input" placeholder="Add source URL here for instant citation" />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Autofill from URL" style="margin-left:8px;min-width:160px;">
+      Autofill from URL
     </button>
   </div>
 
@@ -3879,41 +4075,36 @@ loadPromptClicks()
   </div>
 
   <div class="cite-actions">
-    <button id="cite-generate" class="cite-btn primary">Generate</button>
-    <button id="cite-reset" class="cite-btn ghost"> Reset <span class="btn-hint">(clear fields)</span> </button>
-    <button id="cite-copy" class="cite-btn ghost">
-      Copy <span class="btn-hint">(to clipboard)</span>
-    </button>
-    <button id="cite-save" class="cite-btn ghost" title="Save locally">
-      Save <span class="btn-hint">(add to Works Cited)</span>
-    </button>
-    <button id="cite-load" class="cite-btn ghost" title="Load last">
-      Load <span class="btn-hint">(view Works Cited)</span>
-    </button>
-    <button id="cite-notes-toggle" class="cite-btn ghost" title="Open notes panel">
-      📝 Notes
-    </button>
+    <button id="cite-generate" class="cite-btn primary">📝 Create Citation</button>
+    <button id="cite-reset" class="cite-btn ghost">🔄 Clear</button>
+    <button id="cite-copy" class="cite-btn ghost">📋 Copy</button>
+    <button id="cite-save" class="cite-btn ghost">💾 Add Reference</button>
+    <button id="cite-notes-toggle" class="cite-btn ghost">📝 Notes</button>
   </div>
 
-  <div id="cite-output" class="cite-output" aria-live="polite"></div>
-  <div id="cite-parenthetical" class="cite-output" style="margin-top:8px;"></div>
+  <div class="cite-output" aria-live="polite">
+    <span class="citation-output-label">Citation:</span>
+    <div id="cite-output-text"></div>
+  </div>
+  <div class="cite-output" style="margin-top:8px;">
+    <div id="cite-parenthetical"></div>
+  </div>
   <div id="cite-warning" class="cite-warning" style="display:none;"></div>
-  <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
 
   <div class="works-cited-section" id="works-cited-section" style="display: none;">
-    <h3>Works Cited</h3>
-    <div id="works-cited-list" class="works-cited-list"></div>
+    <h3>References</h3>
+    <div class="references-actions">
+      <button id="copy-all-references" class="cite-btn ghost">📋 Copy All References</button>
+      <button id="clear-all-references" class="cite-btn ghost">🗑️ Clear All References</button>
+    </div>
+    <div id="works-cited-by-style"></div>
   </div>
 </div>
 
-<!-- Source Notes Panel -->
+<!-- Source Notes Panel - slides in from right, no close button -->
 <div id="notes-panel" class="notes-panel">
   <div class="notes-header">
     <h3>📝 Source Notes</h3>
-  </div>
-  
-  <div class="notes-intro">
-    Add quick notes to your saved citations. Notes are linked to specific sources from your Works Cited list.
   </div>
 
   <div class="notes-section">
@@ -3935,7 +4126,7 @@ loadPromptClicks()
   <div class="notes-section">
     <h4>Your Notes</h4>
     <div id="notes-list" class="notes-list">
-      <div class="empty-state">No notes yet. Add a source to your Works Cited and create a note for it.</div>
+      <div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>
     </div>
   </div>
 </div>
@@ -4006,17 +4197,19 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
   const titleEl = document.getElementById('cite-title');
   const sourceEl = document.getElementById('cite-source');
   const urlEl = document.getElementById('cite-url');
-  const outEl = document.getElementById('cite-output');
+  const outTextEl = document.getElementById('cite-output-text');
   const fetchBtn = document.getElementById('cite-fetch-metadata');
   const generateBtn = document.getElementById('cite-generate');
   const copyBtn = document.getElementById('cite-copy');
   const saveBtn = document.getElementById('cite-save');
-  const loadBtn = document.getElementById('cite-load');
   const worksCitedSection = document.getElementById('works-cited-section');
-  const worksCitedList = document.getElementById('works-cited-list');
+  const worksCitedByStyle = document.getElementById('works-cited-by-style');
+  const copyAllBtn = document.getElementById('copy-all-references');
+  const clearAllBtn = document.getElementById('clear-all-references');
+  const helpToggleBtn = document.getElementById('help-toggle-btn');
+  const helpPanel = document.getElementById('help-panel');
   const notesToggleBtn = document.getElementById('cite-notes-toggle');
   const notesPanel = document.getElementById('notes-panel');
-  const notesCloseBtn = document.getElementById('notes-close');
   const noteSourceSelect = document.getElementById('note-source-select');
   const noteCategorySelect = document.getElementById('note-category-select');
   const noteTextarea = document.getElementById('note-textarea');
@@ -4067,6 +4260,30 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
       return null;
     }
   }
+
+  // Help toggle
+  helpToggleBtn.addEventListener('click', () => {
+    helpPanel.style.display = helpPanel.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // Notes panel toggle
+  notesToggleBtn.addEventListener('click', () => {
+    notesPanel.classList.toggle('open');
+    if (notesPanel.classList.contains('open')) {
+      updateNotesSourceSelect();
+      loadNotes();
+    }
+  });
+
+  // Close notes panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (notesPanel.classList.contains('open') && 
+        !notesPanel.contains(e.target) && 
+        e.target !== notesToggleBtn &&
+        !notesToggleBtn.contains(e.target)) {
+      notesPanel.classList.remove('open');
+    }
+  });
 
   // ===== CROSS-CHECK FORMATTING =====
 function validateCitationFields() {
@@ -4343,7 +4560,7 @@ if (style === 'mla') citation = fmtMLA9(payload);
 else if (style === 'chicago') citation = fmtChicago(payload);
 else citation = fmtAPA(payload);
 
-outEl.innerHTML = citation;
+outTextEl.innerHTML = citation;
 
 // Pass style to buildParenthetical!
 const parentheticalEl = document.getElementById('cite-parenthetical');
@@ -4351,7 +4568,7 @@ const parenthetical = buildParenthetical({ ...payload, style });
 
 if (parentheticalEl) {
   parentheticalEl.innerHTML = parenthetical
-    ? `<b>Parenthetical citation:</b> ${parenthetical}`
+    ? `<span class="citation-output-label">Parenthetical Citation:</span>${parenthetical}`
     : '';
 }
 
@@ -4410,6 +4627,17 @@ if (parentheticalEl) {
       return;
     }
     
+    const payload = {
+      author: safe(authorEl.value),
+      date: safe(dateEl.value),
+      title: safe(titleEl.value),
+      source: safe(sourceEl.value),
+      url: safe(urlEl.value)
+    };
+    
+    const style = styleEl.value;
+    const parenthetical = buildParenthetical({ ...payload, style });
+    
     // Get existing list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     const newCitation = { 
@@ -4420,18 +4648,19 @@ if (parentheticalEl) {
       title: safe(titleEl.value),
       url: safe(urlEl.value),
       author: safe(authorEl.value),
-      date: safe(dateEl.value)
+      date: safe(dateEl.value),
+      parenthetical: parenthetical
     };
     saved.push(newCitation);
     localStorage.setItem(KEY, JSON.stringify(saved));
-    alert('✓ Citation saved to Works Cited!');
+    alert('✓ Citation saved to References!');
     
     loadWorksCited();
     updateNotesSourceSelect();
   }
 
   // PROCEDURE CALL: Use student-developed procedure to process citations
-  // OUTPUT: Display filtered and processed citations
+  // OUTPUT: Display filtered and processed citations organized by style
   async function loadWorksCited() {
     // Get list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
@@ -4441,72 +4670,114 @@ if (parentheticalEl) {
       return;
     }
 
-    // PROCEDURE CALL: Process citation list
-    const result = processCitationList(saved, 'all', 100);
-    
     // Display results
     worksCitedSection.style.display = 'block';
-    worksCitedList.innerHTML = '';
+    worksCitedByStyle.innerHTML = '';
 
-    // ITERATION: Display each citation
-    for (let index = 0; index < result.citations.length; index++) {
-      const item = result.citations[index];
-      
-      const citationDiv = document.createElement('div');
-      citationDiv.className = 'citation-item';
-      
-      const textDiv = document.createElement('div');
-      textDiv.className = 'citation-text';
-      
-      // Add loading badge initially
-      const loadingBadge = '<span class="quality-badge quality-loading">⏳</span>';
-      textDiv.innerHTML = item.citation + loadingBadge;
-      
-      const actionsDiv = document.createElement('div');
-      actionsDiv.className = 'citation-actions';
-      
-      const noteBtn = document.createElement('button');
-      noteBtn.className = 'citation-note-btn';
-      noteBtn.innerHTML = '📝';
-      noteBtn.title = 'Add note to this source';
-      noteBtn.onclick = () => openNotesForSource(index);
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'citation-delete';
-      deleteBtn.innerHTML = '×';
-      deleteBtn.title = 'Delete this citation';
-      deleteBtn.onclick = () => deleteCitation(index);
-      
-      actionsDiv.appendChild(noteBtn);
-      actionsDiv.appendChild(deleteBtn);
-      citationDiv.appendChild(textDiv);
-      citationDiv.appendChild(actionsDiv);
-      worksCitedList.appendChild(citationDiv);
+    // Group citations by style
+    const byStyle = {
+      apa: [],
+      mla: [],
+      chicago: []
+    };
 
-      // Check quality asynchronously
-      const quality = await checkCitationQuality(
-        item.url || '',
-        saved[index].author || '',
-        saved[index].date || '',
-        item.source || ''
-      );
-
-      // Update badge with quality score
-      if (quality) {
-        const qualityClass = `quality-${quality.quality}`;
-        const badge = `<span class="quality-badge ${qualityClass}" title="${quality.message}">${quality.score}/10</span>`;
-        textDiv.innerHTML = item.citation + badge;
-      } else {
-        // Remove loading badge if quality check failed
-        textDiv.innerHTML = item.citation;
+    saved.forEach((item, index) => {
+      if (byStyle[item.style]) {
+        byStyle[item.style].push({ item, index });
       }
-    }
+    });
+
+    // Display each style group
+    const styleLabels = {
+      apa: 'APA',
+      mla: 'MLA (9th ed.)',
+      chicago: 'Chicago (author-date)'
+    };
+
+    ['apa', 'mla', 'chicago'].forEach(style => {
+      if (byStyle[style].length > 0) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'style-group';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'style-group-header';
+        headerDiv.textContent = `${styleLabels[style]} (${byStyle[style].length})`;
+        groupDiv.appendChild(headerDiv);
+
+        const listDiv = document.createElement('div');
+        listDiv.className = 'works-cited-list';
+
+        byStyle[style].forEach(async ({ item, index }) => {
+          const citationDiv = document.createElement('div');
+          citationDiv.className = 'citation-item';
+          
+          const textDiv = document.createElement('div');
+          textDiv.className = 'citation-text';
+          
+          // Add loading badge initially
+          const loadingBadge = '<span class="quality-badge quality-loading">⏳</span>';
+          textDiv.innerHTML = item.citation + loadingBadge;
+          
+          const actionsDiv = document.createElement('div');
+          actionsDiv.className = 'citation-actions';
+          
+         const parentheticalBtn = document.createElement('button');
+parentheticalBtn.className = 'citation-parenthetical-btn';
+parentheticalBtn.innerHTML = '✏️';
+parentheticalBtn.title = 'Show parenthetical citation';
+
+const parentheticalDiv = document.createElement('div');
+parentheticalDiv.className = 'citation-parenthetical';
+parentheticalDiv.textContent = item.parenthetical || 'No parenthetical citation available.';
+
+parentheticalBtn.onclick = () => {
+  parentheticalDiv.style.display =
+    parentheticalDiv.style.display === 'none' ? 'block' : 'none';
+};
+
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'citation-delete';
+          deleteBtn.innerHTML = '×';
+          deleteBtn.title = 'Delete this citation';
+          deleteBtn.onclick = () => deleteCitation(index);
+          
+          actionsDiv.appendChild(parentheticalBtn);
+          actionsDiv.appendChild(deleteBtn);
+          citationDiv.appendChild(textDiv);
+          citationDiv.appendChild(actionsDiv);
+          citationDiv.appendChild(parentheticalDiv);
+          listDiv.appendChild(citationDiv);
+
+          // Check quality asynchronously
+          const quality = await checkCitationQuality(
+            item.url || '',
+            item.author || '',
+            item.date || '',
+            item.source || ''
+          );
+
+          // Update badge with quality score
+          if (quality) {
+            const qualityClass = `quality-${quality.quality}`;
+            const badge = `<span class="quality-badge ${qualityClass}" title="${quality.message}">${quality.score}/10</span>`;
+            textDiv.innerHTML = item.citation + badge;
+          } else {
+            // Remove loading badge if quality check failed
+            textDiv.innerHTML = item.citation;
+          }
+        });
+
+        groupDiv.appendChild(listDiv);
+        worksCitedByStyle.appendChild(groupDiv);
+      }
+    });
 
     worksCitedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function deleteCitation(index) {
-    if (!confirm('Delete this citation from Works Cited?')) return;
+    if (!confirm('Delete this citation from References?')) return;
     
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     saved.splice(index, 1);
@@ -4514,6 +4785,33 @@ if (parentheticalEl) {
     loadWorksCited();
     updateNotesSourceSelect();
   }
+
+  // Copy all references
+  copyAllBtn.addEventListener('click', () => {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (saved.length === 0) {
+      alert('No references to copy.');
+      return;
+    }
+    
+    const allCitations = saved.map(item => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = item.citation;
+      return tempDiv.textContent || tempDiv.innerText || '';
+    }).join('\n\n');
+    
+    copyToClipboard(allCitations);
+  });
+
+  // Clear all references
+  clearAllBtn.addEventListener('click', () => {
+    if (!confirm('Clear all references? This cannot be undone.')) return;
+    
+    localStorage.removeItem(KEY);
+    worksCitedSection.style.display = 'none';
+    updateNotesSourceSelect();
+    alert('All references cleared.');
+  });
 
   // Notes functionality
   function updateNotesSourceSelect() {
@@ -4536,7 +4834,7 @@ if (parentheticalEl) {
     const saved = JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]');
     
     if (notes.length === 0) {
-      notesList.innerHTML = '<div class="empty-state">No notes yet. Add a source to your Works Cited and create a note for it.</div>';
+      notesList.innerHTML = '<div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>';
       return;
     }
 
@@ -4576,12 +4874,6 @@ if (parentheticalEl) {
     loadNotes();
   };
 
-  function openNotesForSource(sourceIndex) {
-    notesPanel.classList.add('open');
-    noteSourceSelect.value = sourceIndex;
-    noteTextarea.focus();
-  }
-
   // Enable add note button when source and text are filled
   noteSourceSelect.addEventListener('change', () => {
     addNoteBtn.disabled = !noteSourceSelect.value || !noteTextarea.value.trim();
@@ -4617,26 +4909,6 @@ if (parentheticalEl) {
     
     loadNotes();
     alert('✓ Note added successfully!');
-  });
-
-  // Notes panel toggle
-  notesToggleBtn.addEventListener('click', () => {
-    notesPanel.classList.toggle('open');
-    if (notesPanel.classList.contains('open')) {
-      updateNotesSourceSelect();
-      loadNotes();
-    }
-  });
-
-  // Close panel when clicking outside
-  document.addEventListener('click', (e) => {
-    if (notesPanel.classList.contains('open') && 
-        !notesPanel.contains(e.target) && 
-        e.target !== notesToggleBtn &&
-        !notesToggleBtn.contains(e.target) &&
-        !e.target.classList.contains('citation-note-btn')) {
-      notesPanel.classList.remove('open');
-    }
   });
 
   // INPUT: Fetch data from online source (URL)
@@ -4765,7 +5037,7 @@ if (parentheticalEl) {
       console.warn(err);
       alert('Error fetching metadata.');
     } finally {
-      fetchBtn.textContent = 'Generate from URL';
+      fetchBtn.textContent = 'Autofill from URL';
       fetchBtn.disabled = false;
     }
   }
@@ -4780,7 +5052,7 @@ resetBtn.addEventListener('click', () => {
   [authorEl, dateEl, titleEl, sourceEl, urlEl].forEach(el => el.value = '');
   
   // Clear outputs
-  outEl.innerHTML = '';
+  outTextEl.innerHTML = '';
   document.getElementById('cite-parenthetical').innerHTML = '';
   document.getElementById('cite-warning').style.display = 'none';
   
@@ -4788,25 +5060,19 @@ resetBtn.addEventListener('click', () => {
   [authorEl, dateEl, titleEl, sourceEl].forEach(el => el.classList.remove('missing'));
 });
   copyBtn.addEventListener('click', () => {
-    const citation = outEl.innerHTML;
-    if (!citation || citation === 'Your citation will appear here...') {
+    const citation = outTextEl.innerHTML;
+    if (!citation || citation === '') {
       alert('Generate a citation first.');
       return;
     }
     copyToClipboard(citation);
   });
   saveBtn.addEventListener('click', saveToWorksCited);
-  loadBtn.addEventListener('click', () => {
-    if (JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]').length === 0) {
-      alert('No saved citations yet. Click "Save" to add citations to your Works Cited list.');
-      return;
-    }
-    loadWorksCited();
-  });
 
   // Initialize
   updateNotesSourceSelect();
   loadWorksCited();
+  loadNotes();
 })();
 </script>
  </p>
@@ -5949,6 +6215,17 @@ resetBtn.addEventListener('click', () => {
 <script type="module">
         let currentSection = 0;
         const totalSections = document.querySelectorAll('.section-container').length;
+        const helpPopover = document.getElementById('help-popover');
+        const helpGoBtn = document.getElementById('help-popover-go');
+        const helpDismissBtn = document.getElementById('help-popover-dismiss');
+        const backPopover = document.getElementById('back-to-game-popover');
+        const backGoBtn = document.getElementById('back-to-game-go');
+        const backDismissBtn = document.getElementById('back-to-game-dismiss');
+        let helpPopoverDismissed = false;
+        let helpPopoverTimer = null;
+        let backPopoverDismissed = false;
+        let backPopoverTimer = null;
+        let chatObserver = null;
 
         window.addEventListener('DOMContentLoaded', () => {
         const savedSection = localStorage.getItem('english_module_section');
@@ -5964,6 +6241,7 @@ resetBtn.addEventListener('click', () => {
             }
         }
         updateProgress();
+        initChatObserver();
     });
 
         function formatDuration(totalSeconds) {
@@ -6128,6 +6406,10 @@ resetBtn.addEventListener('click', () => {
             // Scroll to top smoothly
             localStorage.setItem('english_module_section', currentSection);
 
+            scheduleHelpPopover();
+            if (currentSection !== 0) {
+                hideBackPopover();
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -6154,4 +6436,119 @@ resetBtn.addEventListener('click', () => {
                 }
             });
         });
+
+        function hideHelpPopover() {
+            if (!helpPopover) return;
+            helpPopover.classList.remove('show');
+            if (helpPopoverTimer) {
+                window.clearTimeout(helpPopoverTimer);
+                helpPopoverTimer = null;
+            }
+        }
+
+        function scheduleHelpPopover() {
+            if (!helpPopover) return;
+            if (currentSection !== 0) {
+                hideHelpPopover();
+                return;
+            }
+            if (helpPopoverDismissed) return;
+            if (helpPopover.classList.contains('show')) return;
+            if (helpPopoverTimer) return;
+
+            helpPopoverTimer = window.setTimeout(() => {
+                if (currentSection === 0 && !helpPopoverDismissed) {
+                    helpPopover.classList.add('show');
+                }
+                helpPopoverTimer = null;
+            }, 1600);
+        }
+
+        function dismissHelpPopover() {
+            helpPopoverDismissed = true;
+            hideHelpPopover();
+        }
+
+        if (helpGoBtn) {
+            helpGoBtn.addEventListener('click', () => {
+                const target = document.getElementById('intel-source-chat');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                dismissHelpPopover();
+            });
+        }
+
+        if (helpDismissBtn) {
+            helpDismissBtn.addEventListener('click', () => {
+                dismissHelpPopover();
+            });
+        }
+
+        function hideBackPopover() {
+            if (!backPopover) return;
+            backPopover.classList.remove('show');
+            if (backPopoverTimer) {
+                window.clearTimeout(backPopoverTimer);
+                backPopoverTimer = null;
+            }
+        }
+
+        function scheduleBackPopover() {
+            if (!backPopover) return;
+            if (currentSection !== 0) {
+                hideBackPopover();
+                return;
+            }
+            if (backPopoverDismissed) return;
+            if (backPopover.classList.contains('show')) return;
+            if (backPopoverTimer) return;
+
+            backPopoverTimer = window.setTimeout(() => {
+                if (currentSection === 0 && !backPopoverDismissed) {
+                    backPopover.classList.add('show');
+                }
+                backPopoverTimer = null;
+            }, 800);
+        }
+
+        function dismissBackPopover() {
+            backPopoverDismissed = true;
+            hideBackPopover();
+        }
+
+        function initChatObserver() {
+            if (!backPopover) return;
+            const chatTarget = document.getElementById('intel-source-chat');
+            if (!chatTarget || !('IntersectionObserver' in window)) {
+                return;
+            }
+
+            chatObserver = new IntersectionObserver((entries) => {
+                const entry = entries[0];
+                if (entry && entry.isIntersecting) {
+                    scheduleBackPopover();
+                } else {
+                    hideBackPopover();
+                }
+            }, { threshold: 0.35 });
+
+            chatObserver.observe(chatTarget);
+        }
+
+        if (backGoBtn) {
+            backGoBtn.addEventListener('click', () => {
+                const target = document.getElementById('media-bias-game');
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                dismissBackPopover();
+            });
+        }
+
+        if (backDismissBtn) {
+            backDismissBtn.addEventListener('click', () => {
+                dismissBackPopover();
+            });
+        }
     </script>

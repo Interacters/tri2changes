@@ -336,7 +336,7 @@ date: 2025-12-12
         <!-- Section 1: Media Bias Game (with AI Chatbox) -->
         <div class="section-container active" id="section-1">
             <div class="section-header">
-                <h2 class="section-title">Media Bias Sorting Game</h2>
+                <h2 class="section-title">Media Bias Classifying Game</h2>
                 <p class="section-description">
                     When writing a paper, checking the bias of sources is very important. 
                     Drag the news sources to the correct bins. Use the AI chatbox below if you need help!

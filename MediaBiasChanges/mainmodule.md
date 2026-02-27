@@ -865,7 +865,7 @@ body {
     <div class="source-selection">
         <div class="images-area" id="images"></div>
         <div class="help-popover" id="help-popover" role="dialog" aria-live="polite" aria-label="Need help with media bias?">
-            <div class="help-popover-title">Need help?</div>
+            <div class="help-popover-title">Review</div>
             <p class="help-popover-text">Jump to Source Intel Chat for quick tips on bias and sources.</p>
             <div class="help-popover-actions">
                 <button type="button" class="help-popover-btn primary" id="help-popover-go">Go to Chat</button>

@@ -336,7 +336,7 @@ date: 2025-12-12
         <!-- Section 1: Media Bias Game (with AI Chatbox) -->
         <div class="section-container active" id="section-1">
             <div class="section-header">
-                <h2 class="section-title">Media Bias Sorting Game</h2>
+                <h2 class="section-title">Media Bias Classifying Game</h2>
                 <p class="section-description">
                     When writing a paper, checking the bias of sources is very important. 
                     Drag the news sources to the correct bins. Use the AI chatbox below if you need help!
@@ -865,7 +865,7 @@ body {
     <div class="source-selection">
         <div class="images-area" id="images"></div>
         <div class="help-popover" id="help-popover" role="dialog" aria-live="polite" aria-label="Need help with media bias?">
-            <div class="help-popover-title">Need help?</div>
+            <div class="help-popover-title">Review</div>
             <p class="help-popover-text">Jump to Source Intel Chat for quick tips on bias and sources.</p>
             <div class="help-popover-actions">
                 <button type="button" class="help-popover-btn primary" id="help-popover-go">Go to Chat</button>

@@ -1,9 +1,39 @@
+<!-- Section 3: Citation Generator -->
+<div class="section-container" id="section-3">
+    <div class="section-header">
+        <h2 class="section-title">
+            Citation Generator
+            <button
+  id="help-toggle-btn"
+  class="help-icon-btn"
+  aria-label="Citation Generator Help"
+  title="How to use the citation generator"
+>
+  ?
+</button>
+        </h2>
+        
+        <!-- Help Panel (hidden by default) -->
+        <div id="help-panel" style="display: none; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; margin-top: 15px; font-size: 0.9rem; line-height: 1.6;">
+            <h4 style="color: #7ad2f9; margin-bottom: 10px;">How to Use the Citation Generator</h4>
+            <ul style="margin: 0; padding-left: 20px; color: rgba(255,255,255,0.85);">
+                <li><strong>Autofill from URL:</strong> Paste a source URL to automatically extract citation details.</li>
+                <li><strong>Citation Style:</strong> Choose between APA, MLA (9th ed.), or Chicago (author-date) format.</li>
+                <li><strong>Manual Fields:</strong> Fill in author, date, title, and source if autofill doesn't work.</li>
+                <li><strong>Parenthetical Citation:</strong> Use this shortened version when citing sources within your paper.</li>
+                <li><strong>References:</strong> Save citations to build your reference list. Click the ✏️ button to copy the parenthetical citation for in-text use.</li>
+                <li><strong>Source Notes:</strong> Add notes to your saved sources to organize research findings and track how each source supports your argument.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="content-placeholder">
+        <p>
 <style>
   /* Import modern, readable font matching thesis generator */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-  .cite-card { 
-    background: linear-gradient(160deg,  #555dc2d2, #564ea0ff); 
+   .cite-card { 
+    background: #a7a0d4; 
     color:#ffffff; 
     padding:18px; 
     border-radius:12px; 
@@ -22,7 +52,7 @@
   .cite-label { 
     min-width: 110px;
     font-weight:700; 
-    color:#ffffff;
+    color: #0b0839;
     font-size: 0.9rem;
   }
   
@@ -50,7 +80,7 @@
     display:flex; 
     gap:10px; 
     margin-top:12px; 
-    justify-content:flex-end;
+    justify-content:center;
     flex-wrap: wrap;
   }
   
@@ -65,6 +95,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    transition: all 0.2s ease;
   }
   
   .cite-btn.primary { 
@@ -74,8 +105,13 @@
   
   .cite-btn.ghost { 
     background:rgba(255,255,255,0.15); 
-    color:#ffffff; 
+    color: #292745ad; 
     border:1px solid rgba(255,255,255,0.2); 
+  }
+
+  .cite-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
   
   .cite-btn:disabled {
@@ -99,12 +135,6 @@
     font-size: 0.9rem;
   }
   
-  .cite-output:empty::before {
-    content: 'Your citation will appear here...';
-    color: rgba(255, 255, 255, 0.6);
-    font-style: italic;
-  }
-  
   .cite-small { 
     font-size:0.9rem; 
     color:rgba(255, 255, 255, 0.75); 
@@ -123,6 +153,21 @@
     margin-bottom: 12px;
     font-family: 'Inter', sans-serif;
   }
+
+  .style-group {
+    margin-bottom: 20px;
+  }
+
+  .style-group-header {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #7ad2f9;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: rgba(122, 210, 249, 0.15);
+    border-left: 4px solid #7ad2f9;
+    border-radius: 4px;
+  }
   
   .works-cited-list {
     background: rgba(0,0,0,0.2);
@@ -134,7 +179,7 @@
   }
   
   .works-cited-list:empty::before {
-    content: 'No saved citations yet. Click "Save" to add citations to your Works Cited list.';
+    content: 'No saved citations yet. Click "Add Reference" to add citations to your References list.';
     color: rgba(255, 255, 255, 0.7);
     font-style: italic;
     display: block;
@@ -151,7 +196,7 @@
     border-left: 4px solid #7ad2f9;
     border-radius: 6px;
     position: relative;
-    padding-right: 40px;
+    padding-right: 80px;
   }
   
   .citation-item:last-child {
@@ -165,17 +210,84 @@
     font-family: 'Inter', sans-serif;
   }
   
-  .citation-delete {
+  .quality-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+    background: rgba(122, 210, 249, 0.2);
+    color: #7ad2f9;
+    border: 1px solid rgba(122, 210, 249, 0.3);
+  }
+
+  .quality-high {
+    /* Uses default badge style */
+  }
+
+  .quality-medium {
+    /* Uses default badge style */
+  }
+
+  .quality-low {
+    /* Uses default badge style */
+  }
+
+  .quality-loading {
+    opacity: 0.6;
+  }
+
+  .citation-actions {
     position: absolute;
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+  }
+
+  .citation-parenthetical-btn {
+    background: rgba(122, 210, 249, 0.8);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .citation-parenthetical-btn:hover {
+    background: rgba(122, 210, 249, 1);
+    transform: scale(1.1);
+  }
+
+  .citation-parenthetical {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.25);
+  border-left: 3px solid #7ad2f9;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #ffffff;
+  display: none;
+}
+  
+  .citation-delete {
     background: rgba(248, 113, 113, 0.8);
     color: white;
     border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
     cursor: pointer;
     font-weight: bold;
     font-size: 16px;
@@ -188,29 +300,276 @@
   
   .citation-delete:hover {
     background: rgba(248, 113, 113, 1);
-    transform: translateY(-50%) scale(1.1);
+    transform: scale(1.1);
   }
 
+  .help-icon-btn {
+  width: 28px;
+  height: 28px;
+  margin-left: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(122, 210, 249, 0.8);
+  background: transparent;
+  color: #7ad2f9;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+.help-icon-btn:hover {
+  background: rgba(122, 210, 249, 0.2);
+  transform: scale(1.1);
+}
+
+
   .cite-input.missing {
-  border: 2px solid #f87171 !important;
-  background: rgba(248, 113, 113, 0.2) !important;
-}
+    border: 2px solid #f87171 !important;
+    background: rgba(248, 113, 113, 0.2) !important;
+  }
 
-.cite-warning {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  background: rgba(248, 113, 113, 0.15);
-  color: #fff;
-  font-size: 0.85rem;
-  font-family: 'Inter', sans-serif;
-}
+  .cite-warning {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(248, 113, 113, 0.15);
+    color: #fff;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Source Notes Panel - slide out from right */
+  .notes-panel {
+    position: fixed;
+    right: -320px;
+    top: 0;
+    width: 300px;
+    max-width: 90vw;
+    height: 100vh;
+    background: linear-gradient(160deg, #564ea0ee, #3b3666ee);
+    color: #fff;
+    box-shadow: -8px 0 40px rgba(0,0,0,0.5);
+    padding: 20px;
+    transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 9999;
+    overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .notes-panel.open {
+    right: 0;
+  }
+  
+  .notes-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+  }
+
+  .notes-header h3 { 
+    margin: 0;
+    font-size: 1.2rem;
+    color: #fff;
+  }
+  
+  .notes-section {
+    margin-bottom: 20px;
+  }
+
+  .notes-section h4 {
+    font-size: 1rem;
+    color: #7ad2f9;
+    margin-bottom: 10px;
+  }
+
+  .source-select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+
+  .source-select option {
+    background: #3b3666;
+    color: #fff;
+  }
+
+  .note-category-select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+
+  .note-category-select option {
+    background: #3b3666;
+    color: #fff;
+  }
+
+  .note-textarea {
+    width: 100%;
+    min-height: 70px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    resize: vertical;
+    margin-bottom: 10px;
+  }
+
+  .note-textarea::placeholder {
+    color: rgba(255,255,255,0.6);
+  }
+
+  .add-note-btn {
+    width: 100%;
+    padding: 8px;
+    background: #7ad2f9;
+    color: #082033;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .add-note-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(122, 210, 249, 0.4);
+  }
+
+  .add-note-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .note-item {
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 3px solid #7ad2f9;
+    position: relative;
+    padding-right: 35px;
+  }
+
+  .note-category {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .note-category.supports {
+    background: rgba(155, 231, 196, 0.3);
+    color: #9be7c4;
+  }
+
+  .note-category.contradicts {
+    background: rgba(248, 113, 113, 0.3);
+    color: #fca5a5;
+  }
+
+  .note-category.background {
+    background: rgba(122, 210, 249, 0.3);
+    color: #7ad2f9;
+  }
+
+  .note-category.data {
+    background: rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+  }
+
+  .note-content {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.95);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .note-meta {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .note-delete-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    background: rgba(248, 113, 113, 0.8);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .note-delete-btn:hover {
+    background: rgba(248, 113, 113, 1);
+    transform: scale(1.1);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 20px 15px;
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+    font-size: 0.85rem;
+  }
+
+  .citation-output-label {
+    font-weight: 700;
+    color: #7ad2f9;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .references-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  /* Notes toggle button - high z-index to stay clickable */
+  #cite-notes-toggle {
+    position: relative;
+    z-index: 10000;
+  }
 </style>
-
-<div class="intro-text">
-   <h2>Citation Generator</h2>
-    <p>It's important to include correct citations for your work. There are many types of formats for citations including: MLA, APA, Chicago. This tool can help you create citations for your sources.</p>
-</div>
 
 <div class="cite-card" id="citation-tool">
   <div class="cite-row">
@@ -220,6 +579,14 @@
       <option value="mla">MLA (9th ed.)</option>
       <option value="chicago">Chicago (author-date)</option>
     </select>
+  </div>
+
+  <div class="cite-row">
+    <div class="cite-label">URL</div>
+    <input id="cite-url" class="cite-input" placeholder="Add source URL here for instant citation" />
+    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Autofill from URL" style="margin-left:8px;min-width:160px;">
+      Autofill from URL
+    </button>
   </div>
 
   <div class="cite-row">
@@ -242,36 +609,60 @@
     <input id="cite-source" class="cite-input" placeholder="e.g., The New York Times" />
   </div>
 
-  <div class="cite-row">
-    <div class="cite-label">URL</div>
-    <input id="cite-url" class="cite-input" placeholder="https://..." />
-    <button id="cite-fetch-metadata" class="cite-btn ghost" title="Generate citation from URL" style="margin-left:8px;min-width:160px;">
-      Generate from URL
-    </button>
-  </div>
-
   <div class="cite-actions">
-    <button id="cite-generate" class="cite-btn primary">Generate</button>
-    <button id="cite-reset" class="cite-btn ghost"> Reset <span class="btn-hint">(clear fields)</span> </button>
-    <button id="cite-copy" class="cite-btn ghost">
-      Copy <span class="btn-hint">(to clipboard)</span>
-    </button>
-    <button id="cite-save" class="cite-btn ghost" title="Save locally">
-      Save <span class="btn-hint">(add to Works Cited)</span>
-    </button>
-    <button id="cite-load" class="cite-btn ghost" title="Load last">
-      Load <span class="btn-hint">(view Works Cited)</span>
-    </button>
+    <button id="cite-generate" class="cite-btn primary">📝 Create Citation</button>
+    <button id="cite-reset" class="cite-btn ghost">🔄 Clear</button>
+    <button id="cite-copy" class="cite-btn ghost">📋 Copy</button>
+    <button id="cite-save" class="cite-btn ghost">💾 Add Reference</button>
+    <button id="cite-notes-toggle" class="cite-btn ghost">📝 Notes</button>
   </div>
 
-  <div id="cite-output" class="cite-output" aria-live="polite"></div>
-  <div id="cite-parenthetical" class="cite-output" style="margin-top:8px;"></div>
+  <div class="cite-output" aria-live="polite">
+    <span class="citation-output-label">Citation:</span>
+    <div id="cite-output-text"></div>
+  </div>
+  <div class="cite-output" style="margin-top:8px;">
+    <div id="cite-parenthetical"></div>
+  </div>
   <div id="cite-warning" class="cite-warning" style="display:none;"></div>
-  <div class="cite-small">Formats: APA, MLA (9th ed.), Chicago (author-date). Saved citations are stored locally in your browser.</div>
 
   <div class="works-cited-section" id="works-cited-section" style="display: none;">
-    <h3>Works Cited</h3>
-    <div id="works-cited-list" class="works-cited-list"></div>
+    <h3>References</h3>
+    <div class="references-actions">
+      <button id="copy-all-references" class="cite-btn ghost">📋 Copy All References</button>
+      <button id="clear-all-references" class="cite-btn ghost">🗑️ Clear All References</button>
+    </div>
+    <div id="works-cited-by-style"></div>
+  </div>
+</div>
+
+<!-- Source Notes Panel - slides in from right, no close button -->
+<div id="notes-panel" class="notes-panel">
+  <div class="notes-header">
+    <h3>📝 Source Notes</h3>
+  </div>
+
+  <div class="notes-section">
+    <h4>Add Note</h4>
+    <select id="note-source-select" class="source-select">
+      <option value="">Select a source...</option>
+    </select>
+    <select id="note-category-select" class="note-category-select">
+      <option value="">Category (optional)</option>
+      <option value="supports">Supports</option>
+      <option value="contradicts">Contradicts</option>
+      <option value="background">Background</option>
+      <option value="data">Data</option>
+    </select>
+    <textarea id="note-textarea" class="note-textarea" placeholder="Write your note here..."></textarea>
+    <button id="add-note-btn" class="add-note-btn" disabled>Add Note</button>
+  </div>
+
+  <div class="notes-section">
+    <h4>Your Notes</h4>
+    <div id="notes-list" class="notes-list">
+      <div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>
+    </div>
   </div>
 </div>
 
@@ -341,20 +732,93 @@ import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.j
   const titleEl = document.getElementById('cite-title');
   const sourceEl = document.getElementById('cite-source');
   const urlEl = document.getElementById('cite-url');
-  const outEl = document.getElementById('cite-output');
+  const outTextEl = document.getElementById('cite-output-text');
   const fetchBtn = document.getElementById('cite-fetch-metadata');
   const generateBtn = document.getElementById('cite-generate');
   const copyBtn = document.getElementById('cite-copy');
   const saveBtn = document.getElementById('cite-save');
-  const loadBtn = document.getElementById('cite-load');
   const worksCitedSection = document.getElementById('works-cited-section');
-  const worksCitedList = document.getElementById('works-cited-list');
+  const worksCitedByStyle = document.getElementById('works-cited-by-style');
+  const copyAllBtn = document.getElementById('copy-all-references');
+  const clearAllBtn = document.getElementById('clear-all-references');
+  const helpToggleBtn = document.getElementById('help-toggle-btn');
+  const helpPanel = document.getElementById('help-panel');
+  const notesToggleBtn = document.getElementById('cite-notes-toggle');
+  const notesPanel = document.getElementById('notes-panel');
+  const noteSourceSelect = document.getElementById('note-source-select');
+  const noteCategorySelect = document.getElementById('note-category-select');
+  const noteTextarea = document.getElementById('note-textarea');
+  const addNoteBtn = document.getElementById('add-note-btn');
+  const notesList = document.getElementById('notes-list');
+
+  // Storage keys
+  const CITATIONS_KEY = 'biasGame_citations_v1';
+  const NOTES_KEY = 'biasGame_notes_v1';
+  const SESSION_KEY = 'citation_session_v1';
 
   // Backend configuration
   if (!window.fetchProxyBase) {
       window.fetchProxyBase = 'http://localhost:8404/api/media';
       console.info('fetchProxyBase defaulted to', window.fetchProxyBase);
   }
+
+  // Helper functions
+  function safe(val, fallback='') { return (val || '').trim(); }
+
+  function extractSourceName(citationText) {
+    // Try to extract a readable source name from the citation
+    const match = citationText.match(/<i>(.*?)<\/i>/);
+    if (match) return match[1];
+    
+    // Fallback: take first 60 chars
+    const plainText = citationText.replace(/<[^>]*>/g, '');
+    return plainText.substring(0, 60) + (plainText.length > 60 ? '...' : '');
+  }
+
+  // Check citation quality using backend API
+  async function checkCitationQuality(url, author, date, source) {
+    try {
+      const response = await fetch(`${pythonURI}/api/media/check_quality`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, author, date, source })
+      });
+      
+      if (!response.ok) {
+        console.warn('Quality check failed:', response.status);
+        return null;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking quality:', error);
+      return null;
+    }
+  }
+
+  // Help toggle
+  helpToggleBtn.addEventListener('click', () => {
+    helpPanel.style.display = helpPanel.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // Notes panel toggle
+  notesToggleBtn.addEventListener('click', () => {
+    notesPanel.classList.toggle('open');
+    if (notesPanel.classList.contains('open')) {
+      updateNotesSourceSelect();
+      loadNotes();
+    }
+  });
+
+  // Close notes panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (notesPanel.classList.contains('open') && 
+        !notesPanel.contains(e.target) && 
+        e.target !== notesToggleBtn &&
+        !notesToggleBtn.contains(e.target)) {
+      notesPanel.classList.remove('open');
+    }
+  });
 
   // ===== CROSS-CHECK FORMATTING =====
 function validateCitationFields() {
@@ -395,7 +859,6 @@ function validateCitationFields() {
 styleEl.addEventListener('change', validateCitationFields);
 
 // Save session whenever inputs change
-const SESSION_KEY = 'citation_session_v1';
 [authorEl, titleEl, sourceEl, dateEl, urlEl, styleEl].forEach(el => {
   el.addEventListener('input', () => {
     localStorage.setItem(SESSION_KEY, JSON.stringify({
@@ -411,8 +874,6 @@ const SESSION_KEY = 'citation_session_v1';
 
   // LIST: Storage key for citation collection
   const KEY = 'biasGame_citations_v1';
-
-  function safe(val, fallback='') { return (val || '').trim(); }
 
   // FIXED APA FORMAT
   function fmtAPA({ author, date, title, source, url }) {
@@ -634,7 +1095,7 @@ if (style === 'mla') citation = fmtMLA9(payload);
 else if (style === 'chicago') citation = fmtChicago(payload);
 else citation = fmtAPA(payload);
 
-outEl.innerHTML = citation;
+outTextEl.innerHTML = citation;
 
 // Pass style to buildParenthetical!
 const parentheticalEl = document.getElementById('cite-parenthetical');
@@ -642,7 +1103,7 @@ const parenthetical = buildParenthetical({ ...payload, style });
 
 if (parentheticalEl) {
   parentheticalEl.innerHTML = parenthetical
-    ? `<b>Parenthetical citation:</b> ${parenthetical}`
+    ? `<span class="citation-output-label">Parenthetical Citation:</span>${parenthetical}`
     : '';
 }
 
@@ -701,69 +1162,289 @@ if (parentheticalEl) {
       return;
     }
     
+    const payload = {
+      author: safe(authorEl.value),
+      date: safe(dateEl.value),
+      title: safe(titleEl.value),
+      source: safe(sourceEl.value),
+      url: safe(urlEl.value)
+    };
+    
+    const style = styleEl.value;
+    const parenthetical = buildParenthetical({ ...payload, style });
+    
     // Get existing list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
-    saved.push({ 
+    const newCitation = { 
       citation, 
       style: styleEl.value,
-      at: Date.now() 
-    });
+      at: Date.now(),
+      source: safe(sourceEl.value),
+      title: safe(titleEl.value),
+      url: safe(urlEl.value),
+      author: safe(authorEl.value),
+      date: safe(dateEl.value),
+      parenthetical: parenthetical
+    };
+    saved.push(newCitation);
     localStorage.setItem(KEY, JSON.stringify(saved));
-    alert('✓ Citation saved to Works Cited!');
+    alert('✓ Citation saved to References!');
     
     loadWorksCited();
+    updateNotesSourceSelect();
   }
 
   // PROCEDURE CALL: Use student-developed procedure to process citations
-  // OUTPUT: Display filtered and processed citations
-  function loadWorksCited() {
+  // OUTPUT: Display filtered and processed citations organized by style
+  async function loadWorksCited() {
     // Get list from storage
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     
     if (saved.length === 0) {
       worksCitedSection.style.display = 'none';
-      alert('No saved citations yet. Click "Save" to add citations to your Works Cited list.');
       return;
     }
 
-    // PROCEDURE CALL: Process citation list
-    const result = processCitationList(saved, 'all', 100);
-    
     // Display results
     worksCitedSection.style.display = 'block';
-    worksCitedList.innerHTML = '';
+    worksCitedByStyle.innerHTML = '';
 
-    // ITERATION: Display each citation
-    result.citations.forEach((item, index) => {
-      const citationDiv = document.createElement('div');
-      citationDiv.className = 'citation-item';
-      
-      const textDiv = document.createElement('div');
-      textDiv.className = 'citation-text';
-      textDiv.innerHTML = item.citation;
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'citation-delete';
-      deleteBtn.innerHTML = '×';
-      deleteBtn.title = 'Delete this citation';
-      deleteBtn.onclick = () => deleteCitation(index);
-      
-      citationDiv.appendChild(textDiv);
-      citationDiv.appendChild(deleteBtn);
-      worksCitedList.appendChild(citationDiv);
+    // Group citations by style
+    const byStyle = {
+      apa: [],
+      mla: [],
+      chicago: []
+    };
+
+    saved.forEach((item, index) => {
+      if (byStyle[item.style]) {
+        byStyle[item.style].push({ item, index });
+      }
+    });
+
+    // Display each style group
+    const styleLabels = {
+      apa: 'APA',
+      mla: 'MLA (9th ed.)',
+      chicago: 'Chicago (author-date)'
+    };
+
+    ['apa', 'mla', 'chicago'].forEach(style => {
+      if (byStyle[style].length > 0) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'style-group';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'style-group-header';
+        headerDiv.textContent = `${styleLabels[style]} (${byStyle[style].length})`;
+        groupDiv.appendChild(headerDiv);
+
+        const listDiv = document.createElement('div');
+        listDiv.className = 'works-cited-list';
+
+        byStyle[style].forEach(async ({ item, index }) => {
+          const citationDiv = document.createElement('div');
+          citationDiv.className = 'citation-item';
+          
+          const textDiv = document.createElement('div');
+          textDiv.className = 'citation-text';
+          
+          // Add loading badge initially
+          const loadingBadge = '<span class="quality-badge quality-loading">⏳</span>';
+          textDiv.innerHTML = item.citation + loadingBadge;
+          
+          const actionsDiv = document.createElement('div');
+          actionsDiv.className = 'citation-actions';
+          
+         const parentheticalBtn = document.createElement('button');
+parentheticalBtn.className = 'citation-parenthetical-btn';
+parentheticalBtn.innerHTML = '✏️';
+parentheticalBtn.title = 'Show parenthetical citation';
+
+const parentheticalDiv = document.createElement('div');
+parentheticalDiv.className = 'citation-parenthetical';
+parentheticalDiv.textContent = item.parenthetical || 'No parenthetical citation available.';
+
+parentheticalBtn.onclick = () => {
+  parentheticalDiv.style.display =
+    parentheticalDiv.style.display === 'none' ? 'block' : 'none';
+};
+
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'citation-delete';
+          deleteBtn.innerHTML = '×';
+          deleteBtn.title = 'Delete this citation';
+          deleteBtn.onclick = () => deleteCitation(index);
+          
+          actionsDiv.appendChild(parentheticalBtn);
+          actionsDiv.appendChild(deleteBtn);
+          citationDiv.appendChild(textDiv);
+          citationDiv.appendChild(actionsDiv);
+          citationDiv.appendChild(parentheticalDiv);
+          listDiv.appendChild(citationDiv);
+
+          // Check quality asynchronously
+          const quality = await checkCitationQuality(
+            item.url || '',
+            item.author || '',
+            item.date || '',
+            item.source || ''
+          );
+
+          // Update badge with quality score
+          if (quality) {
+            const qualityClass = `quality-${quality.quality}`;
+            const badge = `<span class="quality-badge ${qualityClass}" title="${quality.message}">${quality.score}/10</span>`;
+            textDiv.innerHTML = item.citation + badge;
+          } else {
+            // Remove loading badge if quality check failed
+            textDiv.innerHTML = item.citation;
+          }
+        });
+
+        groupDiv.appendChild(listDiv);
+        worksCitedByStyle.appendChild(groupDiv);
+      }
     });
 
     worksCitedSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function deleteCitation(index) {
-    if (!confirm('Delete this citation from Works Cited?')) return;
+    if (!confirm('Delete this citation from References?')) return;
     
     const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
     saved.splice(index, 1);
     localStorage.setItem(KEY, JSON.stringify(saved));
     loadWorksCited();
+    updateNotesSourceSelect();
   }
+
+  // Copy all references
+  copyAllBtn.addEventListener('click', () => {
+    const saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (saved.length === 0) {
+      alert('No references to copy.');
+      return;
+    }
+    
+    const allCitations = saved.map(item => {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = item.citation;
+      return tempDiv.textContent || tempDiv.innerText || '';
+    }).join('\n\n');
+    
+    copyToClipboard(allCitations);
+  });
+
+  // Clear all references
+  clearAllBtn.addEventListener('click', () => {
+    if (!confirm('Clear all references? This cannot be undone.')) return;
+    
+    localStorage.removeItem(KEY);
+    worksCitedSection.style.display = 'none';
+    updateNotesSourceSelect();
+    alert('All references cleared.');
+  });
+
+  // Notes functionality
+  function updateNotesSourceSelect() {
+    const saved = JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]');
+    noteSourceSelect.innerHTML = '<option value="">Select a source...</option>';
+    
+    saved.forEach((item, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = extractSourceName(item.citation);
+      noteSourceSelect.appendChild(option);
+    });
+
+    // Enable/disable add button
+    addNoteBtn.disabled = saved.length === 0;
+  }
+
+  function loadNotes() {
+    const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+    const saved = JSON.parse(localStorage.getItem(CITATIONS_KEY) || '[]');
+    
+    if (notes.length === 0) {
+      notesList.innerHTML = '<div class="empty-state">No notes yet. Add a source to your References and create a note for it.</div>';
+      return;
+    }
+
+    notesList.innerHTML = '';
+    notes.reverse().forEach((note, reverseIndex) => {
+      const actualIndex = notes.length - 1 - reverseIndex;
+      const citation = saved[note.sourceIndex];
+      if (!citation) return; // Skip if citation was deleted
+
+      const noteDiv = document.createElement('div');
+      noteDiv.className = 'note-item';
+      
+      let categoryHTML = '';
+      if (note.category) {
+        categoryHTML = `<span class="note-category ${note.category}">${note.category}</span>`;
+      }
+      
+      noteDiv.innerHTML = `
+        ${categoryHTML}
+        <div class="note-content">${note.content}</div>
+        <div class="note-meta">
+          <strong>${extractSourceName(citation.citation)}</strong> • ${new Date(note.timestamp).toLocaleString()}
+        </div>
+        <button class="note-delete-btn" onclick="deleteNote(${actualIndex})">×</button>
+      `;
+      
+      notesList.appendChild(noteDiv);
+    });
+  }
+
+  window.deleteNote = function(index) {
+    if (!confirm('Delete this note?')) return;
+    
+    const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+    notes.splice(index, 1);
+    localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+    loadNotes();
+  };
+
+  // Enable add note button when source and text are filled
+  noteSourceSelect.addEventListener('change', () => {
+    addNoteBtn.disabled = !noteSourceSelect.value || !noteTextarea.value.trim();
+  });
+
+  noteTextarea.addEventListener('input', () => {
+    addNoteBtn.disabled = !noteSourceSelect.value || !noteTextarea.value.trim();
+  });
+
+  addNoteBtn.addEventListener('click', () => {
+    const sourceIndex = parseInt(noteSourceSelect.value);
+    const content = noteTextarea.value.trim();
+    const category = noteCategorySelect.value;
+    
+    if (!content || isNaN(sourceIndex)) {
+      alert('Please select a source and write a note.');
+      return;
+    }
+
+    const notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+    notes.push({
+      sourceIndex: sourceIndex,
+      content: content,
+      category: category,
+      timestamp: Date.now()
+    });
+    localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+    
+    noteTextarea.value = '';
+    noteCategorySelect.value = '';
+    noteSourceSelect.value = '';
+    addNoteBtn.disabled = true;
+    
+    loadNotes();
+    alert('✓ Note added successfully!');
+  });
 
   // INPUT: Fetch data from online source (URL)
   async function tryFetchHtml(url) {
@@ -781,7 +1462,7 @@ if (parentheticalEl) {
       console.warn('Proxy fetch failed', err);
     }
     return null;
-  }
+    }
 
   function parseMetadataFromHtml(html, url) {
     const parser = new DOMParser();
@@ -891,7 +1572,7 @@ if (parentheticalEl) {
       console.warn(err);
       alert('Error fetching metadata.');
     } finally {
-      fetchBtn.textContent = 'Generate from URL';
+      fetchBtn.textContent = 'Autofill from URL';
       fetchBtn.disabled = false;
     }
   }
@@ -906,7 +1587,7 @@ resetBtn.addEventListener('click', () => {
   [authorEl, dateEl, titleEl, sourceEl, urlEl].forEach(el => el.value = '');
   
   // Clear outputs
-  outEl.innerHTML = '';
+  outTextEl.innerHTML = '';
   document.getElementById('cite-parenthetical').innerHTML = '';
   document.getElementById('cite-warning').style.display = 'none';
   
@@ -914,14 +1595,18 @@ resetBtn.addEventListener('click', () => {
   [authorEl, dateEl, titleEl, sourceEl].forEach(el => el.classList.remove('missing'));
 });
   copyBtn.addEventListener('click', () => {
-    const citation = outEl.innerHTML;
-    if (!citation || citation === 'Your citation will appear here...') {
+    const citation = outTextEl.innerHTML;
+    if (!citation || citation === '') {
       alert('Generate a citation first.');
       return;
     }
     copyToClipboard(citation);
   });
   saveBtn.addEventListener('click', saveToWorksCited);
-  loadBtn.addEventListener('click', loadWorksCited);
+
+  // Initialize
+  updateNotesSourceSelect();
+  loadWorksCited();
+  loadNotes();
 })();
 </script>

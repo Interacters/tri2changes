@@ -1161,6 +1161,43 @@ async function submitFinalTime(username, elapsed) {
         alert('Failed to save your score. Please try again.');
     }
 }
+//SRP CHANGES
+// WORKER: Validate all images are placed
+function validateAllPlaced(placedImages) {
+    const total = document.querySelectorAll('.image').length;
+    if (placedImages.size < total) {
+        alert(`Place all images first! (${placedImages.size}/${total})`);
+        return false;
+    }
+    return true;
+}
+
+// WORKER: Find incorrect placements
+function getIncorrectPlacements() {
+    const incorrect = [];
+    document.querySelectorAll('.bin').forEach(bin => {
+        bin.querySelectorAll('.image').forEach(img => {
+            if (img.dataset.bin !== bin.dataset.bin) {
+                incorrect.push({
+                    name: img.dataset.company,
+                    currentBin: bin.dataset.bin,
+                    src: img.src
+                });
+            }
+        });
+    });
+    return incorrect;
+}
+
+// WORKER: Save attempt data to localStorage
+function saveAttemptLocally(username, elapsed) {
+    const d = loadData();
+    d.attempts = d.attempts || [];
+    const prompts = d.meta?.currentChatPrompts?.slice() ?? [];
+    d.attempts.push({ username, time: Number(elapsed) || 0, at: Date.now(), prompts });
+    if (d.meta) delete d.meta.currentChatPrompts;
+    saveData(d);
+}
 
     window.addEventListener('DOMContentLoaded', () => {
         console.log("DOM fully loaded — initializing game & buttons");
@@ -1196,72 +1233,35 @@ async function submitFinalTime(username, elapsed) {
         const submitBtn = document.getElementById('submit-btn');
         if (submitBtn) {
             submitBtn.addEventListener('click', () => {
-                console.log("Submit clicked");
+                if (!validateAllPlaced(placedImages)) return;
 
-                const totalImages = document.querySelectorAll('.image').length;
-                const placedCount = placedImages.size;
-
-                if (placedCount < totalImages) {
-                    alert(`You haven't placed all the images yet! You've placed ${placedCount} out of ${totalImages}.`);
+                const incorrect = getIncorrectPlacements();
+                if (incorrect.length > 0) {
+                    showIncorrectFeedback(incorrect);
                     return;
                 }
 
-                // Check for correct placement and collect incorrect ones
-                let incorrectImages = [];
-                document.querySelectorAll('.bin').forEach(bin => {
-                    bin.querySelectorAll('.image').forEach(img => {
-                        if (img.dataset.bin !== bin.dataset.bin) {
-                            incorrectImages.push({
-                                name: img.dataset.company,
-                                currentBin: bin.dataset.bin,
-                                src: img.src
-                            });
-                        }
-                    });
-                });
-
-                if (incorrectImages.length > 0) {
-                    showIncorrectFeedback(incorrectImages);
-                    return;
-                }
-
-                // NEW: Check if autofill was used
                 if (autofillUsed) {
                     showAutofillWarning();
-                    initGame(); // Reset game
+                    initGame();
                     return;
                 }
 
-                // Stop timer and get final time (only if autofill wasn't used)
-                if (timerHandle) {
-                    const elapsed = timerHandle.stop();
-                    const username = window.currentPlayerUid || 'Guest';
-
-                    try {
-                        const d = loadData();
-                        d.attempts = d.attempts || [];
-                        const prompts = (d.meta && d.meta.currentChatPrompts) ? d.meta.currentChatPrompts.slice() : [];
-                        d.attempts.push({ 
-                            username: username,
-                            time: Number(elapsed) || 0, 
-                            at: Date.now(), 
-                            prompts 
-                        });
-                        if (d.meta) delete d.meta.currentChatPrompts;
-                        saveData(d);
-                    } catch (err) {
-                        console.warn('save attempt with prompts failed', err);
-                    }
-
-                    submitFinalTime(username, elapsed);
-                    
-                    showCongrats(elapsed);
-                    initGame();
-                } else {
+                if (!timerHandle) {
                     alert("Timer not started. Please play the game first!");
+                    return;
                 }
+
+                const elapsed = timerHandle.stop();
+                const username = window.currentPlayerUid || 'Guest';
+
+                saveAttemptLocally(username, elapsed);
+                submitFinalTime(username, elapsed);
+                showCongrats(elapsed);
+                initGame();
             });
-        }
+        }       
+        
     });
 
     // Initialize

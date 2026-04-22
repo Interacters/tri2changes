@@ -1204,29 +1204,32 @@ body {
         }
     }
 
-    // Fetches the current top-five entries from the backend and renders them into the leaderboard table and converts raw seconds into a readable MM:SS format (Minutes:Seconds)
-    async function fetchLeaderboard() {
+    // The limit parameter controls how many rows are fetched and requested from the backend when displaying top entreis for the leaderboard table
+    // A smaller limit keeps the panel compact in a way where scrolling is minimized
+    async function fetchLeaderboard(limit = 5) {
         const tbody = document.getElementById('leaderboard-body');
 
         try {
-            // Request only 5 rows so the panel stays compact without the need to scroll further
-            const response = await fetch(pythonURI + '/api/media/leaderboard?limit=5');
+            // Pass the limit value directly into the URL so the backend only returns that many rows
+            const response = await fetch(pythonURI + `/api/media/leaderboard?limit=${limit}`);
 
+            // If the server returned an error status, throw so the catch block handles it
             if (!response.ok) throw new Error('Failed to fetch leaderboard');
 
             const data = await response.json();
 
-            // Clear any previous rows before inserting the fresh data
+            // Clear any previous rows before inserting fresh data so old entries do not stack up
             tbody.innerHTML = '';
 
+            // Iterate over every entry the server returned and insert one table row each
             data.forEach((entry, index) => {
                 const row = tbody.insertRow();
 
-                // Use the backend rank field if available, otherwise fall back to position
+                // Use the backend rank field if available, otherwise fall back to loop position
                 row.insertCell().textContent = entry.rank || (index + 1);
                 row.insertCell().textContent = entry.username || 'Unknown';
 
-                // Convert the stored integer seconds into a readable and understandable MM:SS string
+                // Convert raw seconds into a readable MM:SS string for the time column
                 const timeInSeconds = entry.time || 0;
                 const minutes       = Math.floor(timeInSeconds / 60);
                 const seconds       = timeInSeconds % 60;
@@ -1235,7 +1238,7 @@ body {
         } catch (err) {
             console.error('Error fetching leaderboard:', err);
 
-            // Show a friendly error row so the player knows something went wrong or that the backend probably isn't connected
+            // Show a friendly error row so the player knows the leaderboard could not load
             tbody.innerHTML = '<tr><td colspan="3">Unable to load leaderboard</td></tr>';
         }
     }

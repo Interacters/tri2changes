@@ -1540,8 +1540,8 @@ body {
         // initGame may have already run from DOMContentLoaded; calling it again here is safe because it always starts from a fully clean state
         initGame();
 
-        // Show current standings as soon as the page is fully ready
-        fetchLeaderboard();
+        // Show current top 5 standings as soon as the page is fully ready
+        fetchLeaderboard(5);
 
         // Poll for updated standings every 30 seconds so new scores appear automatically
         setInterval(fetchLeaderboard, 30000);

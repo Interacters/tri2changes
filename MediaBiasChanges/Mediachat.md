@@ -741,8 +741,7 @@ body {
     ];
 
     // localStorage helpers
-    // All game data lives under one versioned key so reads and writes go through
-    // a single path and future schema changes are easy to handle in one place.
+    // All game data lives under one versioned key so reads and writes go through a single path and future schema changes are easy to handle in one place.
 
     const STORAGE_KEY = 'biasGameData_v1';
 
@@ -933,7 +932,7 @@ body {
         img.dataset.company = file.company;
         img.dataset.id      = slugify(file.company);
     
-        // This section that involved autofilling the news source into a chatbot by clicking or dragging the card is for my other group mate's project. I did not write the function of autofillNewsSource
+        // Call autofillNewsSource() to pre-populate the news source input in the chat panel (implemented by another team member's module). This lets players quickly look up bias info about the outlet they're dragging.
         const autofillNewsSource = () => {
             const newsSourceInput = document.getElementById('news-source');
             if (!newsSourceInput) return;    // field may not exist on every page variant
@@ -973,8 +972,13 @@ body {
         return img;
     }
 
-    // Resets the board to a clean starting state: wipes all bins and the image tray, resets every session variable, then picks and renders a fresh set of 21 cards.
-    // If a valid round selection already exists in localStorage it is reused so a mid-round page refresh does not change the set of cards the player was working on.
+    // Initializes a new game round or resets the current round.
+    // The board state (bins + tray) is cleared
+    // When the game is reset, the session flags (game started, timer, autofill) are also reset
+    // Randomly selects 21 cards (balanced: 7 left, 7 center, 7 right)
+    // The selection is saved to local storage
+    // Makes the cards draggable images
+    // Any placements from previous session that are in-progress are restored
     function initGame() {
         // Wipe the image tray and every bin content area
         imagesArea.innerHTML = '';
@@ -998,7 +1002,7 @@ body {
         }
 
         // Returns a randomly ordered slice of arr containing count items.
-        // Spread into a new array first to avoid mutating the original imageFiles list.
+        // Spread into a new array first to avoid changing the original imageFiles list.
         const getRandomSubset = (arr, count) => {
             return [...arr]
                 .sort(() => 0.5 - Math.random())

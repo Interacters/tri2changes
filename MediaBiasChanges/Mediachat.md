@@ -1,566 +1,3 @@
-<style>
-    /* Floats the help popover to the right of whatever card it is nested inside. Absolute positioning lets it escape normal flow without shifting other elements. */
-    .help-popover {
-        position: absolute;
-        top: 0;
-        left: 100%;           /* anchors to the right edge of the parent card */
-        width: 280px;
-        background: rgba(15, 23, 42, 0.95);
-        color: #e2e8f0;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        border-radius: 16px;
-        padding: 16px;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.6);
-        display: none;        /* hidden until the .show class is added via JS */
-        z-index: 9999;        /* stays on top of all other page content */
-        margin-left: 16px;    /* gap between the card edge and the popover */
-    }
-
-    /* Adding .show switches display back on and plays the entrance animation */
-    .help-popover.show {
-        display: block;
-        animation: popIn 0.25s ease;
-    }
-
-    /* Fades the popover in while nudging it upward from a slightly lower start position */
-    @keyframes popIn {
-        from {
-            opacity: 0;
-            transform: translateY(8px) scale(0.98);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    /* Bright title text so it stands out against the dark panel background */
-    .help-popover-title {
-        font-weight: 700;
-        color: #f8fafc;
-        margin-bottom: 6px;
-        font-size: 1rem;
-    }
-
-    /* Softer body copy that describes what the primary button will do */
-    .help-popover-text {
-        font-size: 0.9rem;
-        color: #cbd5e1;
-        margin: 0 0 12px;
-    }
-
-    /* Flex row that places the two action buttons side by side */
-    .help-popover-actions {
-        display: flex;
-        gap: 8px;
-    }
-
-    /* Shared base for both action buttons inside the popover */
-    .help-popover-btn {
-        flex: 1;              /* both buttons share the row width equally */
-        padding: 10px 12px;
-        border-radius: 10px;
-        border: 1px solid transparent;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    /* Filled blue button draws the eye to the primary action */
-    .help-popover-btn.primary {
-        background: #60a5fa;
-        color: #0f172a;       /* dark text for contrast on the light blue fill */
-        box-shadow: 0 8px 18px rgba(96, 165, 250, 0.35);
-    }
-
-    /* Transparent ghost button signals a secondary / dismissal option */
-    .help-popover-btn.ghost {
-        background: transparent;
-        color: #e2e8f0;
-        border-color: rgba(148, 163, 184, 0.4);
-    }
-
-    /* Both buttons lift slightly on hover to feel clickable */
-    .help-popover-btn:hover {
-        transform: translateY(-1px);
-    }
-
-    /* When the popover is used next to the chat panel it mirrors to the left */
-    .help-popover.chat {
-        left: auto;
-        right: 100%;          /* now anchors to the left edge of the parent */
-        margin-left: 0;
-        margin-right: 16px;
-    }
-
-    /* Both card types need overflow:visible so the absolute popover is not clipped */
-    .ai-card {
-        position: relative;
-        overflow: visible;
-    }
-
-    .source-selection {
-        position: relative;
-        overflow: visible;
-    }
-
-    /* Below 1100px there is no room for the popover to float beside the card, so it drops back into normal document flow and stacks underneath */
-    @media (max-width: 1100px) {
-        .help-popover {
-            position: relative;
-            left: auto;
-            top: auto;
-            width: 100%;
-            margin: 12px 0 0;
-        }
-    }
-
-    /* Spacing wrapper around the spectrum intro content */
-    .media-spectrum-intro {
-        margin-bottom: 30px;
-    }
-
-    /* Horizontal gradient bar that visualizes the left-to-right bias scale */
-    .spectrum-bar {
-        height: 12px;
-        background: linear-gradient(to right, #3b82f6, #94a3b8, #ef4444); /* blue > grey > red */
-        border-radius: 10px;
-        margin: 20px 0;
-    }
-
-    /* Pill-shaped button that collapses or expands the bias info section */
-    .spectrum-toggle-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        padding: 12px 20px;
-        background: rgba(15, 23, 42, 0.8);
-        border: 2px solid #94a3b8;
-        border-radius: 16px;
-        color: #afb3e8;
-        font-size: 1.2rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-bottom: 20px;
-        user-select: none;    /* stops the label being accidentally selected */
-    }
-
-    /* Blue border on hover signals the button is interactive */
-    .spectrum-toggle-btn:hover {
-        background: rgba(15, 23, 42, 0.95);
-        border-color: #60a5fa;
-    }
-
-    /* Arrow icon that rotates smoothly when the section opens or closes */
-    .spectrum-collapse-icon {
-        font-size: 1.2rem;
-        transition: transform 0.3s ease;
-    }
-
-    /* Pointing left shows the section is currently closed */
-    .spectrum-collapse-icon.collapsed {
-        transform: rotate(-90deg);
-    }
-
-    /* Animates height and opacity so the collapse feels smooth rather than instant */
-    #bias-info-box {
-        max-height: 2000px;   /* tall enough to always fit all content when open */
-        overflow: hidden;
-        transition: max-height 0.5s ease, opacity 0.4s ease, margin 0.3s ease;
-        opacity: 1;
-        margin-bottom: 30px;
-    }
-
-    /* Collapsing zeroes out height, opacity, and margin so no empty gap remains */
-    #bias-info-box.collapsed {
-        max-height: 0;
-        opacity: 0;
-        margin-bottom: 0;
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-</style>
-
-<!-- Toggle button lives outside the collapsible box so it stays visible even when the box is hidden, giving the user a way to reopen it -->
-<div class="spectrum-toggle-btn" id="spectrum-toggle">
-    <span>Click Here to See Spectrum of Bias</span>
-    <span class="spectrum-collapse-icon" id="spectrum-icon">&#9660;</span>
-</div>
-
-<!-- Dark panel holding the bias spectrum explorer. Starts fully expanded; collapses when the toggle above is clicked. -->
-<div id="bias-info-box" style="background: rgba(15, 23, 42, 0.8); border: 2px solid #94a3b8; border-radius: 16px; padding: 10px; transition: all 0.3s;">
-    <div class="media-spectrum-intro">
-        <h3 style="color: #60a5fa; font-size: 1.8rem; margin-bottom: 20px; text-align: center;">The Media Spectrum Explorer</h3>
-        <p style="color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; text-align: center;">
-            Media bias is how stories get framed. Drag the slider to explore different perspectives!
-        </p>
-        <div style="position: relative; padding: 40px 20px;">
-            <div class="spectrum-bar"></div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                <span style="color: #3b82f6; font-weight: 700; font-size: 0.9rem;">LEFT</span>
-                <span style="color: #94a3b8; font-weight: 700; font-size: 0.9rem;">CENTER</span>
-                <span style="color: #ef4444; font-weight: 700; font-size: 0.9rem;">RIGHT</span>
-            </div>
-            <!-- Slider starts at 50 so the page loads showing Center/Neutral -->
-            <div style="position: relative; margin: 30px 0;">
-                <input type="range" min="0" max="100" value="50"
-                       id="bias-slider"
-                       style="width: 100%; height: 8px; border-radius: 5px; background: rgba(148, 163, 184, 0.3); outline: none; cursor: pointer;">
-            </div>
-            <div style="text-align: center;">
-                <div style="font-size: 4rem; margin-bottom: 15px;" id="bias-emoji">&#x1318D;</div>
-                <h4 style="color: #94a3b8; font-size: 1.5rem; margin-bottom: 15px;" id="bias-title">Center/Neutral</h4>
-                <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.8;" id="bias-description">
-                    Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints.
-                </p>
-                <div style="margin-top: 20px; padding: 15px; background: rgba(148, 163, 184, 0.1); border-radius: 10px;">
-                    <p style="color: #60a5fa; font-weight: 700; margin-bottom: 8px;" id="bias-key">Key Characteristics:</p>
-                    <p style="color: #e2e8f0; font-size: 0.9rem;" id="bias-traits">
-                        Fact-based headlines<br>
-                        Multiple perspectives<br>
-                        Minimal opinion language
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 20px; border-radius: 12px; margin-top: 25px;">
-        <h4 style="color: #a78bfa; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-            Pro Tip
-        </h4>
-        <p style="color: #e2e8f0; line-height: 1.6;">
-            <strong>No source is 100% unbiased.</strong> Do not strive for perfection. Just consider the value each source brings. Smart readers consume multiple viewpoints to have a well rounded opinion.
-        </p>
-    </div>
-</div>
-
-<script>
-    // Wrap the slider and collapse logic in an IIFE so no variable names here bleed into the global scope and clash with the game scripts below
-    (function() {
-
-        // Cache the slider element once at startup so we are not querying the DOM on every event
-        const biasSlider = document.getElementById('bias-slider');
-
-        // Lookup table keyed by the five slider positions: 0, 25, 50, 75, 100.
-        // Each entry holds all the content the info panel needs to show for that position.
-        const biasData = {
-            0: {
-                emoji: 'warning',
-                title: 'Far Left',
-                color: '#1e40af',
-                description: 'Strong progressive advocacy. Often focuses on social justice, wealth inequality, and systemic change. May use passionate language to drive urgency.',
-                traits: 'Advocacy journalism<br>Social justice focus<br>Bold reform proposals'
-            },
-            25: {
-                emoji: 'speaker',
-                title: 'Left-Leaning',
-                color: '#3b82f6',
-                description: 'Generally supports progressive policies like environmental regulation, social programs, and diversity initiatives. Frames stories with these values in mind.',
-                traits: 'Progressive values<br>Government solutions<br>Social equity emphasis'
-            },
-            50: {
-                emoji: 'scale',
-                title: 'Center/Neutral',
-                color: '#94a3b8',
-                description: 'Focuses on factual reporting with minimal editorial opinion, presenting multiple viewpoints. Prioritizes verifiable information over interpretation.',
-                traits: 'Fact-based headlines<br>Multiple perspectives<br>Minimal opinion language'
-            },
-            75: {
-                emoji: 'mic',
-                title: 'Right-Leaning',
-                color: '#ef4444',
-                description: 'Generally supports conservative values like free markets, limited government, and traditional institutions. Stories emphasize these principles.',
-                traits: 'Conservative values<br>Market solutions<br>Traditional institutions'
-            },
-            100: {
-                emoji: 'warning',
-                title: 'Far Right',
-                color: '#a01414',
-                description: 'Strong conservative advocacy. Often focuses on individual liberty, national sovereignty, and traditional values. May use passionate language about cultural issues.',
-                traits: 'Advocacy journalism<br>Nationalist focus<br>Traditional values defense'
-            }
-        };
-
-        // Only attach the listener if the slider element actually exists on the page
-        if (biasSlider) {
-
-            // Fire on every incremental movement so the panel updates while dragging, not only when the user releases the thumb
-            biasSlider.addEventListener('input', function() {
-
-                // Convert the raw string from the input to a real integer
-                const value = parseInt(this.value, 10);
-
-                // Start the nearest-key search from position 50 (Center) as a safe default
-                let closestKey = 50;
-                let minDiff = Math.abs(value - 50);
-
-                // Walk every defined key and remember whichever sits closest to the slider value
-                Object.keys(biasData).forEach(key => {
-                    const diff = Math.abs(value - parseInt(key, 10));
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        closestKey = key;
-                    }
-                });
-
-                // Pull the content block for the winning position
-                const data = biasData[closestKey];
-
-                // Get a reference to the outer box so we can recolor its border below
-                const infoBox = document.getElementById('bias-info-box');
-
-                // Update every dynamic element in the panel to match the selected position
-                document.getElementById('bias-emoji').textContent       = data.emoji;
-                document.getElementById('bias-title').textContent       = data.title;
-                document.getElementById('bias-title').style.color       = data.color;
-                document.getElementById('bias-description').textContent = data.description;
-                document.getElementById('bias-traits').innerHTML        = data.traits;
-
-                // Tint the box border to reinforce which end of the spectrum is active
-                infoBox.style.borderColor = data.color;
-            });
-        }
-
-        // Grab all three elements involved in the collapse toggle before wiring any events
-        const toggleBtn = document.getElementById('spectrum-toggle');
-        const box       = document.getElementById('bias-info-box');
-        const icon      = document.getElementById('spectrum-icon');
-
-        // Guard against any element being absent from the DOM before attaching the listener
-        if (toggleBtn && box && icon) {
-            toggleBtn.addEventListener('click', function() {
-                // Toggle the collapsed class on the box to animate it open or shut
-                box.classList.toggle('collapsed');
-
-                // Rotate the arrow icon in sync with the box open/close state
-                icon.classList.toggle('collapsed');
-            });
-        }
-
-    })();
-</script>
-
-<div class="content-placeholder">
-    <p>
-
-<style>
-/* Zero out default browser margin and padding so layout measurements are exact */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Page-level background color and padding that surrounds all content */
-body {
-    min-height: 100vh;
-    background-size: cover;
-    background-color: #9393c7;
-    padding: 20px;
-}
-
-/* Constrain the content width and center it horizontally on wide screens */
-.page-content {
-    max-width: 1800px;
-    margin: 0 auto;
-}
-
-/* Semi-transparent dark card for blocks of introductory text */
-.intro-text {
-    background: rgba(0, 0, 30, 0.85);
-    padding: 20px;
-    border-radius: 12px;
-    font-family: "Inter", system-ui, sans-serif;
-    font-size: 1.05rem;
-    margin-bottom: 20px;
-    line-height: 1.5;
-    color: #e2e8f0;
-}
-
-/* Outer card that wraps the game header, bins, image tray, controls, and leaderboard */
-.game-container {
-    background: #a7a0d4;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    margin: 20px 0;
-    font-family: system-ui, -apple-system, sans-serif;
-}
-
-/* Top bar of the game holding the player info pills and the auth button */
-.game-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-}
-
-/* Groups the player name and timer badges into a flex row */
-.player-info {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-/* Rounded badge used for the player name and elapsed time displays */
-.info-pill {
-    background: rgba(255, 255, 255, 0.5);
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-weight: 600;
-    color: #2c5282;
-}
-
-/* Side-by-side row of three drop targets, each taking equal width */
-.bins-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin: 20px 0;
-}
-
-/* Individual drop bin; dashed border makes it obvious cards can land here */
-.bin {
-    flex: 1;
-    min-height: 150px;
-    background: rgba(255, 255, 255, 0.4);
-    border: 2px dashed #4299e1;
-    border-radius: 10px;
-    padding: 15px;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Visual feedback applied while a dragged card hovers over the bin */
-.bin.highlight {
-    background: rgba(255, 255, 255, 0.6);
-    border-color: #2b6cb0;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(66, 153, 225, 0.2);
-}
-
-/* Text label at the top of each bin */
-.bin-label {
-    font-weight: 600;
-    color: #2c5282;
-    margin-bottom: 10px;
-}
-
-/* Tray that holds the shuffled source logo cards before they are sorted */
-.images-area {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-    min-height: 100px;
-}
-
-/* Individual draggable source logo card */
-.image {
-    width: 80px;
-    height: 80px;
-    padding: 8px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    cursor: grab;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-/* Slight upward nudge on hover hints the card is draggable */
-.image:hover {
-    transform: translateY(-2px);
-}
-
-/* While dragging, the card turns semi-transparent so the bin beneath is visible */
-.image.dragging {
-    opacity: 0.5;
-    transform: scale(0.95);
-}
-
-/* Footer row containing the Reset, Autofill, and Submit buttons */
-.controls {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-/* Base styles shared by all game buttons */
-.btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-}
-
-/* Filled blue button used for the primary Submit action */
-.btn-primary {
-    background: #4299e1;
-    color: white;
-}
-
-/* Lightly tinted button for secondary actions like Reset */
-.btn-ghost {
-    background: rgb(255 255 255 / 29%);
-    color: #2c5282;
-}
-
-/* All buttons lift slightly on hover */
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(66, 153, 225, 0.2);
-}
-
-/* Leaderboard panel that sits below the game and shows top completion times */
-.leaderboard {
-    background: linear-gradient(180deg, rgba(95, 73, 174, 0.18), rgba(60, 97, 156, 0.4));
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
-    color: #ffffffff;
-    border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-/* Header row inside the leaderboard */
-.leaderboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-/* Table that fills the leaderboard panel */
-.leaderboard-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-/* Shared padding and text color for header and data cells */
-.leaderboard-table th,
-.leaderboard-table td {
-    padding: 10px;
-    text-align: left;
-    color: #b2c7deff;
-}
-
-/* Alternating row tint makes it easier to scan across entries */
-.leaderboard-table tr:nth-child(even) {
-    background: rgba(29, 31, 75, 1);
-}
-</style>
-
 <!-- Main game card containing the header, bins, image tray, controls, and leaderboard -->
 <div class="game-container" id="media-bias-game">
     <div class="game-header">
@@ -622,82 +59,6 @@ body {
     </div>
 </div>
 
-<script type="module">
-    // Import the backend base URL from the site config and attach it to window so the second module script below can read it without re-importing
-    import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
-    window.pythonURI = pythonURI;
-
-    // Find the session endpoint to find out if the user is currently logged in.
-    // Returns the user object on success or null if there is no active session.
-    async function getCurrentUser() {
-        try {
-            const response = await fetch(`${pythonURI}/api/id`, {
-                method: 'GET',
-                credentials: 'include',   // send the session cookie so the backend can verify it
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Only try to read the body when the server returned a success status
-            if (response.ok) {
-                const userData = await response.json();
-                return userData;   // object contains uid, name, role, etc.
-            }
-        } catch (error) {
-            // Network failures and CORS errors land here; treat the user as a guest
-            console.log('No authenticated user:', error);
-        }
-
-        // Returning null signals guest state to every caller
-        return null;
-    }
-
-    // Refreshes the sign-in/sign-out button and the player name pill to match whether a real session currently exists
-    async function updateAuthButton() {
-        const authBtn       = document.getElementById('auth-btn');
-        const playerDisplay = document.getElementById('player-name');
-
-        // If either element is missing from the DOM there is nothing to update
-        if (!authBtn || !playerDisplay) return;
-
-        // Ask the backend for the current session state before making any changes
-        const user = await getCurrentUser();
-
-        if (user && user.uid) {
-            // Authenticated: rename the button to Sign Out and wire it to the logout URL
-            authBtn.textContent = 'Sign Out';
-            authBtn.onclick = () => {
-                window.location.href = '{{site.baseurl}}/logout';
-            };
-
-            // Show the real username in the pill and store it globally for the game module
-            playerDisplay.textContent = `Player: ${user.uid}`;
-            window.currentPlayerUid   = user.uid;
-            window.currentPlayerName  = user.name;
-        } else {
-            // Guest: rename the button to Sign In and wire it to the login page
-            authBtn.textContent = 'Sign In';
-            authBtn.onclick = () => {
-                window.location.href = '{{site.baseurl}}/login';
-            };
-
-            // Show a generic placeholder and mark the player as Guest globally
-            playerDisplay.textContent = 'Player: Guest';
-            window.currentPlayerUid   = 'Guest';
-            window.currentPlayerName  = 'Guest';
-        }
-    }
-
-    // Run the auth check as soon as the HTML is parsed so the button state is correct before the user has any chance to interact with it
-    window.addEventListener('DOMContentLoaded', () => {
-        updateAuthButton();
-    });
-
-    // Expose the function on window so other scripts or a post-login redirect can trigger a button refresh without needing to re-import this module
-    window.updateAuthButton = updateAuthButton;
-</script>
-
 
 <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
@@ -739,91 +100,6 @@ body {
         { src: "upwardR.png",      company: "Upward News",          bin: "Right"  },
         { src: "cbnR.png",         company: "CBN",                  bin: "Right"  }
     ];
-
-    // localStorage helpers
-    // All game data lives under one versioned key so reads and writes go through a single path and future schema changes are easy to handle in one place.
-
-    const STORAGE_KEY = 'biasGameData_v1';
-
-    // Shape that every freshly loaded data object must conform to.
-    // Used both as the initial value and as the merge template inside loadData.
-    const DEFAULT_DATA = {
-        profiles:  {},
-        gameState: {},
-        meta:      { lastModule: null, showInstructions: true },
-        _version:  1
-    };
-
-    // Wraps localStorage.getItem in a try/catch so private-browsing mode and storage quota errors fail silently instead of crashing the game
-    function _safeGet(key) {
-        try {
-            return localStorage.getItem(key);
-        } catch (err) {
-            console.warn('localStorage read error', err);
-            return null;
-        }
-    }
-
-    // Same silent-fail wrapper for localStorage.setItem
-    function _safeSet(key, value) {
-        try {
-            localStorage.setItem(key, value);
-        } catch (err) {
-            console.warn('localStorage write error', err);
-        }
-    }
-
-    // Reads and returns the full game data object, merging in any missing keys from DEFAULT_DATA so downstream code never has to guard for undefined
-    function loadData() {
-        const raw = _safeGet(STORAGE_KEY);
-
-        // Nothing stored yet so hand back a clean deep copy of the defaults
-        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_DATA));
-
-        try {
-            const parsed = JSON.parse(raw);
-
-            // Shallow-merge the saved object onto the defaults so new keys added to DEFAULT_DATA in future code versions are automatically present
-            const merged     = Object.assign({}, DEFAULT_DATA, parsed);
-            merged.profiles  = Object.assign({}, DEFAULT_DATA.profiles,  parsed.profiles  || {});
-            merged.gameState = Object.assign({}, DEFAULT_DATA.gameState, parsed.gameState || {});
-            merged.meta      = Object.assign({}, DEFAULT_DATA.meta,      parsed.meta      || {});
-
-            return merged;
-        } catch (err) {
-            // Corrupt JSON in storage: log and fall back to a clean default object
-            console.warn('Failed to parse storage; returning defaults', err);
-            return JSON.parse(JSON.stringify(DEFAULT_DATA));
-        }
-    }
-
-    // Writes the data object back to localStorage and stamps the current schema version so data from older builds can be detected on a future load
-    function saveData(data) {
-        try {
-            data._version = DEFAULT_DATA._version;
-            _safeSet(STORAGE_KEY, JSON.stringify(data));
-        } catch (err) {
-            console.warn('Failed to save storage', err);
-        }
-    }
-
-    // Removes the stored bin assignment for each of the provided image IDs.
-    // Called by the reset button so those cards return to the unsorted tray above.
-    function clearGameStateForIds(ids = []) {
-        const data = loadData();
-
-        // Make sure gameState exists before trying to delete keys from it
-        if (!data.gameState) data.gameState = {};
-
-        ids.forEach(id => {
-            // hasOwnProperty guard avoids accidentally touching prototype properties
-            if (Object.prototype.hasOwnProperty.call(data.gameState, id)) {
-                delete data.gameState[id];
-            }
-        });
-
-        saveData(data);
-    }
 
     // Session-level game state
     // These variables reset every time initGame runs and are read by event handlers.
@@ -906,12 +182,12 @@ body {
         }
     }
 
-    // Pushes the current player name into the info pill in the game header
+    // Pushes the current player name into the info pill in the game header. Player name is fetched from the backend when they login.
     function updateDisplays() {
         playerDisplay.textContent = `Player: ${currentPlayer}`;
     }
 
-    // Converts a company display name into a safe DOM id by lowercasing by collapsing non-word characters into underscores and adding a prefix.
+    // Converts a company display name into a safe DOM id by lowercasing by turning non-word characters into underscores and adding a prefix 'img-'.
     // For example: "NY Times" becomes "img-ny_times"
     function slugify(text) {
         return 'img-' + String(text)
@@ -920,33 +196,19 @@ body {
             .replace(/^_+|_+$/g, '');   // strip any leading or trailing underscores
     }
 
-    // Builds and returns one draggable img element for the given source file. Clicking or dragging the card pre-fills the news-source input in the chat panel so the player can look up that outlet without typing.
+    // Builds and returns one draggable img element for the given source file so that game can add it to the image tray. This function also stores metadata on the element using "data." attributes.
     function createImageCard(file) {
         // Create the img element and stamp all the data attributes the game relies on
         const img           = document.createElement('img');
-        img.src             = IMAGE_BASE + file.src;
-        img.alt             = file.company;
+        img.src             = IMAGE_BASE + file.src; // logo image path
+        img.alt             = file.company; //sets the alt to the company name
         img.className       = 'image';
         img.draggable       = true;
         img.dataset.bin     = file.bin;        // correct answer used during validation
-        img.dataset.company = file.company;
-        img.dataset.id      = slugify(file.company);
-    
-        // Call autofillNewsSource() to pre-populate the news source input in the chat panel (implemented by another team member's module). This lets players quickly look up bias info about the outlet they're dragging.
-        const autofillNewsSource = () => {
-            const newsSourceInput = document.getElementById('news-source');
-            if (!newsSourceInput) return;    // field may not exist on every page variant
-            newsSourceInput.value = file.company;
-            newsSourceInput.dispatchEvent(new Event('input', { bubbles: true }));
-        };
-
-        img.addEventListener('click', () => {
-            autofillNewsSource();
-        });
+        img.dataset.company = file.company;   // This is used in the incorrect feedback modal to show the user what they got wrong
+        img.dataset.id      = slugify(file.company); //ID is used during drag/drop to find the dragged card again
 
         img.addEventListener('dragstart', (e) => {
-            
-            autofillNewsSource();
             
             //This section that starts the timer with a drag is part of my project
             // Start the round timer on the very first manual drag.
@@ -980,7 +242,7 @@ body {
     // Makes the cards draggable images
     // Any placements from previous session that are in-progress are restored
     function initGame() {
-        // Wipe the image tray and every bin content area
+        // Wipe the selectedImages tray and every bin content area
         imagesArea.innerHTML = '';
         document.querySelectorAll('.bin-content').forEach(el => el.innerHTML = '');
 
@@ -1014,37 +276,11 @@ body {
         const centerImages = imageFiles.filter(img => img.bin === "Center");
         const rightImages  = imageFiles.filter(img => img.bin === "Right");
 
-        const data = loadData();
-        data.meta  = data.meta || {};
-
-        // Try to restore a previously saved round selection from localStorage. Only trust it if it contains exactly 21 entries that all resolve to known files, otherwise fall through and generate a fresh set.
-        let selectedImages = null;
-
-        if (Array.isArray(data.meta.roundImages) && data.meta.roundImages.length === 21) {
-            // Build a quick lookup map from slug ID to file object
-            const idMap = new Map(imageFiles.map(f => [slugify(f.company), f]));
-            const files = data.meta.roundImages
-                .map(id => idMap.get(id))
-                .filter(Boolean);   // drop any IDs that no longer exist in imageFiles
-
-            // Only use the restored set when every single entry resolved correctly
-            if (files.length === 21) {
-                selectedImages = files;
-            }
-        }
-
-        // No usable saved set found, so draw a fresh balanced selection and persist it immediately so a reload within the same round is consistent. Each bin,Left, Center, and Right, wil have an equal 7 news icons randomly selected from the list.
-        if (!selectedImages) {
-            selectedImages = [
-                ...getRandomSubset(leftImages,   7),
-                ...getRandomSubset(centerImages, 7),
-                ...getRandomSubset(rightImages,  7)
-            ].sort(() => 0.5 - Math.random());   // shuffle the combined 21 cards
-
-            // Save slugified IDs (removing special characters to become a URL slug form of text) so the same set can be restored on the next page load
-            data.meta.roundImages = selectedImages.map(f => slugify(f.company));
-            saveData(data);
-        }
+        const selectedImages = [
+            ...getRandomSubset(leftImages,   7),
+            ...getRandomSubset(centerImages, 7),
+            ...getRandomSubset(rightImages,  7)
+        ].sort(() => 0.5 - Math.random());   // shuffle the combined 21 cards
 
         // Build a card element for each selected file and add it to the tray
         selectedImages.forEach((file) => {
@@ -1052,28 +288,6 @@ body {
             imagesArea.appendChild(card);
         });
 
-        // Re-apply any bin placements the player had already made before the page was loaded.
-        // This restores their progress from localStorage so a refresh does not wipe their hard work.
-        document.querySelectorAll('img.image').forEach(img => {
-            const id   = img.dataset.id;
-            const zone = data.gameState && data.gameState[id];
-
-            if (zone) {
-                // Find the bin whose data-bin attribute matches the saved zone name
-                const bin = document.querySelector(`.bin[data-bin="${zone}"]`);
-                if (bin) {
-                    bin.querySelector('.bin-content').appendChild(img);
-                    placedImages.add(id);   // keep the set in sync with what is in the DOM
-                    img.style.opacity = '1';
-                    img.style.cursor  = 'grab';
-                }
-            }
-        });
-
-        // Record which module was last active so other parts of the page can read it
-        // "data.meta.lastModule = 'sortingGame';" is for my other group member's section of the project. Not relevent to the Media Bias game
-        data.meta.lastModule = 'sortingGame';
-        saveData(data);
     }
 
     // Places every card into its correct bin automatically without any player input.
@@ -1097,9 +311,6 @@ body {
         // Work from every card currently on the page regardless of where it sits
         const imgs = Array.from(document.querySelectorAll('img.image'));
         let correctCount = 0;
-        // Make sure the data is initialized to avoid "Typrerror: Cannot set property..." errors
-        const data     = loadData();
-        data.gameState = data.gameState || {};
 
         imgs.forEach(img => {
             // Each card already knows its correct bin via the data-bin attribute set when it's created
@@ -1116,15 +327,11 @@ body {
                 img.style.opacity = '1';
                 img.style.cursor  = 'grab';
 
-                // Save the placement in both the in-memory set and localStorage
+                // Save the placement in the session-only set
                 placedImages.add(id);
-                data.gameState[id] = target;
                 correctCount++;
             }
         });
-
-        // Keep every auto-placed position so state remains consistent across modules
-        saveData(data);
     }
 
     // Attaches drag-and-drop event handlers to every bin element so they can receive cards that are dragged over and dropped onto them.
@@ -1162,12 +369,6 @@ body {
             // Restore full opacity and grab cursor in case earlier code had altered them
             img.style.opacity = '1';
             img.style.cursor  = 'grab';
-
-            // Keep the placement right away so a page refresh does not lose this drop of the icon into the bin
-            const data     = loadData();
-            data.gameState = data.gameState || {};
-            data.gameState[id] = bin.dataset.bin;
-            saveData(data);
         });
     });
 
@@ -1181,27 +382,6 @@ body {
         }
 
         updateDisplays();
-    }
-
-    // Posts a completed score to the backend endpoint and then refreshes the leaderboard. This function is the legacy path; submitFinalTime is the one called by the submit button.
-    async function postScore(username, finalTime) {
-        try {
-            const response = await fetch(
-                `${pythonURI}/api/media/score/${encodeURIComponent(username)}/${finalTime}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'   // include the session cookie for server-side auth to save the userid in the leaderboard next to score
-                }
-            );
-
-            if (!response.ok) throw new Error('Failed to save score');
-
-            // Pull fresh standings immediately after a successful save
-            fetchLeaderboard();
-        } catch (err) {
-            console.error('Error saving score:', err);
-        }
     }
 
     // The limit parameter controls how many rows are fetched and requested from the backend when displaying top entreis for the leaderboard table
@@ -1238,14 +418,35 @@ body {
         } catch (err) {
             console.error('Error fetching leaderboard:', err);
 
-            // Show a friendly error row so the player knows the leaderboard could not load
+            // Show a error row so the player knows the leaderboard could not load
             tbody.innerHTML = '<tr><td colspan="3">Unable to load leaderboard</td></tr>';
+        }
+    }
+    
+    // Posts a completed score to the backend endpoint and then refreshes the leaderboard. This function is the legacy path; submitFinalTime is the one called by the submit button.
+    async function postScore(username, finalTime) {
+        try {
+            const response = await fetch(
+                `${pythonURI}/api/media/score/${encodeURIComponent(username)}/${finalTime}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'   // include the session cookie for server-side auth to save the userid in the leaderboard next to score
+                }
+            );
+
+            if (!response.ok) throw new Error('Failed to save score');
+
+            // Pull fresh standings immediately after a successful save
+            fetchLeaderboard(5);
+        } catch (err) {
+            console.error('Error saving score:', err);
         }
     }
 
     // Shows a full-screen modal informing the player that autofill was detected and that their time will not appear on the leaderboard
     function showAutofillWarning() {
-        // Create the dark semi-transparent overlay that sits on top of the whole page
+        // Create the dark semi-transparent sheer overlay that sits on top of the whole page
         const msg = document.createElement('div');
         msg.style.position       = 'fixed';
         msg.style.top            = '0';
@@ -1455,38 +656,28 @@ body {
     // Wire up every button click handler as soon as the HTML is parsed. Also runs the first game initialization so cards appear without waiting for the full window load event, which may be delayed by slow-loading images.
     window.addEventListener('DOMContentLoaded', () => {
 
+        // Build the first round immediately after the page HTML is parsed.
         initGame();
-        // Reset Button
+
+        // Reset Button: clears the current board and starts a brand new game round
         const resetBtn = document.getElementById('reset-btn');
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
-
-                // Collect the ID of every card on the page before wiping anything
-                const ids = Array.from(document.querySelectorAll('img.image'))
-                    .map(i => i.dataset.id);
-
-                // Delete each card's bin assignment from storage so the slate is clean
-                clearGameStateForIds(ids);
-
-                // Also remove the saved round image set so a brand new 21 are chosen
-                const data = loadData();
-                if (data.meta && data.meta.roundImages) {
-                    delete data.meta.roundImages;
-                    saveData(data);
-                }
-
-                // Run the full init to draw a fresh shuffled set of cards
+                // Reset does not keep any previous assignments or round state
+                // It simply rebuilds the tray, bins, and timer from ground 0
                 initGame();
             });
         }
-        // Autofill Button:
+
+        // Autofill Button: automatically places every card into its correct bin
         const autofillBtn = document.getElementById('autofill-images');
         if (autofillBtn) {
             autofillBtn.addEventListener('click', () => {
                 autofillImageGame(true);   // passing true signals the button was explicitly pressed
             });
         }
-        // Submit Button:
+
+        // Submit Button: validates the current board and submits the score if correct
         const submitBtn = document.getElementById('submit-btn');
         if (submitBtn) {
             submitBtn.addEventListener('click', () => {
@@ -1517,9 +708,6 @@ body {
                 // All four gates passed: stop the clock and capture the final time
                 const elapsed  = timerHandle.stop();
                 const username = window.currentPlayerUid || 'Guest';
-
-                // Save locally first so the attempt is not lost if the network call fails
-                saveAttemptLocally(username, elapsed);
 
                 // Submit the score to the backend and refresh the leaderboard
                 submitFinalTime(username, elapsed);

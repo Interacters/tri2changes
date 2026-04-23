@@ -201,8 +201,7 @@
     function slugify(text) {
         return 'img-' + String(text)
             .toLowerCase()
-            .replace(/[^
-\w]+/g, '_')    // replace spaces, dots, dashes etc. with underscores
+            .replace(/[^\w]+/g, '_')    // replace spaces, dots, dashes etc. with underscores
             .replace(/^_+|_+$/g, '');   // strip any leading or trailing underscores
     }
 
@@ -776,6 +775,6 @@
         fetchLeaderboard(5);
 
         // Poll for updated standings every 30 seconds so new scores appear automatically
-        setInterval(fetchLeaderboard(5), 30000);
+        setInterval(fetchLeaderboard, 30000, 5);
     };
 </script>

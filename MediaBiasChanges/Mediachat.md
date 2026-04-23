@@ -22,17 +22,9 @@
             <div class="bin-content"></div>
         </div>
     </div>
-    <!-- Image tray where unsorted logos appear, plus the optional help popover -->
+    <!-- Image tray where unsorted logos appear-->
     <div class="source-selection">
         <div class="images-area" id="images"></div>
-        <div class="help-popover" id="help-popover" role="dialog" aria-live="polite" aria-label="Need help with media bias?">
-            <div class="help-popover-title">Need help?</div>
-            <p class="help-popover-text">Jump to Source Intel Chat for quick tips on bias and sources.</p>
-            <div class="help-popover-actions">
-                <button type="button" class="help-popover-btn primary" id="help-popover-go">Go to Chat</button>
-                <button type="button" class="help-popover-btn ghost" id="help-popover-dismiss">Not now</button>
-            </div>
-        </div>
     </div>
     <!-- Action buttons: reset the board, autofill answers, or submit a score -->
     <div class="controls">
@@ -61,6 +53,7 @@
 
 
 <script type="module">
+    // Importing the backend pythonURI which produces player UID info and Leaderboard info
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
     // ---------------------------------------------------------------------------
@@ -208,7 +201,8 @@
     function slugify(text) {
         return 'img-' + String(text)
             .toLowerCase()
-            .replace(/[^\w]+/g, '_')    // replace spaces, dots, dashes etc. with underscores
+            .replace(/[^
+\w]+/g, '_')    // replace spaces, dots, dashes etc. with underscores
             .replace(/^_+|_+$/g, '');   // strip any leading or trailing underscores
     }
 
@@ -253,6 +247,48 @@
 
         return img;
     }
+
+    // ---------------------------------------------------------------------------
+    // Drag/drop bindings
+    // ---------------------------------------------------------------------------
+
+    // Attaches drag-and-drop event handlers to every bin element so they can receive cards that are dragged over and dropped onto them.
+    bins.forEach(bin => {
+
+        // dragover must call preventDefault to tell the browser this element accepts drops because without it the drop event will never fire on this element
+        bin.addEventListener('dragover', e => {
+            e.preventDefault();
+            bin.classList.add('highlight');   // light up the bin to confirm it is a valid target
+        });
+
+        // Remove the highlight as soon as the dragged card exits the bin boundary
+        bin.addEventListener('dragleave', () => {
+            bin.classList.remove('highlight');
+        });
+
+        bin.addEventListener('drop', e => {
+            e.preventDefault();
+            bin.classList.remove('highlight');   // clear the visual indicator once the card lands in desired bin
+
+            // Retrieve the card ID that was stored in the drag payload at dragstart time
+            const id  = e.dataTransfer.getData('text/plain');
+            const img = document.querySelector(`[data-id="${id}"]`);
+
+            // The element could theoretically have been removed from the DOM so this is a saftey measure
+            if (!img) return;
+
+            // Remove (delete) the card from the placed set before re-adding it under the new bin
+            placedImages.delete(id);
+
+            // Move the card element into this bin's content area
+            bin.querySelector('.bin-content').appendChild(img);
+            placedImages.add(id);
+
+            // Restore full opacity and grab cursor in case earlier code had altered them
+            img.style.opacity = '1';
+            img.style.cursor  = 'grab';
+        });
+    });
 
     // ---------------------------------------------------------------------------
     // Game flow
@@ -356,48 +392,6 @@
     }
 
     // ---------------------------------------------------------------------------
-    // Drag/drop bindings
-    // ---------------------------------------------------------------------------
-
-    // Attaches drag-and-drop event handlers to every bin element so they can receive cards that are dragged over and dropped onto them.
-    bins.forEach(bin => {
-
-        // dragover must call preventDefault to tell the browser this element accepts drops because without it the drop event will never fire on this element
-        bin.addEventListener('dragover', e => {
-            e.preventDefault();
-            bin.classList.add('highlight');   // light up the bin to confirm it is a valid target
-        });
-
-        // Remove the highlight as soon as the dragged card exits the bin boundary
-        bin.addEventListener('dragleave', () => {
-            bin.classList.remove('highlight');
-        });
-
-        bin.addEventListener('drop', e => {
-            e.preventDefault();
-            bin.classList.remove('highlight');   // clear the visual indicator once the card lands in desired bin
-
-            // Retrieve the card ID that was stored in the drag payload at dragstart time
-            const id  = e.dataTransfer.getData('text/plain');
-            const img = document.querySelector(`[data-id="${id}"]`);
-
-            // The element could theoretically have been removed from the DOM so this is a saftey measure
-            if (!img) return;
-
-            // Remove (delete) the card from the placed set before re-adding it under the new bin
-            placedImages.delete(id);
-
-            // Move the card element into this bin's content area
-            bin.querySelector('.bin-content').appendChild(img);
-            placedImages.add(id);
-
-            // Restore full opacity and grab cursor in case earlier code had altered them
-            img.style.opacity = '1';
-            img.style.cursor  = 'grab';
-        });
-    });
-
-    // ---------------------------------------------------------------------------
     // Auth & leaderboard
     // ---------------------------------------------------------------------------
     // Reads the player identity that was stored globally by the auth module and pushes it so it displays as the player name pill in the game header
@@ -472,11 +466,12 @@
         }
     }
 
-    // Shows a full-screen modal informing the player that autofill was detected and that their time will not appear on the leaderboard
+
     // ---------------------------------------------------------------------------
     // Modals
     // ---------------------------------------------------------------------------
 
+    // AUTOFILL USED ALERT: Shows a full-screen modal informing the player that autofill was detected and that their time will not appear on the leaderboard
     function showAutofillWarning() {
         // Create the dark semi-transparent sheer overlay that sits on top of the whole page
         const msg = document.createElement('div');
@@ -510,7 +505,7 @@
         // Add the overlay to the body so it renders above everything else
         document.body.appendChild(msg);
 
-        // Wire the "Got It" button to remove the overlay and hand control back to the game
+        // EXIT: Wire the "Got It" button to remove the overlay and hand control back to the game
         const btn = document.getElementById('return-to-game-autofill');
         if (btn) {
             btn.addEventListener('click', () => {
@@ -519,7 +514,7 @@
         }
     }
 
-    // Shows a full-screen congratulations modal after a legitimate submission without only autofill.
+    // CONGRATULATIONS ALERT: Shows a full-screen congratulations modal after a legitimate submission without only autofill.
     // Formats the elapsed seconds into MM:SS and displays the completion time prominently.
     function showCongrats(elapsedSeconds) {
         // Build the time string before touching the DOM
@@ -558,7 +553,7 @@
 
         document.body.appendChild(msg);
 
-        // Clicking Return to Game dismisses the overlay;
+        // EXIT: Clicking Return to Game dismisses the overlay;
         // initGame is called by the submit handler right after showCongrats returns
         const btn = document.getElementById('return-to-game');
         if (btn) {
@@ -568,7 +563,7 @@
         }
     }
 
-    // Shows a modal listing every card that landed in the wrong bin.
+    // INCORRECT ALERT: Shows a modal listing every card that landed in the wrong bin.
     // Each entry displays the outlet logo, the outlet name, and which bin it was placed in so the player gets specific feedback rather than a generic wrong-answer message.
     function showIncorrectFeedback(incorrectImages) {
         // Full-page overlay consistent with the other game modals
@@ -613,12 +608,12 @@
 
         document.body.appendChild(modal);
 
-        // The "Try Again" button closes the modal so the player can fix their mistakes
+        // EXIT: The "Try Again" button closes the modal so the player can fix their mistakes
         document.getElementById('close-feedback').addEventListener('click', () => {
             modal.remove();
         });
 
-        // Clicking anywhere on the dark backdrop also dismisses the modal
+        // EXIT: Clicking anywhere on the dark backdrop also dismisses the modal
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
@@ -629,6 +624,7 @@
     // ---------------------------------------------------------------------------
     // Validation & submit
     // ---------------------------------------------------------------------------
+
     // Sends the player's elapsed seconds to the backend score endpoint with their registered username and time and then refreshes the leaderboard so the new entry appears straight away
     async function submitFinalTime(username, elapsed) {
         try {
@@ -645,7 +641,7 @@
             if (!response.ok) throw new Error('Failed to save score');
 
             // Pull fresh leaderboard data now that the new score is in the database
-            fetchLeaderboard();
+            fetchLeaderboard(5);
         } catch (err) {
             // Alert the player so they know the save failed and can try again
             alert('Failed to save your score. Please try again.');
@@ -667,25 +663,27 @@
         return true;
     }
 
-    // Displays every bin and collects cards whose data-bin attribute does not match the bin they currently sit inside. Returns an array of plain objects that the feedback modal can show directly.
-    function getIncorrectPlacements() {
-        const incorrect = [];
+    // This function checks each card against its correct bin to validate the player's placements
+    // It iterates through all bins, then through all images in each bin, and finds mismatches
+    // The result is used to provide specific feedback on which cards are wrong and where they are so the player can fix them
+    function getIncorrectPlacements(binsList) {
+        const incorrect = []; // Array to hold details of incorrectly placed cards
 
-        document.querySelectorAll('.bin').forEach(bin => {
-            bin.querySelectorAll('.image').forEach(img => {
-                // data-bin is the correct answer stamped at card creation time
-                // bin.dataset.bin is where the card was actually dropped so the user can see incorrect placements
+        binsList.forEach(bin => { // Iterate through each bin element
+            bin.querySelectorAll('.image').forEach(img => { // For each image card in this bin
+                // Check if the card's correct bin (data-bin) matches the bin it's currently in
                 if (img.dataset.bin !== bin.dataset.bin) {
+                    // Card is misplaced, collect its details for feedback
                     incorrect.push({
-                        name:       img.dataset.company,
-                        currentBin: bin.dataset.bin,
-                        src:        img.src
+                        name: img.dataset.company, // Company name to display in the feedback modal
+                        currentBin: bin.dataset.bin, // The bin where the card is currently placed (wrong)
+                        src: img.src // Image source to show the outlet logo
                     });
                 }
             });
         });
 
-        return incorrect;
+        return incorrect; // Return the list of incorrect placements
     }
 
     // ---------------------------------------------------------------------------
@@ -712,7 +710,7 @@
         const autofillBtn = document.getElementById('autofill-images');
         if (autofillBtn) {
             autofillBtn.addEventListener('click', () => {
-                autofillImageGame(true);   // passing true signals the button was explicitly pressed
+                autofillImageGame(true);   // passing true signals the button was deliberaely pressed
             });
         }
 
@@ -721,24 +719,27 @@
         if (submitBtn) {
             submitBtn.addEventListener('click', () => {
 
-                // Gate 1: every card must be in a bin before anything else is checked
+                // Checkpoint 1: every card must be in a bin before anything else is checked
+
                 if (!validateAllPlaced(placedImages)) return;
 
-                // Gate 2: all placed cards must be in their correct bins, if they aren't the feedback modal is displayed indicating what icons are in the wrong placements
-                const incorrect = getIncorrectPlacements();
+                // Checkpoint 2: all placed cards must be in their correct bins, if they aren't the feedback modal is displayed indicating what icons are in the wrong placements
+                // Retrieve a list of incorrectly placed cards by checking each bin for mismatches by finding every element with class="bin" (e.g., the three drop zones for Left, Center, and Right bias categories)
+                const incorrect = getIncorrectPlacements(document.querySelectorAll('.bin'));
+                // If there are any mistakes, show the feedback modal and stop submission
                 if (incorrect.length > 0) {
                     showIncorrectFeedback(incorrect); 
-                    return;
+                    return; // Prevent further processing (score submission)
                 }
 
-                // Gate 3: autofill disqualifies this run from appearing on the leaderboard and halts the timer
+                // Checkpoint 3: autofill disqualifies this run from appearing on the leaderboard and halts the timer
                 if (autofillUsed) {
                     showAutofillWarning();
                     initGame();   // start a fresh round after the player dismisses the warning
                     return;
                 }
 
-                // Gate 4: the timer must have been started by actual player interaction like dragging an icon to a bin
+                // Checkpoint 4: the timer must have been started by actual player interaction like dragging an icon to a bin
                 if (!timerHandle) {
                     alert("Timer not started. Please play the game first!");
                     return;
@@ -759,7 +760,7 @@
     });
 
     // ---------------------------------------------------------------------------
-    // Page lifecycle
+    // Page Setup
     // ---------------------------------------------------------------------------
 
     // Secondary initialization that runs once the entire page including external resources has finished loading. Syncs the player identity, ensures the game board is drawn, fetches initial leaderboard standings, and starts a 30-second polling interval so scores from other players appear without a manual reload.
@@ -775,6 +776,6 @@
         fetchLeaderboard(5);
 
         // Poll for updated standings every 30 seconds so new scores appear automatically
-        setInterval(fetchLeaderboard, 30000);
+        setInterval(fetchLeaderboard(5), 30000);
     };
 </script>

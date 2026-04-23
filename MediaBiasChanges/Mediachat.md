@@ -63,6 +63,10 @@
 <script type="module">
     import { pythonURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
 
+    // ---------------------------------------------------------------------------
+    // Constants & data
+    // ---------------------------------------------------------------------------
+
     // Root folder where all media outlet logo images are stored
     const IMAGE_BASE = '{{site.baseurl}}/media/assets/';
 
@@ -101,6 +105,10 @@
         { src: "cbnR.png",         company: "CBN",                  bin: "Right"  }
     ];
 
+    // ---------------------------------------------------------------------------
+    // Session state
+    // ---------------------------------------------------------------------------
+
     // Session-level game state
     // These variables reset every time initGame runs and are read by event handlers.
     let currentPlayer = "Guest";     // If logged in, the username will appear instead of Guest
@@ -114,6 +122,10 @@
     const timerDisplay  = document.getElementById('timer');
     const bins          = document.querySelectorAll('.bin');
     const imagesArea    = document.getElementById('images');
+
+    // ---------------------------------------------------------------------------
+    // Timer helpers
+    // ---------------------------------------------------------------------------
 
     // Starts a 1-second interval and returns a handle with two methods.
         // stop() halts the interval and returns total elapsed wall-clock seconds.
@@ -182,6 +194,10 @@
         }
     }
 
+    // ---------------------------------------------------------------------------
+    // UI helpers
+    // ---------------------------------------------------------------------------
+
     // Pushes the current player name into the info pill in the game header. Player name is fetched from the backend when they login.
     function updateDisplays() {
         playerDisplay.textContent = `Player: ${currentPlayer}`;
@@ -197,6 +213,10 @@
     }
 
     // Builds and returns one draggable img element for the given source file so that game can add it to the image tray. This function also stores metadata on the element using "data." attributes.
+    // ---------------------------------------------------------------------------
+    // Card builder
+    // ---------------------------------------------------------------------------
+
     function createImageCard(file) {
         // Create the img element and stamp all the data attributes the game relies on
         const img           = document.createElement('img');
@@ -234,13 +254,14 @@
         return img;
     }
 
+    // ---------------------------------------------------------------------------
+    // Game flow
+    // ---------------------------------------------------------------------------
     // Initializes a new game round or resets the current round.
     // The board state (bins + tray) is cleared
     // When the game is reset, the session flags (game started, timer, autofill) are also reset
     // Randomly selects 21 cards (balanced: 7 left, 7 center, 7 right)
-    // The selection is saved to local storage
     // Makes the cards draggable images
-    // Any placements from previous session that are in-progress are restored
     function initGame() {
         // Wipe the selectedImages tray and every bin content area
         imagesArea.innerHTML = '';
@@ -334,6 +355,10 @@
         });
     }
 
+    // ---------------------------------------------------------------------------
+    // Drag/drop bindings
+    // ---------------------------------------------------------------------------
+
     // Attaches drag-and-drop event handlers to every bin element so they can receive cards that are dragged over and dropped onto them.
     bins.forEach(bin => {
 
@@ -372,6 +397,9 @@
         });
     });
 
+    // ---------------------------------------------------------------------------
+    // Auth & leaderboard
+    // ---------------------------------------------------------------------------
     // Reads the player identity that was stored globally by the auth module and pushes it so it displays as the player name pill in the game header
     async function fetchUser() {
         // currentPlayerUid is set by updateAuthButton in the first script module
@@ -422,7 +450,7 @@
             tbody.innerHTML = '<tr><td colspan="3">Unable to load leaderboard</td></tr>';
         }
     }
-    
+
     // Posts a completed score to the backend endpoint and then refreshes the leaderboard. This function is the legacy path; submitFinalTime is the one called by the submit button.
     async function postScore(username, finalTime) {
         try {
@@ -445,6 +473,10 @@
     }
 
     // Shows a full-screen modal informing the player that autofill was detected and that their time will not appear on the leaderboard
+    // ---------------------------------------------------------------------------
+    // Modals
+    // ---------------------------------------------------------------------------
+
     function showAutofillWarning() {
         // Create the dark semi-transparent sheer overlay that sits on top of the whole page
         const msg = document.createElement('div');
@@ -594,6 +626,9 @@
         });
     }
 
+    // ---------------------------------------------------------------------------
+    // Validation & submit
+    // ---------------------------------------------------------------------------
     // Sends the player's elapsed seconds to the backend score endpoint with their registered username and time and then refreshes the leaderboard so the new entry appears straight away
     async function submitFinalTime(username, elapsed) {
         try {
@@ -652,6 +687,10 @@
 
         return incorrect;
     }
+
+    // ---------------------------------------------------------------------------
+    // Event wiring
+    // ---------------------------------------------------------------------------
 
     // Wire up every button click handler as soon as the HTML is parsed. Also runs the first game initialization so cards appear without waiting for the full window load event, which may be delayed by slow-loading images.
     window.addEventListener('DOMContentLoaded', () => {
@@ -718,6 +757,10 @@
             });
         }
     });
+
+    // ---------------------------------------------------------------------------
+    // Page lifecycle
+    // ---------------------------------------------------------------------------
 
     // Secondary initialization that runs once the entire page including external resources has finished loading. Syncs the player identity, ensures the game board is drawn, fetches initial leaderboard standings, and starts a 30-second polling interval so scores from other players appear without a manual reload.
     window.onload = () => {

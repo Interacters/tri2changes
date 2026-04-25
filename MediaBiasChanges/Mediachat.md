@@ -99,11 +99,11 @@
 
     // This is the session-level game state
     // These variables reset every time initGame runs and are read by the event handlers.
-    let user = "Guest";     // If you're logged in, the username will appear instead of Guest
-    let placed  = new Set();   // IDs of every card that has been dropped into a bin
-    let timer   = null;        // This is the object returned by timerStart or null when idle
-    let started   = false;       // This is true after the player's first manual drag
-    let autofilled  = false;       // This is true if the Autofill button was clicked this round
+    let user = "Guest"; // If you're logged in, the username will appear instead of Guest
+    let placed = new Set(); // IDs of every card that has been dropped into a bin
+    let timer = null; // This is the object returned by timerStart or null when idle
+    let started = false; // This is true after the player's first manual drag
+    let autofilled = false; // This is true if the Autofill button was clicked this round
 
     // We cache DOM references once at module load so we don't have to call querySelector repeatedly
     const playerDiv = document.getElementById('player');
@@ -114,67 +114,71 @@
 
     // TIMER HELPERS
 
-    // This starts a 1-second interval and returns a handle with two methods.
-        // stop() halts the interval and returns the total elapsed wall-clock seconds.
-        // getSeconds() reads the running count without stopping the timer.
+    // We start timer that increments once per second.
+    // This returns an object so we can either stop the timer or read the current time.
     function timerStart() {
-        // We record the start time so the final total is accurate even if the browser changes the interval slightly
-        const startedAt = Date.now();
-        let seconds = 0;
 
-        // We tick the counter once per second and push the new value to the display
+        // This stores the exact start time for more accurate final calculations
+        const startTimestamp = Date.now();
+        let elapsedSeconds = 0;
+
+        // This updates the visible timer every second
         const interval = setInterval(() => {
-            seconds++;
-            timeShow(seconds);
+            elapsedSeconds++;
+            timeShow(elapsedSeconds);
         }, 1000);
 
         return {
-            // We clear the interval and calculate elapsed time from the wall clock instead of relying on the interval counter to be perfect
+            // This stops the timer and calculates total elapsed time using real clock time
             stop: () => {
                 clearInterval(interval);
-                const total = Math.round((Date.now() - startedAt) / 1000);
-                return total;
+                const totalSeconds = Math.round((Date.now() - startTimestamp) / 1000);
+                return totalSeconds;
             },
-            // We read the running counter without stopping it
-            getSeconds: () => seconds
+
+            // This returns the current running time without stopping the timer
+            getSeconds: () => elapsedSeconds
         };
     }
 
-    // This converts a raw second count to MM:SS format and writes it to the timer pill
+
+    // This converts raw seconds into MM:SS format and updates the UI
     function timeShow(seconds) {
-        // The division gives us whole minutes and multiplication gives the leftover seconds
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
+
+        const minutes = Math.floor(seconds / 60); // Minutes are calulated with division
+        const remainingSeconds = seconds % 60; // Seconds are calculated with multiplication
 
         if (timerDiv) {
-            // The padStart ensures that the single-digit seconds always show two characters, like 0:07
-            timerDiv.textContent = `Time: ${minutes}:${secs.toString().padStart(2, '0')}`;
+            timerDiv.textContent =
+                `Time: ${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
         }
     }
 
-    // This freezes the timer  with a visual display after autofill so it's clear to the player that the clock has stopped and the time will not be submitted to the leaderboard
+
+    // Visually locks the timer after autofill is used using a lock emoji in unicode
+    // This makes it clear the time will not count toward the leaderboard
     function lockTime() {
-        if (timerDiv) {
-            // We capture the readable time string before overwriting innerHTML
-            const currentTime = timerDiv.textContent;
 
-            // We layer a lock icon using unicode "&#x1F512" over the existing time text 
-            timerDiv.innerHTML = `
-                <span style="position: relative; display: inline-block;">
-                    ${currentTime}
-                    <span style="
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        font-size: 1.2em;
-                        color: #ef4444;
-                        text-shadow: 0 0 3px white;
-                    ">&#x1F512;</span>  
+        if (!timerDiv) return;
+
+        const currentText = timerDiv.textContent;
+
+        timerDiv.innerHTML = `
+            <span style="position: relative; display: inline-block;">
+                ${currentText}
+                <span style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    font-size: 1.2em;
+                    color: #ef4444;
+                    text-shadow: 0 0 3px white;
+                ">
+                    &#x1F512; 
                 </span>
-            `;
-
-        }
+            </span>
+        `;
     }
 
 
@@ -190,7 +194,7 @@
     // CARD CATEGORIES
    
 
-    function createImageCard(file) {
+    function createIMG(file) {
         // We create the img element and stamp all the data attributes the game relies on
         const img = document.createElement('img');
         img.src  = imgBase + file.src; // This is the logo image path
@@ -301,12 +305,12 @@
                 .slice(0, count);
         };
 
-        // We split the master list into the three bias bin categories so we can sample evenly
+        // We split the master list into the three bias bin categories so we can get a balanced, even sample
         const leftImages = files.filter(img => img.bin === "Left");
         const centerImages = files.filter(img => img.bin === "Center");
         const rightImages = files.filter(img => img.bin === "Right");
 
-        const selectedImages = [ // We randomly select 21 cards (7 left, 7 center, 7 right)
+        const selectedImages = [ // We randomly select 21 cards (7 from left, 7 from center, 7 from right)
             ...getRandomSubset(leftImages, 7),
             ...getRandomSubset(centerImages, 7),
             ...getRandomSubset(rightImages, 7) 
@@ -314,7 +318,7 @@
 
         // We build a card element for each selected file and add it to the tray
         selectedImages.forEach((file) => {
-            const card = createImageCard(file);
+            const card = createIMG(file);
             imagesDiv.appendChild(card);
         });
 
@@ -322,7 +326,7 @@
 
     // This places every card into its correct bin automatically without any player input.
     // We stop and lock the timer so the completed state cannot be added via post method to the leaderboard.
-    function autofillImageGame() {
+    function autofill() {
         // We kill the timer if it was already running from a partial manual attempt
         if (timerHandle) {
             timerHandle.stop();
@@ -404,10 +408,10 @@
                 row.insertCell().textContent = entry.rank || (index + 1);
                 row.insertCell().textContent = entry.username || 'Unknown';
 
-                // We convert raw seconds into a readable MM:SS string for the time column
+                // We convert raw seconds into a readable MM:SS string for the time column again similar to before in the time pill
                 const timeInSeconds = entry.time || 0;
-                const minutes       = Math.floor(timeInSeconds / 60);
-                const seconds       = timeInSeconds % 60;
+                const minutes = Math.floor(timeInSeconds / 60);
+                const seconds = timeInSeconds % 60;
                 row.insertCell().textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             });
         } catch (err) {
@@ -421,9 +425,8 @@
 
     // MODAL
 
-
     // AUTOFILL USED ALERT: This shows a full-screen modal informing the player that autofill was detected and that their time will not appear on the leaderboard
-    function showAutofillWarning() {
+    function autofillWarn() {
         // We create the dark semi-transparent sheer overlay that sits on top of the whole page
         const msg = document.createElement('div');
         msg.style.position = 'fixed';
@@ -516,7 +519,7 @@
 
     // INCORRECT ALERT: This shows a modal listing every card that landed in the wrong bin.
     // Each entry displays the outlet logo, the outlet name, and which bin it was placed in so the player gets specific feedback 
-    function showIncorrectFeedback(incorrectImages) {
+    function showWrong(incorrectImages) {
         // This is a full-page overlay consistent with the other game modals
         const modal = document.createElement('div');
         modal.style.position = 'fixed';
@@ -678,13 +681,13 @@
                 const incorrect = getWrong(document.querySelectorAll('.bin'));
                 // If there are any mistakes, we show the feedback alert and stop submission
                 if (incorrect.length > 0) {
-                    showIncorrectFeedback(incorrect);
+                    showWrong(incorrect);
                     return; // Prevent further processing (score submission)
                 }
 
                 // Checkpoint 3: Autofill stops this run from appearing on the leaderboard and stops the timer
                 if (autofilled) {
-                    showAutofillWarning();
+                    autofillWarn();
                     startGame();   // This start a fresh round after the player exists from the warning
                     return;
                 }
